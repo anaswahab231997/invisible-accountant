@@ -64,6 +64,8 @@ async def process_intake_task(sender_id: str, message: str, media_urls: List[Htt
             auditor_question=result.get("auditor_question", "")
         )
 
+from security import verify_whatsapp_signature, mask_pii, encrypt_token, decrypt_token, generate_hmrc_fraud_headers
+
 WEBHOOK_SECRET = "dummy_secret"
 
 @app.post("/webhook/whatsapp")
@@ -73,22 +75,18 @@ async def receive_whatsapp(
     request: Request,
     x_hub_signature_256: str = Header(None)
 ):
-    if not x_hub_signature_256:
-        raise HTTPException(status_code=401, detail="Missing signature")
-        
+    # 1. WhatsApp Webhook Security (HMAC Signature)
     raw_body = await request.body()
-    expected_sig = "sha256=" + hmac.new(
-        WEBHOOK_SECRET.encode(), raw_body, hashlib.sha256
-    ).hexdigest()
-    
-    if not hmac.compare_digest(x_hub_signature_256, expected_sig):
-        raise HTTPException(status_code=401, detail="Invalid signature")
+    verify_whatsapp_signature(raw_body, x_hub_signature_256, WEBHOOK_SECRET)
+
+    # 2. AI Data Privacy (PII Masking) before processing
+    masked_message = mask_pii(payload.message)
 
     # Offload the heavy LLM parsing and queueing to a background task instantly
     background_tasks.add_task(
         process_intake_task, 
         payload.sender_id, 
-        payload.message, 
+        masked_message, 
         payload.media_urls or [],
         payload.turn_count
     )
