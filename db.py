@@ -1,15 +1,20 @@
-import sqlite3
+import aiosqlite
 import json
 from datetime import datetime, timedelta
 
 DB_FILE = "prototype_db.sqlite"
 
-def init_db():
-    conn = sqlite3.connect(DB_FILE)
-    cursor = conn.cursor()
+async def get_connection():
+    conn = await aiosqlite.connect(DB_FILE)
+    await conn.execute("PRAGMA journal_mode=WAL;")
+    conn.row_factory = aiosqlite.Row
+    return conn
+
+async def init_db():
+    conn = await get_connection()
     
     # Table for raw ingested messages
-    cursor.execute('''
+    await conn.execute('''
         CREATE TABLE IF NOT EXISTS intake_logs (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             timestamp TEXT,
@@ -22,7 +27,7 @@ def init_db():
     ''')
     
     # Table for categorized expenses ready for HMRC queue
-    cursor.execute('''
+    await conn.execute('''
         CREATE TABLE IF NOT EXISTS hmrc_queue (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             intake_id INTEGER,
@@ -37,85 +42,76 @@ def init_db():
         )
     ''')
     
-    conn.commit()
-    conn.close()
+    await conn.commit()
+    await conn.close()
 
-def log_intake(sender_id, raw_message, media_urls=None, turn_count=1):
-    conn = sqlite3.connect(DB_FILE)
-    cursor = conn.cursor()
+async def log_intake(sender_id, raw_message, media_urls=None, turn_count=1):
+    conn = await get_connection()
     
     timestamp = datetime.now().isoformat()
     # For prototype testing, TTL is set to 20 seconds from now (instead of 24h)
     ttl_timestamp = (datetime.now() + timedelta(seconds=20)).isoformat()
     media_urls_str = json.dumps(media_urls) if media_urls else "[]"
     
-    cursor.execute('''
+    cursor = await conn.execute('''
         INSERT INTO intake_logs (timestamp, sender_id, raw_message, media_urls, turn_count, ttl_timestamp)
         VALUES (?, ?, ?, ?, ?, ?)
     ''', (timestamp, sender_id, raw_message, media_urls_str, turn_count, ttl_timestamp))
     
     intake_id = cursor.lastrowid
-    conn.commit()
-    conn.close()
+    await conn.commit()
+    await conn.close()
     
     return intake_id
 
-def queue_expense(intake_id, vendor, amount, category, is_ambiguous, auditor_question=""):
-    conn = sqlite3.connect(DB_FILE)
-    cursor = conn.cursor()
+async def queue_expense(intake_id, vendor, amount, category, is_ambiguous, auditor_question=""):
+    conn = await get_connection()
     
     timestamp = datetime.now().isoformat()
     status = "DISAMBIGUATING" if is_ambiguous else "PENDING"
     
-    cursor.execute('''
+    cursor = await conn.execute('''
         INSERT INTO hmrc_queue (intake_id, timestamp, vendor, amount, category, is_ambiguous, status, auditor_question)
         VALUES (?, ?, ?, ?, ?, ?, ?, ?)
     ''', (intake_id, timestamp, vendor, amount, category, is_ambiguous, status, auditor_question))
     
     queue_id = cursor.lastrowid
-    conn.commit()
-    conn.close()
+    await conn.commit()
+    await conn.close()
     
     return queue_id
 
-def get_pending_hmrc_queue():
-    conn = sqlite3.connect(DB_FILE)
-    conn.row_factory = sqlite3.Row
-    cursor = conn.cursor()
-    cursor.execute('SELECT * FROM hmrc_queue WHERE status = "PENDING" ORDER BY timestamp ASC')
-    rows = cursor.fetchall()
-    conn.close()
+async def get_pending_hmrc_queue():
+    conn = await get_connection()
+    cursor = await conn.execute('SELECT * FROM hmrc_queue WHERE status = "PENDING" ORDER BY timestamp ASC')
+    rows = await cursor.fetchall()
+    await conn.close()
     return [dict(row) for row in rows]
 
-def mark_hmrc_submitted(queue_id):
-    conn = sqlite3.connect(DB_FILE)
-    cursor = conn.cursor()
-    cursor.execute('UPDATE hmrc_queue SET status = "SUBMITTED" WHERE id = ?', (queue_id,))
-    conn.commit()
-    conn.close()
+async def mark_hmrc_submitted(queue_id):
+    conn = await get_connection()
+    await conn.execute('UPDATE hmrc_queue SET status = "SUBMITTED" WHERE id = ?', (queue_id,))
+    await conn.commit()
+    await conn.close()
 
-def get_all_hmrc_queue():
-    conn = sqlite3.connect(DB_FILE)
-    conn.row_factory = sqlite3.Row
-    cursor = conn.cursor()
-    cursor.execute('SELECT * FROM hmrc_queue ORDER BY timestamp ASC')
-    rows = cursor.fetchall()
-    conn.close()
+async def get_all_hmrc_queue():
+    conn = await get_connection()
+    cursor = await conn.execute('SELECT * FROM hmrc_queue ORDER BY timestamp ASC')
+    rows = await cursor.fetchall()
+    await conn.close()
     return [dict(row) for row in rows]
 
-def get_expiring_ambiguous_intakes():
-    conn = sqlite3.connect(DB_FILE)
-    conn.row_factory = sqlite3.Row
-    cursor = conn.cursor()
+async def get_expiring_ambiguous_intakes():
+    conn = await get_connection()
     
     now = datetime.now().isoformat()
     # Get ambiguous items where TTL has expired (or is close)
-    cursor.execute('''
+    cursor = await conn.execute('''
         SELECT i.*, h.category FROM intake_logs i 
         JOIN hmrc_queue h ON i.id = h.intake_id 
         WHERE h.status = "DISAMBIGUATING" AND i.ttl_timestamp <= ?
     ''', (now,))
     
-    rows = cursor.fetchall()
-    conn.close()
+    rows = await cursor.fetchall()
+    await conn.close()
     return [dict(row) for row in rows]

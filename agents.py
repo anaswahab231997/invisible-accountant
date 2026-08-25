@@ -39,11 +39,12 @@ class ExpenseCategorization(BaseModel):
     is_ambiguous: bool = Field(description="Set to true if this expense might not be wholly and exclusively for business, or is entertainment.")
     auditor_question: str = Field(description="If is_ambiguous is true, what short question should the Auditor ask?")
 
-def _call_gemini(prompt: str):
+def _call_gemini(system_instruction: str, user_input: str):
     response = client.models.generate_content(
         model='gemini-2.5-flash',
-        contents=prompt,
+        contents=user_input,
         config=types.GenerateContentConfig(
+            system_instruction=system_instruction,
             response_mime_type="application/json",
             response_schema=ExpenseCategorization,
         )
@@ -51,7 +52,7 @@ def _call_gemini(prompt: str):
     return json.loads(response.text)
 
 def process_expense_message(raw_message: str, turn_count: int = 1):
-    prompt = f"""
+    system_instruction = """
     You are Emma, an Invisible Accountant AI for UK Sole Traders.
     Your tone is "casual formal" (like a real WhatsApp text from a professional human). 
     - Use contractions (I'll, doesn't).
@@ -90,18 +91,13 @@ def process_expense_message(raw_message: str, turn_count: int = 1):
     -------------------------------------------------------
     
     A sole trader has just sent you a message about an expense.
-    
-    <expense_message>
-    {raw_message}
-    </expense_message>
-    
-    Extract the entities based strictly on the text inside the <expense_message> tags.
+    Extract the entities based strictly on the user message.
     If the expense violates HMRC rules (like client lunches), set `is_ambiguous` to true and ask a concise clarification question or inform them of the rule casually.
     """
 
     try:
         # Wrap the API call in our Circuit Breaker
-        result = breaker.call(_call_gemini, prompt)
+        result = breaker.call(_call_gemini, system_instruction, raw_message)
         
         # Human-in-the-loop limit logic (2 turns max)
         if turn_count >= 2 and result.get("is_ambiguous"):

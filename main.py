@@ -1,11 +1,13 @@
-from fastapi import FastAPI, Request, HTTPException, BackgroundTasks
+from fastapi import FastAPI, Request, HTTPException, BackgroundTasks, Depends, Header, Query
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
 import uvicorn
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, HttpUrl
 from typing import Optional, List
 import asyncio
 import uuid
+import hmac
+import hashlib
 
 from db import init_db, log_intake, queue_expense, get_pending_hmrc_queue, get_all_hmrc_queue
 from agents import process_expense_message
@@ -23,12 +25,12 @@ async def serve_frontend():
 class WhatsAppPayload(BaseModel):
     sender_id: str
     message: str = Field(..., max_length=1000)
-    media_urls: Optional[List[str]] = None
+    media_urls: Optional[List[HttpUrl]] = None
     turn_count: int = Field(default=1, description="Number of conversational turns so far")
 
 @app.on_event("startup")
 async def startup_event():
-    init_db()
+    await init_db()
     # Start the async workers in the background
     asyncio.create_task(process_hmrc_queue())
     asyncio.create_task(process_ttl_sweeper())
@@ -45,13 +47,15 @@ async def get_presigned_url():
         "expires_in": 3600
     }
 
-def process_intake_task(sender_id: str, message: str, media_urls: List[str], turn_count: int):
+async def process_intake_task(sender_id: str, message: str, media_urls: List[HttpUrl], turn_count: int):
     # This runs asynchronously after responding to WhatsApp
-    intake_id = log_intake(sender_id, message, media_urls, turn_count)
+    # Convert HttpUrl to str for DB and downstream tasks
+    media_urls_str = [str(url) for url in media_urls] if media_urls else []
+    intake_id = await log_intake(sender_id, message, media_urls_str, turn_count)
     result = process_expense_message(message, turn_count)
     
     if result:
-        queue_expense(
+        await queue_expense(
             intake_id=intake_id,
             vendor=result.get("vendor", "Unknown"),
             amount=result.get("amount", 0.0),
@@ -60,14 +64,32 @@ def process_intake_task(sender_id: str, message: str, media_urls: List[str], tur
             auditor_question=result.get("auditor_question", "")
         )
 
+WEBHOOK_SECRET = "dummy_secret"
+
 @app.post("/webhook/whatsapp")
-async def receive_whatsapp(payload: WhatsAppPayload, background_tasks: BackgroundTasks):
+async def receive_whatsapp(
+    payload: WhatsAppPayload, 
+    background_tasks: BackgroundTasks,
+    request: Request,
+    x_hub_signature_256: str = Header(None)
+):
+    if not x_hub_signature_256:
+        raise HTTPException(status_code=401, detail="Missing signature")
+        
+    raw_body = await request.body()
+    expected_sig = "sha256=" + hmac.new(
+        WEBHOOK_SECRET.encode(), raw_body, hashlib.sha256
+    ).hexdigest()
+    
+    if not hmac.compare_digest(x_hub_signature_256, expected_sig):
+        raise HTTPException(status_code=401, detail="Invalid signature")
+
     # Offload the heavy LLM parsing and queueing to a background task instantly
     background_tasks.add_task(
         process_intake_task, 
         payload.sender_id, 
         payload.message, 
-        payload.media_urls,
+        payload.media_urls or [],
         payload.turn_count
     )
     
@@ -77,9 +99,15 @@ async def receive_whatsapp(payload: WhatsAppPayload, background_tasks: Backgroun
         "message": "Payload received. Processing in background."
     }
 
-@app.get("/queue")
+API_KEY = "super-secret-key"
+
+def verify_api_key(api_key: str = Query(None)):
+    if api_key != API_KEY:
+        raise HTTPException(status_code=401, detail="Invalid API Key")
+
+@app.get("/queue", dependencies=[Depends(verify_api_key)])
 async def view_hmrc_queue():
-    return {"queue": get_all_hmrc_queue()}
+    return {"queue": await get_all_hmrc_queue()}
 
 if __name__ == "__main__":
     uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=True)
