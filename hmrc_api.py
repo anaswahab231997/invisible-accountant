@@ -11,6 +11,19 @@ logger = get_logger("hmrc_api")
 HMRC_BASE_URL = os.environ.get("HMRC_BASE_URL", "https://test-api.service.hmrc.gov.uk")
 HMRC_ACCEPT_HEADER = "application/vnd.hmrc.1.0+json"
 
+_cached_ip = None
+
+def get_public_ip():
+    global _cached_ip
+    if _cached_ip: 
+        return _cached_ip
+    try:
+        import httpx
+        _cached_ip = httpx.get("https://api.ipify.org", timeout=2.0).text.strip()
+    except Exception:
+        _cached_ip = "127.0.0.1"
+    return _cached_ip
+
 def generate_whatsapp_fraud_headers(real_device_id: str | None = None) -> dict:
     """
     Generates HMRC-compliant Fraud Prevention Headers for the OTHER_VIA_SERVER architecture.
@@ -21,8 +34,7 @@ def generate_whatsapp_fraud_headers(real_device_id: str | None = None) -> dict:
     # Dynamically pull the egress IP from the environment.
     server_egress_ip = os.environ.get("STATIC_EGRESS_IP")
     if not server_egress_ip:
-        logger.warning("STATIC_EGRESS_IP is missing. Fraud headers may fail in production.")
-        server_egress_ip = "127.0.0.1" # Fallback for local development
+        server_egress_ip = get_public_ip()
         
     client_ip = os.environ.get("CLIENT_IP", "127.0.0.1")
     
