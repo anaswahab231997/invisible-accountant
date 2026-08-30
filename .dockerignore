@@ -1,0 +1,12 @@
+.venv
+__pycache__
+*.sqlite
+*.sqlite-journal
+*.sqlite-shm
+*.sqlite-wal
+.git
+.github
+tests
+.pytest_cache
+.mypy_cache
+.ruff_cache

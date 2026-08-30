@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Privacy Policy - Invisible Accountant</title>
+    <style>
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif; line-height: 1.6; color: #333; max-width: 800px; margin: 0 auto; padding: 2rem; background: #f9fafb; }
+        h1, h2, h3 { color: #111; }
+        a { color: #0066cc; text-decoration: none; }
+        a:hover { text-decoration: underline; }
+        .container { background: #fff; padding: 2.5rem; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
+        code { background: #eee; padding: 0.2rem 0.4rem; border-radius: 4px; font-size: 0.9em; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="/">&larr; Back to Home</a>
+        <h1>Privacy Policy for Invisible Accountant</h1>
+        <p><strong>Last Updated:</strong> 29 August 2026</p>
+
+        <h2>1. Introduction</h2>
+        <p>Welcome to Invisible Accountant. We are committed to protecting and respecting your privacy. This Privacy Policy explains how we collect, use, store, and protect your personal data when you use our WhatsApp-based Making Tax Digital for Income Tax Self Assessment (MTD for ITSA) application.</p>
+        <p>For the purposes of the UK General Data Protection Regulation (UK GDPR) and the Data Protection Act 2018, Invisible Accountant acts as the <strong>Data Controller</strong> for the personal data we hold about you on our servers. Once your data is transmitted to HM Revenue & Customs (HMRC), HMRC acts as an independent Data Controller.</p>
+
+        <h2>2. The Data We Collect</h2>
+        <p>We collect and process the following data to provide our MTD for ITSA services:</p>
+        <ul>
+            <li><strong>Contact Information:</strong> Your mobile phone number (used for WhatsApp communication).</li>
+            <li><strong>Tax and Identity Information:</strong> Your National Insurance Number (NINO), Unique Taxpayer Reference (UTR), and business details required by HMRC.</li>
+            <li><strong>HMRC OAuth Tokens:</strong> Authentication tokens allowing us to securely submit data to HMRC on your behalf.</li>
+            <li><strong>Financial Records:</strong> Images of receipts, invoices, and other income/expense data you submit via WhatsApp.</li>
+        </ul>
+
+        <h3>2.1 HMRC Fraud Prevention Headers (Mandatory Telemetry)</h3>
+        <p>Under the <em>Delivery of Tax Information through Software Regulations 2019</em>, HMRC legally mandates that all third-party software collects specific device and network telemetry to detect and prevent tax fraud. Because you interact with our service via WhatsApp, we cannot collect your physical device telemetry. Instead, we act as an intermediary server. To comply with HMRC’s Fraud Prevention rules, we cryptographically hash your WhatsApp phone number to generate a secure, anonymous <code>Gov-Client-Device-ID</code>, which is transmitted to HMRC along with our server's IP addresses and timezone during every tax submission. <strong>This data sharing is mandatory to use the service.</strong></p>
+
+        <h2>3. How We Use Your Data</h2>
+        <p>We process your personal data for the following purposes:</p>
+        <ul>
+            <li>To authenticate your identity and link your account with HMRC via OAuth 2.0.</li>
+            <li>To record, categorise, and manage your income and expenses.</li>
+            <li>To submit your quarterly updates and End of Period Statements to HMRC.</li>
+        </ul>
+
+        <h2>4. How We Secure Your Data</h2>
+        <ul>
+            <li><strong>Encryption at Rest:</strong> Your HMRC OAuth tokens and highly sensitive identifiers are encrypted in our database using military-grade <strong>AES-GCM</strong> encryption.</li>
+            <li><strong>Data Transit:</strong> All data transmitted between our servers, WhatsApp, and HMRC is encrypted using strict TLS protocols.</li>
+        </ul>
+
+        <h2>5. Data Retention</h2>
+        <p>We retain your personal data and financial records only for as long as necessary to fulfill the purposes outlined in this policy and to comply with legal obligations. Specifically:</p>
+        <ul>
+            <li><strong>WhatsApp Messages and Receipts:</strong> Images and message history are retained for the duration of the tax year plus six years, in accordance with HMRC record-keeping requirements.</li>
+            <li><strong>Expense Ledger Data:</strong> Kept for six years following the end of the relevant tax year.</li>
+        </ul>
+        <p>If you wish to request earlier deletion of your data where legally permissible, please contact us.</p>
+
+        <h2>6. Your UK GDPR Rights</h2>
+        <p>Under the UK GDPR, you have the following rights regarding your personal data:</p>
+        <ul>
+            <li><strong>Right to Access:</strong> You have the right to request a copy of the personal data we hold about you.</li>
+            <li><strong>Right to be Forgotten (Right to Erasure):</strong> You have the right to request that we delete your personal data, subject to our legal obligation to retain certain tax records for HMRC.</li>
+            <li><strong>Right to Rectification:</strong> You can ask us to correct inaccurate or incomplete data.</li>
+        </ul>
+
+        <h2>7. OAuth Consent & Revocation</h2>
+        <p>By linking your account, you grant Invisible Accountant the "Authority to Interact with HMRC on your behalf." You can revoke this OAuth consent at any time directly through your personal HMRC Government Gateway account online.</p>
+
+        <h2>8. Contact Us</h2>
+        <p>To exercise your GDPR rights, contact our Data Protection Officer at: support@invisibleaccountant.co.uk</p>
+    </div>
+</body>
+</html>

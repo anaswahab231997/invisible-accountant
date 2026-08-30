@@ -1,57 +1,133 @@
-import os
 import json
+import os
+
 from google import genai
 from google.genai import types
 from pydantic import BaseModel, Field
-from circuit_breaker import CircuitBreaker, CircuitBreakerOpenException
+
+from logger import get_logger
+from dotenv import load_dotenv
+
+load_dotenv()
+
+logger = get_logger(__name__)
 
 API_KEY = os.environ.get("GEMINI_API_KEY")
 if not API_KEY:
     raise ValueError("GEMINI_API_KEY environment variable is missing.")
 client = genai.Client(api_key=API_KEY)
 
-breaker = CircuitBreaker(failure_threshold=2, recovery_timeout=10)
+from enum import Enum
 
-HMRC_CATEGORIES = [
-    "Cost of goods sold",
-    "Construction industry costs",
-    "Staff costs",
-    "Travel costs",
-    "Premises running costs",
-    "Repairs and maintenance",
-    "Admin costs",
-    "Advertising and marketing",
-    "Interest on loans",
-    "Bank and financial charges",
-    "Professional fees",
-    "Depreciation and loss of assets",
-    "Other expenses"
-]
+
+class HMRCCategory(str, Enum):
+    COST_OF_GOODS_SOLD = "Cost of goods sold"
+    CONSTRUCTION_INDUSTRY_COSTS = "Construction industry costs"
+    STAFF_COSTS = "Staff costs"
+    TRAVEL_COSTS = "Travel costs"
+    PREMISES_RUNNING_COSTS = "Premises running costs"
+    REPAIRS_AND_MAINTENANCE = "Repairs and maintenance"
+    ADMIN_COSTS = "Admin costs"
+    ADVERTISING_AND_MARKETING = "Advertising and marketing"
+    INTEREST_ON_LOANS = "Interest on loans"
+    BANK_AND_FINANCIAL_CHARGES = "Bank and financial charges"
+    PROFESSIONAL_FEES = "Professional fees"
+    DEPRECIATION_AND_LOSS_OF_ASSETS = "Depreciation and loss of assets"
+    OTHER_EXPENSES = "Other expenses"
+
 
 class ExpenseCategorization(BaseModel):
-    reasoning_step_1_amount_and_vendor: str = Field(description="Extract the exact numerical amount and vendor name from the text.")
-    reasoning_step_2_nature_of_expense: str = Field(description="What exactly was purchased, and what is its business purpose?")
-    reasoning_step_3_hmrc_rules: str = Field(description="Analyze the expense against the UK HMRC Sole Trader rules to determine if it is allowable or has duality of purpose.")
-    reasoning_step_4_final_determination: str = Field(description="Determine the appropriate HMRC category and whether auditor clarification is needed.")
-    vendor: str = Field(description="The name of the shop, person, or business the money was paid to.")
+    reasoning_step_1_amount_and_vendor: str = Field(
+        description="Extract the exact numerical amount and vendor name from the text."
+    )
+    reasoning_step_2_nature_of_expense: str = Field(
+        description="What exactly was purchased, and what is its business purpose?"
+    )
+    reasoning_step_3_hmrc_rules: str = Field(
+        description="Analyze the expense against the UK HMRC Sole Trader rules to determine if it is allowable or has duality of purpose."
+    )
+    reasoning_step_4_final_determination: str = Field(
+        description="Determine the appropriate HMRC category and whether auditor clarification is needed."
+    )
+    vendor: str = Field(
+        description="The name of the shop, person, or business the money was paid to."
+    )
     amount: float = Field(description="The monetary amount (as a float).")
-    category: str = Field(description="Map the expense to exactly ONE of the official HMRC MTD ITSA categories.")
-    is_ambiguous: bool = Field(description="Set to true if this expense might not be wholly and exclusively for business, or is entertainment.")
-    auditor_question: str = Field(description="If is_ambiguous is true, what short question should the Auditor ask?")
+    category: HMRCCategory = Field(
+        description="Map the expense to exactly ONE of the official HMRC MTD ITSA categories."
+    )
+    is_ambiguous: bool = Field(
+        description="Set to true if this expense might not be wholly and exclusively for business, or is entertainment."
+    )
+    auditor_question: str = Field(
+        description="If is_ambiguous is true, what short question should the Auditor ask?"
+    )
 
-def _call_gemini(system_instruction: str, user_input: str):
-    response = client.models.generate_content(
-        model='gemini-2.5-flash',
-        contents=user_input,
+
+from urllib.parse import urlparse
+
+import httpx
+
+ALLOWED_DOMAINS = {
+    "lookaside.fbsbx.com",
+    "s3.amazonaws.com",
+    "mock-s3-bucket.amazonaws.com",
+}
+
+
+def is_safe_url(url: str) -> bool:
+    try:
+        parsed = urlparse(url)
+        return parsed.scheme in ("http", "https") and parsed.netloc in ALLOWED_DOMAINS
+    except Exception:
+        return False
+
+
+async def _call_gemini(
+    system_instruction: str,
+    user_input: str,
+    media_urls: list = None,
+    model: str = "gemini-2.5-flash",
+):
+    contents = []
+
+    if media_urls:
+        async with httpx.AsyncClient() as http_client:
+            for url in media_urls:
+                if not is_safe_url(url):
+                    logger.warning("SSRF mitigation blocked URL", url=url)
+                    continue
+                try:
+                    # Fetch image from URL
+                    resp = await http_client.get(url, timeout=5.0)
+                    resp.raise_for_status()
+                    # Determine mime type from headers if possible, default to jpeg
+                    mime_type = resp.headers.get("content-type", "image/jpeg")
+
+                    contents.append(
+                        types.Part.from_bytes(data=resp.content, mime_type=mime_type)
+                    )
+                except Exception as e:
+                    logger.error("Error fetching media", url=url, error=str(e))
+
+    # Always append text at the end
+    contents.append(user_input)
+
+    response = await client.aio.models.generate_content(
+        model=model,
+        contents=contents,
         config=types.GenerateContentConfig(
             system_instruction=system_instruction,
             response_mime_type="application/json",
             response_schema=ExpenseCategorization,
-        )
+        ),
     )
     return json.loads(response.text)
 
-def process_expense_message(raw_message: str, turn_count: int = 1):
+
+async def process_expense_message(
+    raw_message: str, turn_count: int = 1, media_urls: list = None
+):
     system_instruction = """
     You are Emma, an Invisible Accountant AI for UK Sole Traders.
     Your tone is "casual formal" (like a real WhatsApp text from a professional human). 
@@ -96,27 +172,60 @@ def process_expense_message(raw_message: str, turn_count: int = 1):
     """
 
     try:
-        # Wrap the API call in our Circuit Breaker
-        result = breaker.call(_call_gemini, system_instruction, raw_message)
-        
+        # Phase 1: Fast & Cheap (Gemini 2.5 Flash)
+        result = await _call_gemini(
+            system_instruction, raw_message, media_urls, model="gemini-2.5-flash"
+        )
+
+        # Phase 2: Deep Audit Escalation (Gemini 2.5 Pro)
+        if result.get("is_ambiguous"):
+            logger.info(
+                "Escalating to Gemini 2.5 Pro for deep audit",
+                reason="Flash flagged as ambiguous",
+            )
+            pro_result = await _call_gemini(
+                system_instruction, raw_message, media_urls, model="gemini-2.5-pro"
+            )
+
+            # If Pro ALSO thinks it's ambiguous, or definitively categorizes it, trust Pro.
+            result = pro_result
+
         # Human-in-the-loop limit logic (2 turns max)
         if turn_count >= 2 and result.get("is_ambiguous"):
-            print("INFO: Turn limit reached. Forcing category to 'Other expenses'.")
+            logger.info("Turn limit reached. Forcing category to 'Other expenses'")
             result["is_ambiguous"] = False
             result["category"] = "Other expenses"
-            
+
         return result
-        
-    except CircuitBreakerOpenException:
-        print("Circuit is OPEN. Executing Fallback model.")
-        # Fallback simulated response
-        return {
-            "vendor": "Pending",
-            "amount": 0.0,
-            "category": "Other expenses",
-            "is_ambiguous": True,
-            "auditor_question": "Our AI is currently overloaded. We have queued your receipt for processing shortly."
-        }
+
     except Exception as e:
-        print(f"Error calling Gemini API: {e}")
+        logger.error("Error calling Gemini API", error=str(e))
         raise e
+class AntiHallucinationCheck(BaseModel):
+    is_hallucinated: bool = Field(description="True if the parsed JSON contains information (amount, vendor) not present in the user text.")
+    hallucination_reason: str = Field(description="If hallucinated, why?")
+    corrected_question: str = Field(description="If hallucinated, ask the user to clarify the missing information.")
+
+async def verify_expense_hallucination(raw_message: str, parsed_json: dict) -> dict:
+    system_instruction = """
+    You are an Anti-Hallucination Auditor. Your strict job is to compare the raw user text to the parsed JSON.
+    Did the AI hallucinate an amount, vendor, or date that the user did NOT actually say?
+    For example, if the user says "lunch" and the AI outputs "vendor: Unknown, amount: 0.0", that is a hallucination/failure.
+    If the user says "spent 50 at tesco" and AI outputs "amount: 50.0", that is valid.
+    Return true for hallucination if the amount or vendor is completely fabricated.
+    """
+    contents = [
+        f"USER MESSAGE: {raw_message}",
+        f"PARSED JSON: {json.dumps(parsed_json)}"
+    ]
+    
+    response = await client.aio.models.generate_content(
+        model="gemini-2.5-flash",
+        contents=contents,
+        config=types.GenerateContentConfig(
+            system_instruction=system_instruction,
+            response_mime_type="application/json",
+            response_schema=AntiHallucinationCheck,
+        ),
+    )
+    return json.loads(response.text)

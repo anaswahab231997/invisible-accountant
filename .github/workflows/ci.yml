@@ -1,0 +1,46 @@
+name: CI
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+        with:
+          version: "latest"
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: uv sync
+
+      - name: Lint with Ruff
+        run: uv run ruff check .
+
+      - name: Format with Ruff
+        run: uv run ruff format --check .
+
+      - name: Type check with mypy
+        run: uv run mypy . --ignore-missing-imports
+
+      - name: Security scan with bandit
+        run: uv run bandit -r . -x ./tests
+
+      - name: Run tests
+        env:
+          WEBHOOK_SECRET: "dummy_secret"
+          API_KEY: "super-secret-key"
+          DB_ENCRYPTION_KEY_B64: "ZfsvyAoEFx4Mcxc/Jzgni6qoONNMtVf1oGIwyxnGe2A="
+          GEMINI_API_KEY: "dummy_key"
+        run: uv run pytest --ignore=hmrc_test.py
