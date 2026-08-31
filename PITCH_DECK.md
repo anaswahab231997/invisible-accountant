@@ -18,10 +18,10 @@ Snap a receipt. Record a voice note. Forward a PDF. That's it.
 Our AI engine instantly extracts the data, categorizes it perfectly according to HMRC rules, and prepares the quarterly updates automatically.
 No new apps to download. Zero passwords. Zero learning curve. Accounting becomes invisible, running entirely via WhatsApp.
 
-## UNFAIR ECONOMICS
-A no-brainer £10/month impulse buy.
-Blended CAC: £35 | LTV: £360 | **LTV:CAC Ratio: 10:1**
-We're capturing the 3.2M TAM with 85%+ Gross Margins.
+## UNFAIR ECONOMICS (B2B2C Model)
+White-label Enterprise Licensing for High-Street Accountancy Firms.
+Zero friction onboarding: One B2B sale brings 1,000+ sole trader clients instantly.
+Drastically lowered CAC via enterprise sales cycles, highly scalable Annual Contract Value (ACV), and 85%+ Gross Margins on the underlying software layer.
 
 ## GLOBAL SCALABILITY (Year 3 Expansion)
 The true value is the underlying **AI receipt-extraction and categorization engine**.
