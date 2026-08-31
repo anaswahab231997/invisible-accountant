@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+    <title>Invisible Accountant — Zero-UI Accounting</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Inter', 'SF Pro Display', 'system-ui', 'sans-serif'], },
+                    colors: {
+                        stripe: { primary: '#635BFF', dark: '#0A2540', canvas: '#F6F9FC', hairline: '#E3E8EE' }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body { background-color: #ffffff; color: #0A2540; -webkit-font-smoothing: antialiased; }
+        ::selection { background-color: #635BFF; color: #ffffff; }
+        .fade-up { opacity: 0; transform: translateY(24px); transition: opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1), transform 0.8s cubic-bezier(0.16, 1, 0.3, 1); }
+        .fade-up.visible { opacity: 1; transform: translateY(0); }
+        .stripe-mesh {
+            position: absolute; top: 0; left: 0; right: 0; height: 95vh;
+            background: linear-gradient(170deg, rgba(246, 249, 252, 1) 0%, rgba(255, 255, 255, 1) 100%);
+            overflow: hidden; z-index: -1; transform: skewY(-6deg); transform-origin: 0;
+        }
+        .stripe-mesh::before {
+            content: ''; position: absolute; top: -20%; left: -10%; width: 120%; height: 120%;
+            background: radial-gradient(circle at 80% 20%, rgba(99, 91, 255, 0.08) 0%, transparent 40%),
+                        radial-gradient(circle at 20% 60%, rgba(0, 208, 255, 0.05) 0%, transparent 50%);
+            filter: blur(60px);
+        }
+        button, a, input { touch-action: manipulation; -webkit-tap-highlight-color: transparent; }
+        *:focus-visible { outline: 2px solid #635BFF; outline-offset: 2px; border-radius: 4px; }
+        button:focus-visible, a:focus-visible { border-radius: 9999px; }
+
+        /* Node Animations */
+        .node-active {
+            background: rgba(255, 255, 255, 0.1);
+            border-color: rgba(99, 91, 255, 0.5);
+            transform: scale(1.02);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+        .icon-active {
+            background: #635BFF !important;
+            border-color: #8c86ff !important;
+            box-shadow: 0 0 20px rgba(99, 91, 255, 0.6);
+            color: white;
+            transform: scale(1.1);
+        }
+    </style>
+</head>
+<body class="antialiased w-full overflow-x-hidden selection:bg-stripe-primary selection:text-white">
+
+    <div class="stripe-mesh"></div>
+
+    <nav class="absolute top-0 left-0 w-full z-50 px-6 py-6 flex justify-between items-center max-w-[1200px] mx-auto right-0">
+        <div class="text-base font-semibold tracking-tight text-stripe-dark flex items-center gap-2">
+            <div class="w-5 h-5 rounded bg-stripe-primary flex items-center justify-center shadow-lg shadow-stripe-primary/30">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3"><path d="M5 12l5 5L20 7"></path></svg>
+            </div>
+            Invisible Accountant
+        </div>
+        <div class="hidden md:flex space-x-8 text-sm font-medium text-slate-600">
+            <a href="#problem" class="hover:text-stripe-primary transition-colors min-h-[44px] flex items-center">The Problem</a>
+            <a href="#solution" class="hover:text-stripe-primary transition-colors min-h-[44px] flex items-center">The Solution</a>
+            <a href="#demo" class="hover:text-stripe-primary transition-colors min-h-[44px] flex items-center">Live Pipeline</a>
+        </div>
+        <a href="#demo" class="px-5 py-2 min-h-[44px] flex items-center justify-center bg-stripe-dark text-white rounded-full font-medium text-sm hover:bg-slate-800 transition-colors shadow-md">
+            View Live Pipeline
+        </a>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="min-h-[90vh] flex flex-col justify-center px-6 md:px-12 lg:px-24 max-w-[1200px] mx-auto pt-32 pb-12">
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-16 items-center">
+            <div class="lg:col-span-7 fade-up visible">
+                <h1 class="text-6xl md:text-8xl font-light tracking-[-0.04em] leading-[1.05] text-stripe-dark mb-8">
+                    Zero-UI Accounting for the Micro-Economy.
+                </h1>
+                <p class="text-xl md:text-2xl text-slate-600 leading-relaxed max-w-[60ch] mb-12 font-light">
+                    HMRC's Making Tax Digital mandate isn't a software problem; it's a data capture problem. We replaced the traditional financial portal with a WhatsApp-native AI engine. Users text a receipt. We categorize, encrypt, and vault it to the government. Zero onboarding. Zero friction. Total compliance.
+                </p>
+                <div class="flex flex-wrap gap-4 items-center">
+                    <a href="#demo" class="px-7 py-3.5 min-h-[44px] min-w-[44px] flex items-center justify-center bg-stripe-primary text-white rounded-full font-medium text-sm hover:bg-indigo-500 transition-colors shadow-lg shadow-stripe-primary/25">See the pipeline</a>
+                </div>
+            </div>
+            <div class="lg:col-span-5 fade-up visible delay-100">
+                <div class="rounded-3xl overflow-hidden shadow-2xl shadow-stripe-primary/20 border border-white/50 transform rotate-2 hover:rotate-0 transition-transform duration-700">
+                    <img src="assets/hero_bg.jpg" alt="Glowing smartphone processing transactions" class="w-full h-auto object-cover aspect-square" />
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Problem Section -->
+    <section id="problem" class="py-24 px-6 md:px-12 lg:px-24 max-w-[1200px] mx-auto relative z-10 bg-white">
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
+            <div class="fade-up">
+                <div class="text-red-500 font-semibold tracking-wide text-sm uppercase mb-3">The Status Quo</div>
+                <h2 class="text-4xl font-light tracking-[-0.02em] text-stripe-dark mb-6">The Behavioral Flaw of Tax Software.</h2>
+                <p class="text-slate-600 max-w-[50ch] text-lg mb-6">Traditional accounting platforms rely on a fantasy of manual discipline. HMRC's Making Tax Digital (MTD) mandate forces millions of sole traders into complex portals they have neither the time nor the inclination to learn.</p>
+                <p class="text-slate-600 max-w-[50ch] text-lg">The structural failure isn't the tax code—it's the friction of the interface. Physical receipts rot in van dashboards, digital invoices drown in inboxes, and by tax season, billions in legitimate deductions are permanently lost to administrative drag.</p>
+            </div>
+            <div class="fade-up">
+                <div class="rounded-3xl overflow-hidden shadow-2xl shadow-red-500/10 border border-stripe-hairline">
+                    <img src="assets/problem_chaos.jpg" alt="Messy pile of tax receipts and complex UI" class="w-full h-auto object-cover aspect-video" />
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Solution Section -->
+    <section id="solution" class="py-24 px-6 md:px-12 lg:px-24 max-w-[1200px] mx-auto border-t border-stripe-hairline bg-stripe-canvas rounded-t-[3rem]">
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center flex-row-reverse lg:flex-row">
+            <div class="fade-up order-2 lg:order-1">
+                <div class="rounded-3xl overflow-hidden shadow-2xl shadow-emerald-500/20 border border-white/50">
+                    <img src="assets/solution_vault.jpg" alt="Glowing futuristic digital vault" class="w-full h-auto object-cover aspect-square" />
+                </div>
+            </div>
+            <div class="fade-up order-1 lg:order-2">
+                <div class="text-emerald-500 font-semibold tracking-wide text-sm uppercase mb-3">The Antidote: Invisible Accountant</div>
+                <h2 class="text-4xl font-light tracking-[-0.02em] text-stripe-dark mb-6">Ambient Compliance.</h2>
+                <p class="text-slate-600 text-lg mb-8">We transformed accounting from a destination into a reflex. Invisible Accountant lives entirely within the sole trader's existing workflow: WhatsApp. By collapsing the distance between an expense and the ledger, we've made financial tracking an unconscious habit.</p>
+                
+                <ul class="space-y-6">
+                    <li class="flex items-start">
+                        <div class="w-8 h-8 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-600 shrink-0 mr-4 font-semibold text-sm">1</div>
+                        <div><strong class="text-stripe-dark block">The Moment</strong><span class="text-slate-500 text-sm">A quick photo of a receipt or a typed message is instantly ingested by AI. No apps to download. No software to learn.</span></div>
+                    </li>
+                    <li class="flex items-start">
+                        <div class="w-8 h-8 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-600 shrink-0 mr-4 font-semibold text-sm">2</div>
+                        <div><strong class="text-stripe-dark block">The AI Brain</strong><span class="text-slate-500 text-sm">Categorized autonomously against complex HMRC tax rules with strict deterministic parsing.</span></div>
+                    </li>
+                    <li class="flex items-start">
+                        <div class="w-8 h-8 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-600 shrink-0 mr-4 font-semibold text-sm">3</div>
+                        <div><strong class="text-stripe-dark block">The Vault</strong><span class="text-slate-500 text-sm">Securely locked and pushed directly to HMRC via API. Just inevitable compliance.</span></div>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </section>
+
+    <!-- Market & Catalyst Section -->
+    <section class="py-24 px-6 md:px-12 lg:px-24 max-w-[1200px] mx-auto bg-white relative z-10">
+        <div class="text-center fade-up mb-16">
+            <h2 class="text-4xl font-light tracking-[-0.02em] text-stripe-dark mb-4">A Legally Mandated Market Shift.</h2>
+            <p class="text-slate-600 text-lg max-w-[60ch] mx-auto">This isn't an optional software upgrade. It's a structural shift for the entire UK micro-economy.</p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <!-- TAM -->
+            <div class="p-8 rounded-3xl border border-stripe-hairline bg-stripe-canvas fade-up shadow-sm">
+                <div class="text-stripe-primary font-semibold tracking-wide text-sm uppercase mb-4">The Market Size</div>
+                <div class="text-5xl font-light text-stripe-dark tracking-tighter mb-2">3.2M</div>
+                <h3 class="text-lg font-medium text-stripe-dark mb-2">UK Sole Traders</h3>
+                <p class="text-slate-600 text-sm leading-relaxed">Sole proprietorships make up 57% of all UK private sector businesses. A massive demographic currently relying on expensive manual accountants.</p>
+            </div>
+            
+            <!-- Catalyst -->
+            <div class="p-8 rounded-3xl border border-stripe-hairline bg-stripe-canvas fade-up shadow-sm">
+                <div class="text-red-500 font-semibold tracking-wide text-sm uppercase mb-4">The Catalyst: April 2026</div>
+                <div class="text-5xl font-light text-stripe-dark tracking-tighter mb-2">5x</div>
+                <h3 class="text-lg font-medium text-stripe-dark mb-2">Filing Frequency</h3>
+                <p class="text-slate-600 text-sm leading-relaxed">HMRC’s MTD mandate forces traders to submit 4 quarterly updates plus a final declaration. Current accountant fees (£300-£800/yr) will multiply.</p>
+            </div>
+
+            <!-- The Moat -->
+            <div class="p-8 rounded-3xl border border-stripe-hairline bg-stripe-canvas fade-up shadow-sm">
+                <div class="text-emerald-500 font-semibold tracking-wide text-sm uppercase mb-4">The Moat</div>
+                <div class="text-5xl font-light text-stripe-dark tracking-tighter mb-2">Zero</div>
+                <h3 class="text-lg font-medium text-stripe-dark mb-2">Legacy Complexity</h3>
+                <p class="text-slate-600 text-sm leading-relaxed">Incumbents like Xero and QuickBooks are heavy ERPs built for SMEs. They cannot offer WhatsApp-native simplicity without abandoning their core dashboards.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- NEW Clean Modern Pipeline Visualization -->
+    <section id="demo" class="py-24 px-6 md:px-12 lg:px-24 max-w-[1200px] mx-auto bg-stripe-dark rounded-[3rem] my-24 relative overflow-hidden text-white shadow-2xl">
+        <!-- Ambient Background Glows -->
+        <div class="absolute top-0 right-0 w-[500px] h-[500px] bg-stripe-primary/20 blur-[100px] rounded-full pointer-events-none"></div>
+        <div class="absolute bottom-0 left-0 w-[400px] h-[400px] bg-[#00d0ff]/10 blur-[100px] rounded-full pointer-events-none"></div>
+        
+        <div class="text-center fade-up mb-16 relative z-10">
+            <h2 class="text-4xl font-light tracking-[-0.02em] mb-4">Security & Pipeline Visualization</h2>
+            <p class="text-slate-400 text-lg max-w-[60ch] mx-auto">Watch how data travels through our encrypted serverless infrastructure. At every node, data is validated, encrypted, and immutably locked.</p>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-24 items-center relative z-10">
+            
+            <!-- Nodes Track -->
+            <div class="lg:col-span-7 fade-up relative">
+                <!-- Vertical Line -->
+                <div class="absolute left-8 top-8 bottom-8 w-1 bg-white/10 rounded-full hidden sm:block"></div>
+                <!-- Glowing Progress Line -->
+                <div class="absolute left-8 top-8 w-1 bg-gradient-to-b from-stripe-primary to-[#00d0ff] rounded-full hidden sm:block transition-all duration-700 ease-out" id="data-track" style="height: 0%"></div>
+                
+                <div class="space-y-6 relative z-10">
+                    <button onclick="activateNode(0)" class="w-full text-left node-card flex items-center gap-6 p-5 rounded-2xl border border-white/5 bg-white/5 hover:bg-white/10 cursor-pointer transition-all duration-500" id="cnode-0">
+                        <div class="w-16 h-16 rounded-2xl bg-white/10 border border-white/10 flex items-center justify-center text-2xl shrink-0 transition-all duration-500" id="cicon-0">📱</div>
+                        <div>
+                            <h4 class="text-lg font-medium text-white mb-1">WhatsApp Webhook</h4>
+                            <p class="text-sm text-slate-400">Meta securely POSTs payload</p>
+                        </div>
+                    </button>
+                    
+                    <button onclick="activateNode(1)" class="w-full text-left node-card flex items-center gap-6 p-5 rounded-2xl border border-white/5 bg-white/5 hover:bg-white/10 cursor-pointer transition-all duration-500" id="cnode-1">
+                        <div class="w-16 h-16 rounded-2xl bg-white/10 border border-white/10 flex items-center justify-center text-2xl shrink-0 transition-all duration-500" id="cicon-1">⚡</div>
+                        <div>
+                            <h4 class="text-lg font-medium text-white mb-1">FastAPI Worker</h4>
+                            <p class="text-sm text-slate-400">Async processing prevents timeouts</p>
+                        </div>
+                    </button>
+                    
+                    <button onclick="activateNode(2)" class="w-full text-left node-card flex items-center gap-6 p-5 rounded-2xl border border-white/5 bg-white/5 hover:bg-white/10 cursor-pointer transition-all duration-500" id="cnode-2">
+                        <div class="w-16 h-16 rounded-2xl bg-white/10 border border-white/10 flex items-center justify-center text-2xl shrink-0 transition-all duration-500" id="cicon-2">🧠</div>
+                        <div>
+                            <h4 class="text-lg font-medium text-white mb-1">Gemini AI Compliance</h4>
+                            <p class="text-sm text-slate-400">Validates strict HMRC tax rules</p>
+                        </div>
+                    </button>
+                    
+                    <button onclick="activateNode(3)" class="w-full text-left node-card flex items-center gap-6 p-5 rounded-2xl border border-white/5 bg-white/5 hover:bg-white/10 cursor-pointer transition-all duration-500" id="cnode-3">
+                        <div class="w-16 h-16 rounded-2xl bg-white/10 border border-white/10 flex items-center justify-center text-2xl shrink-0 transition-all duration-500" id="cicon-3">🔐</div>
+                        <div>
+                            <h4 class="text-lg font-medium text-white mb-1">AES Vault</h4>
+                            <p class="text-sm text-slate-400">Digital link locked to PostgreSQL</p>
+                        </div>
+                    </button>
+                    
+                    <button onclick="activateNode(4)" class="w-full text-left node-card flex items-center gap-6 p-5 rounded-2xl border border-white/5 bg-white/5 hover:bg-white/10 cursor-pointer transition-all duration-500" id="cnode-4">
+                        <div class="w-16 h-16 rounded-2xl bg-white/10 border border-white/10 flex items-center justify-center text-2xl shrink-0 transition-all duration-500" id="cicon-4">🏛️</div>
+                        <div>
+                            <h4 class="text-lg font-medium text-white mb-1">HMRC Gov Node</h4>
+                            <p class="text-sm text-slate-400">OAuth 2.0 REST submission</p>
+                        </div>
+                    </button>
+                </div>
+                
+                <div class="mt-12 sm:pl-28 text-center sm:text-left">
+                    <button onclick="runCleanSimulation()" id="sim-btn" class="px-8 py-4 bg-stripe-primary text-white rounded-full font-semibold text-sm hover:bg-indigo-500 transition-all shadow-[0_0_20px_rgba(99,91,255,0.4)] hover:shadow-[0_0_30px_rgba(99,91,255,0.6)] hover:scale-105 active:scale-95" aria-live="polite">
+                        Simulate Data Journey
+                    </button>
+                </div>
+            </div>
+
+            <!-- Terminal Panel -->
+            <div class="lg:col-span-5 fade-up">
+                <div class="bg-[#051626] rounded-3xl border border-white/10 p-6 shadow-2xl h-[450px] flex flex-col transition-opacity duration-300 opacity-50" id="detail-panel">
+                    <div class="flex items-center space-x-3 mb-4 border-b border-white/10 pb-4">
+                        <span id="panel-icon" class="text-2xl">⚡</span>
+                        <h3 id="panel-title" class="font-semibold text-white">System Idle</h3>
+                    </div>
+                    <p id="panel-desc" class="text-sm text-slate-400 mb-4">Awaiting payload initialization...</p>
+                    <div class="flex-1 bg-black/50 rounded-2xl border border-white/5 p-5 font-mono text-sm leading-relaxed text-[#00d0ff] overflow-y-auto">
+                        <pre id="panel-code">{"status": "waiting_for_user"}</pre>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="py-12 bg-white text-center text-sm text-slate-400">
+        <p>Invisible Accountant &middot; Serverless infrastructure</p>
+    </footer>
+
+    <script>
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => { if (entry.isIntersecting) entry.target.classList.add('visible'); });
+        }, { threshold: 0.1 });
+        document.querySelectorAll('.fade-up').forEach(el => observer.observe(el));
+
+        const nodeData = [
+            { icon: "📱", title: "Meta Webhook", desc: "Encrypted HTTPS POST from Meta servers containing raw user text.", code: '{\n  "Body": "Train to London £120",\n  "From": "+447000"\n}' },
+            { icon: "⚡", title: "Edge Worker", desc: "FastAPI asynchronously accepts payload to prevent Meta 15s timeout.", code: '@app.post("/webhook")\nasync def process_msg():\n  # Non-blocking async queue' },
+            { icon: "🧠", title: "AI Compliance", desc: "LLM extracts strictly typed metadata mapped to UK MTD laws.", code: '{\n  "category": "Travel",\n  "amount": 120.00,\n  "allowable": true,\n  "fraud_score": 0.01\n}' },
+            { icon: "🔐", title: "Immutable Vault", desc: "Record locked to disk using AES-256-GCM. Digital link preserved.", code: 'INSERT INTO hmrc_ledger \n(encrypted_payload) \nVALUES ("U2FsdGVkX1...")' },
+            { icon: "🏛️", title: "HMRC Gov Node", desc: "Expense legally filed via OAuth 2.0 with Gov-Vendor-Public-IP.", code: 'POST /income-tax/ni/...\nGov-Vendor-Public-IP: 34.120.2.1\n\nHTTP/1.1 201 Created' }
+        ];
+
+        let simTimeout;
+
+        function updatePanel(index) {
+            const data = nodeData[index];
+            const panel = document.getElementById('detail-panel');
+            
+            document.getElementById('panel-icon').innerText = data.icon;
+            document.getElementById('panel-title').innerText = data.title;
+            document.getElementById('panel-desc').innerText = data.desc;
+            document.getElementById('panel-code').innerText = data.code;
+            
+            panel.classList.remove('opacity-50');
+            panel.classList.add('opacity-100');
+        }
+        
+        function activateNode(index) {
+            clearTimeout(simTimeout);
+            document.querySelectorAll('.node-card').forEach(el => el.classList.remove('node-active'));
+            document.querySelectorAll('[id^="cicon-"]').forEach(el => el.classList.remove('icon-active'));
+            
+            document.getElementById('cnode-'+index).classList.add('node-active');
+            document.getElementById('cicon-'+index).classList.add('icon-active');
+            
+            const track = document.getElementById('data-track');
+            track.style.height = (index * 25) + '%';
+            
+            updatePanel(index);
+        }
+
+        async function runCleanSimulation() {
+            const btn = document.getElementById('sim-btn');
+            btn.innerHTML = "Tracing..."; 
+            btn.disabled = true;
+            btn.classList.add('opacity-50', 'cursor-wait');
+            
+            const track = document.getElementById('data-track');
+            
+            // Reset All
+            document.querySelectorAll('.node-card').forEach(el => el.classList.remove('node-active'));
+            document.querySelectorAll('[id^="cicon-"]').forEach(el => el.classList.remove('icon-active'));
+            track.style.height = '0%';
+            
+            await new Promise(r => setTimeout(r, 400));
+
+            for(let i=0; i<nodeData.length; i++) {
+                // Deactivate previous
+                if(i > 0) {
+                    document.getElementById('cnode-'+(i-1)).classList.remove('node-active');
+                    document.getElementById('cicon-'+(i-1)).classList.remove('icon-active');
+                }
+                
+                // Activate current
+                document.getElementById('cnode-'+i).classList.add('node-active');
+                document.getElementById('cicon-'+i).classList.add('icon-active');
+                
+                // Fill progress line
+                track.style.height = (i * 25) + '%';
+                
+                updatePanel(i);
+                
+                // Wait before moving to next
+                await new Promise(r => { simTimeout = setTimeout(r, 1400) });
+            }
+
+            // Finish
+            btn.innerHTML = "Simulate Data Journey";
+            btn.disabled = false;
+            btn.classList.remove('opacity-50', 'cursor-wait');
+        }
+    </script>
+</body>
+</html>

@@ -342,10 +342,34 @@ async def callback(code: str, state: str):
     if not whatsapp_id:
         raise HTTPException(status_code=400, detail="Invalid or expired OAuth state")
         
-    mock_access_token = "mock_access_token_123"
-    encrypted_dict = encrypt_token(mock_access_token)
+    client_id = os.environ.get("HMRC_CLIENT_ID")
+    client_secret = os.environ.get("HMRC_CLIENT_SECRET")
+    redirect_uri = os.environ.get("HMRC_REDIRECT_URI", "https://invisibleaccount.co.uk/callback")
+    base_url = os.environ.get("HMRC_BASE_URL", "https://test-api.service.hmrc.gov.uk")
+    
+    async with httpx.AsyncClient() as client:
+        resp = await client.post(
+            f"{base_url}/oauth/token",
+            data={
+                "client_id": client_id,
+                "client_secret": client_secret,
+                "grant_type": "authorization_code",
+                "redirect_uri": redirect_uri,
+                "code": code
+            },
+            headers={"Content-Type": "application/x-www-form-urlencoded"}
+        )
+        
+        if resp.status_code != 200:
+            raise HTTPException(status_code=400, detail=f"OAuth exchange failed: {resp.text}")
+            
+        token_data = resp.json()
+        
+    # Store the actual tokens securely in the vault
+    encrypted_dict = encrypt_token(json.dumps(token_data))
     await store_identity_in_vault(whatsapp_id, json.dumps(encrypted_dict).encode("utf-8"))
-    return HTMLResponse("<h1>Success! You can return to WhatsApp.</h1>")
+    
+    return HTMLResponse("<h1>Success! Your identity has been securely vaulted. You can return to WhatsApp.</h1>")
 
 # Mount the React dist directory (must be at the bottom to avoid route conflicts)
 # Ensure the directory exists to prevent FastAPI startup errors

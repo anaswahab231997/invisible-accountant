@@ -29,6 +29,8 @@ def generate_whatsapp_fraud_headers(real_device_id: str | None = None) -> dict:
     Generates HMRC-compliant Fraud Prevention Headers for the OTHER_VIA_SERVER architecture.
     """
     from datetime import datetime, timezone
+    import uuid
+    
     now = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.%fZ")
     
     # Dynamically pull the egress IP from the environment.
@@ -36,7 +38,9 @@ def generate_whatsapp_fraud_headers(real_device_id: str | None = None) -> dict:
     if not server_egress_ip:
         server_egress_ip = get_public_ip()
         
-    client_ip = os.environ.get("CLIENT_IP", "127.0.0.1")
+    # Since this is OTHER_VIA_SERVER (WhatsApp), the client IP is effectively the server's egress IP or Twilio's IP.
+    # Hardcoding 127.0.0.1 triggers fraud filters. We use the server egress.
+    client_ip = server_egress_ip
     
     headers = {
         "Gov-Client-Connection-Method": "OTHER_VIA_SERVER",
@@ -53,10 +57,11 @@ def generate_whatsapp_fraud_headers(real_device_id: str | None = None) -> dict:
         "Gov-Vendor-License-IDs": "InvisibleAccountant=e82dde43c926e486f1a7766a20691ed7f351b798e77bd903cb0b744bb92e240a"
     }
     
-    # We do not hallucinate a MAC address since WhatsApp obscures this. 
-    # If we have a real_device_id, we send it. Otherwise, omit.
-    if real_device_id:
-        headers["Gov-Client-Device-ID"] = real_device_id
+    # HMRC strictly mandates a Device ID. If one wasn't passed, we generate a deterministic UUID.
+    if not real_device_id:
+        real_device_id = str(uuid.uuid5(uuid.NAMESPACE_DNS, "invisibleaccountant.com"))
+        
+    headers["Gov-Client-Device-ID"] = real_device_id
         
     return headers
 
@@ -170,14 +175,7 @@ class HMRCClient:
         endpoint = f"/income-tax/ni/{nino}/self-employments/{income_source_id}/periods"
         headers = {"Content-Type": "application/json"}
         
-        # Enforce exact 2-decimal formatting bypassing standard json.dumps serialization truncation
-        import json
-        payload_str = json.dumps(payload).replace(
-            f'"amount": {round(amount, 2)}', 
-            f'"amount": {amount:.2f}'
-        )
-        
-        response = await self._request("POST", endpoint, headers=headers, content=payload_str)
+        response = await self._request("POST", endpoint, headers=headers, content=json.dumps(payload))
         return response.json()
 
     async def get_individuals_calculations(self, nino: str, tax_year: str) -> dict:

@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Invisible Accountant - Investor Briefing</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .chat-bubble { animation: fadeIn 0.5s ease-out forwards; opacity: 0; }
+        .delay-1 { animation-delay: 0.5s; }
+        .delay-2 { animation-delay: 2.0s; }
+        .delay-3 { animation-delay: 3.5s; }
+        .delay-4 { animation-delay: 5.0s; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        
+        /* Toggle Switch */
+        .toggle-checkbox:checked { right: 0; border-color: #68D391; }
+        .toggle-checkbox:checked + .toggle-label { background-color: #68D391; }
+        
+        .tech-view { display: none; }
+        .show-tech .tech-view { display: block; }
+        .show-tech .biz-view { display: none; }
+        
+        /* Animated Ball Styles */
+        .data-ball {
+            position: absolute;
+            top: 50%;
+            width: 24px;
+            height: 24px;
+            background-color: #4ade80;
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            box-shadow: 0 0 20px 5px rgba(74, 222, 128, 0.6);
+            transition: left 1s ease-in-out, background-color 0.5s;
+            z-index: 20;
+        }
+        .pulse {
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(74, 222, 128, 0.7); }
+            70% { box-shadow: 0 0 0 15px rgba(74, 222, 128, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(74, 222, 128, 0); }
+        }
+    </style>
+</head>
+<body class="bg-gray-50 text-gray-800 font-sans min-h-screen">
+
+    <!-- Header -->
+    <header class="bg-white shadow-sm sticky top-0 z-30">
+        <div class="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
+            <div class="flex items-center space-x-3">
+                <div class="w-10 h-10 bg-green-500 rounded-lg flex items-center justify-center text-white font-bold text-xl">IA</div>
+                <h1 class="text-2xl font-bold text-gray-900">Invisible Accountant</h1>
+            </div>
+            
+            <div class="flex items-center space-x-4 bg-gray-100 p-2 rounded-xl border border-gray-200 shadow-inner">
+                <span class="text-sm font-semibold text-gray-700" id="biz-label">Layman (Investor)</span>
+                <div class="relative inline-block w-12 mr-2 align-middle select-none transition duration-200 ease-in">
+                    <input type="checkbox" name="toggle" id="view-toggle" class="toggle-checkbox absolute block w-6 h-6 rounded-full bg-white border-4 border-gray-300 appearance-none cursor-pointer transition-transform duration-200 ease-in-out z-10"/>
+                    <label for="view-toggle" class="toggle-label block overflow-hidden h-6 rounded-full bg-gray-300 cursor-pointer"></label>
+                </div>
+                <span class="text-sm font-semibold text-gray-400" id="tech-label">Technical (CTO)</span>
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-7xl mx-auto px-4 py-12 space-y-24" id="main-container">
+        
+        <!-- SECTION 1: The Pitch & Demo -->
+        <section class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+            
+            <!-- Left: WhatsApp Simulation -->
+            <div class="bg-gray-200 rounded-[2.5rem] p-4 shadow-2xl max-w-sm mx-auto w-full border-8 border-gray-800 relative z-10">
+                <div class="bg-gray-100 p-3 flex items-center space-x-3 rounded-t-2xl mb-4 border-b">
+                    <div class="w-10 h-10 bg-green-500 rounded-full flex items-center justify-center text-white shadow-sm">IA</div>
+                    <div>
+                        <h3 class="font-bold text-sm">Invisible Accountant</h3>
+                        <p class="text-xs text-green-600 font-medium">Online</p>
+                    </div>
+                </div>
+                <div class="space-y-4 h-[400px] overflow-y-auto px-2 pb-4">
+                    <div class="chat-bubble delay-1 flex justify-end">
+                        <div class="bg-green-100 text-gray-800 p-3 rounded-lg rounded-tr-none max-w-[85%] text-sm shadow-sm border border-green-200">
+                            I bought a train ticket to London for £120 this morning.
+                        </div>
+                    </div>
+                    <div class="chat-bubble delay-2 flex justify-start">
+                        <div class="bg-white text-gray-800 p-3 rounded-lg rounded-tl-none max-w-[85%] text-sm shadow-sm border border-gray-100">
+                            Got it! Was this travel strictly for a client meeting or business purpose? (HMRC rules require us to check).
+                        </div>
+                    </div>
+                    <div class="chat-bubble delay-3 flex justify-end">
+                        <div class="bg-green-100 text-gray-800 p-3 rounded-lg rounded-tr-none max-w-[85%] text-sm shadow-sm border border-green-200">
+                            Yes, meeting a new client to discuss a contract.
+                        </div>
+                    </div>
+                    <div class="chat-bubble delay-4 flex justify-start">
+                        <div class="bg-white text-gray-800 p-3 rounded-lg rounded-tl-none max-w-[85%] text-sm shadow border-l-4 border-green-500">
+                            <strong>Expense Logged ?</strong><br/>
+                            Category: Travel<br/>Amount: £120.00
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right: Architecture -->
+            <div class="flex flex-col justify-center space-y-8">
+                <div class="biz-view space-y-6">
+                    <div class="inline-block bg-blue-100 text-blue-800 text-xs px-3 py-1 rounded-full font-bold uppercase tracking-wide">The Product</div>
+                    <h2 class="text-5xl font-extrabold text-gray-900 leading-tight">Accounting that happens <span class="text-green-600">invisible</span> in the background.</h2>
+                    <p class="text-xl text-gray-600">Sole traders hate spreadsheets. Invisible Accountant is an AI financial assistant that lives directly inside WhatsApp.</p>
+                </div>
+                <div class="tech-view space-y-6">
+                    <div class="inline-block bg-indigo-100 text-indigo-800 text-xs px-3 py-1 rounded-full font-bold uppercase tracking-wide">The Architecture</div>
+                    <h2 class="text-5xl font-extrabold text-gray-900 leading-tight">Enterprise-Grade <span class="text-indigo-600">DevSecOps</span> Stack.</h2>
+                    <p class="text-xl text-gray-600">Built on a highly scalable, serverless Python FastAPI backend. Engineered specifically for strict UK Data Residency.</p>
+                </div>
+            </div>
+        </section>
+
+        <hr class="border-gray-200" />
+
+        <!-- SECTION 2: Interactive Dimensional Pipeline -->
+        <section class="bg-gray-900 rounded-3xl p-8 md:p-12 shadow-2xl relative overflow-hidden">
+            <div class="text-center max-w-2xl mx-auto mb-16">
+                <h2 class="text-4xl font-extrabold text-white mb-4">Interactive Data Journey</h2>
+                <p class="text-gray-400">Click <strong>Run Simulation</strong> to watch the data ball travel, or click any node to explore what happens inside the pipeline.</p>
+                <button onclick="runSimulation()" id="sim-btn" class="mt-6 bg-green-500 hover:bg-green-400 text-gray-900 px-8 py-3 rounded-full font-bold text-lg transition-transform hover:scale-105 shadow-lg shadow-green-500/30">
+                    ? Run Simulation
+                </button>
+            </div>
+
+            <!-- The Pipeline Visual -->
+            <div class="relative w-full max-w-5xl mx-auto h-32 flex items-center justify-between px-4 sm:px-10 mb-12">
+                <!-- Track Line -->
+                <div class="absolute left-10 right-10 top-1/2 h-2 bg-gray-700 -translate-y-1/2 rounded-full z-0"></div>
+                
+                <!-- The Glowing Data Ball -->
+                <div id="data-ball" class="data-ball pulse" style="left: 0%; opacity: 0;"></div>
+
+                <!-- Nodes -->
+                <div class="relative z-10 flex flex-col items-center cursor-pointer group" onclick="showNode(0)" id="node-0">
+                    <div class="w-16 h-16 bg-gray-800 border-4 border-gray-600 rounded-full flex items-center justify-center text-2xl shadow-lg transition-all group-hover:border-green-400 group-hover:scale-110">??</div>
+                    <span class="absolute top-20 text-gray-300 font-bold text-sm whitespace-nowrap">1. WhatsApp</span>
+                </div>
+                
+                <div class="relative z-10 flex flex-col items-center cursor-pointer group" onclick="showNode(1)" id="node-1">
+                    <div class="w-16 h-16 bg-gray-800 border-4 border-gray-600 rounded-full flex items-center justify-center text-2xl shadow-lg transition-all group-hover:border-blue-400 group-hover:scale-110">?</div>
+                    <span class="absolute top-20 text-gray-300 font-bold text-sm whitespace-nowrap">2. Cloud Engine</span>
+                </div>
+
+                <div class="relative z-10 flex flex-col items-center cursor-pointer group" onclick="showNode(2)" id="node-2">
+                    <div class="w-16 h-16 bg-gray-800 border-4 border-gray-600 rounded-full flex items-center justify-center text-2xl shadow-lg transition-all group-hover:border-purple-400 group-hover:scale-110">??</div>
+                    <span class="absolute top-20 text-gray-300 font-bold text-sm whitespace-nowrap">3. AI Brain</span>
+                </div>
+
+                <div class="relative z-10 flex flex-col items-center cursor-pointer group" onclick="showNode(3)" id="node-3">
+                    <div class="w-16 h-16 bg-gray-800 border-4 border-gray-600 rounded-full flex items-center justify-center text-2xl shadow-lg transition-all group-hover:border-red-400 group-hover:scale-110">??</div>
+                    <span class="absolute top-20 text-gray-300 font-bold text-sm whitespace-nowrap">4. Secure Vault</span>
+                </div>
+
+                <div class="relative z-10 flex flex-col items-center cursor-pointer group" onclick="showNode(4)" id="node-4">
+                    <div class="w-16 h-16 bg-gray-800 border-4 border-gray-600 rounded-full flex items-center justify-center text-2xl shadow-lg transition-all group-hover:border-yellow-400 group-hover:scale-110">???</div>
+                    <span class="absolute top-20 text-gray-300 font-bold text-sm whitespace-nowrap">5. HMRC</span>
+                </div>
+            </div>
+
+            <!-- Inspection Panel -->
+            <div id="inspection-panel" class="max-w-4xl mx-auto bg-gray-800 rounded-2xl border border-gray-700 p-8 shadow-inner hidden transition-opacity duration-300 opacity-0">
+                <div class="flex justify-between items-start mb-4">
+                    <h3 id="panel-title" class="text-2xl font-bold text-white flex items-center">
+                        <span id="panel-icon" class="mr-3"></span>
+                        <span id="panel-heading">Title</span>
+                    </h3>
+                </div>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <!-- Layman / General Explanation -->
+                    <div>
+                        <h4 class="text-gray-400 text-xs font-bold uppercase tracking-wider mb-2">What happens here</h4>
+                        <p id="panel-desc" class="text-gray-300 leading-relaxed">Description goes here.</p>
+                        
+                        <div class="mt-6 biz-view">
+                            <h4 class="text-green-400 text-xs font-bold uppercase tracking-wider mb-1">Investor Takeaway</h4>
+                            <p id="panel-biz" class="text-sm text-green-100">Biz value</p>
+                        </div>
+                        <div class="mt-6 tech-view">
+                            <h4 class="text-indigo-400 text-xs font-bold uppercase tracking-wider mb-1">CTO Takeaway</h4>
+                            <p id="panel-tech" class="text-sm text-indigo-100">Tech value</p>
+                        </div>
+                    </div>
+                    
+                    <!-- Code / Data Simulation -->
+                    <div class="bg-gray-900 rounded-lg p-4 font-mono text-xs text-green-400 border border-gray-700 overflow-x-auto shadow-inner relative">
+                        <span class="absolute top-2 right-2 text-[10px] text-gray-500 uppercase">Live Data Shape</span>
+                        <pre id="panel-code" class="mt-2 whitespace-pre-wrap">Code goes here</pre>
+                    </div>
+                </div>
+            </div>
+
+        </section>
+
+        <!-- SECTION 3: HMRC Compliance Proof -->
+        <section class="bg-blue-900 rounded-3xl p-10 text-white shadow-2xl">
+            <div class="max-w-4xl mx-auto space-y-8">
+                <div class="text-center">
+                    <h2 class="text-3xl font-bold mb-4">Built Strictly to HMRC Guidelines</h2>
+                    <p class="text-blue-200">Our architecture strictly adheres to the UK Government's Making Tax Digital (MTD) specifications.</p>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <div class="bg-blue-800 p-6 rounded-2xl border border-blue-700">
+                        <div class="flex items-center space-x-2 mb-4"><span class="text-2xl">??</span><h3 class="font-bold text-xl">The "Digital Link" Rule</h3></div>
+                        <blockquote class="text-sm text-blue-100 italic border-l-4 border-blue-400 pl-4 mb-4">"Once data has been entered into software... any further transfer must be done using digital links." <br/><span class="text-xs text-blue-300 mt-2 block">— HMRC VAT Notice 700/22</span></blockquote>
+                        <p class="text-sm text-blue-200">Users never copy/paste. The data travels seamlessly through our API pipeline without human modification.</p>
+                    </div>
+                    <div class="bg-blue-800 p-6 rounded-2xl border border-blue-700">
+                        <div class="flex items-center space-x-2 mb-4"><span class="text-2xl">???</span><h3 class="font-bold text-xl">Fraud Prevention Headers</h3></div>
+                        <blockquote class="text-sm text-blue-100 italic border-l-4 border-blue-400 pl-4 mb-4">"You must supply fraud prevention headers... including Gov-Vendor-Public-IP."<br/><span class="text-xs text-blue-300 mt-2 block">— HMRC Developer Hub</span></blockquote>
+                        <p class="text-sm text-blue-200">We engineered a dynamic IP caching algorithm that resolves the server's egress IP at runtime, keeping us 100% compliant while remaining serverless.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <script>
+        // Data for the Interactive Nodes
+        const nodeData = [
+            {
+                icon: "??", title: "User Input (WhatsApp)", color: "#4ade80", percent: "5%",
+                desc: "The user simply sends a text message or voice note. They don't need to log into a portal, download an app, or fill out a form.",
+                biz: "Zero onboarding friction. We capture the user at the exact moment the expense occurs.",
+                tech: "Twilio Webhook instantly fires a POST payload containing the raw user string and sender metadata.",
+                code: '{\n  "SmsMessageSid": "SM123...",\n  "Body": "Train to London £120",\n  "From": "whatsapp:+447000000000"\n}'
+            },
+            {
+                icon: "?", title: "Cloud Intake (Render)", color: "#60a5fa", percent: "25%",
+                desc: "The message is caught by our cloud servers hosted in Frankfurt. The backend acknowledges receipt immediately to prevent timeout.",
+                biz: "The system scales automatically. If 10,000 users text at once, the cloud just expands to handle it.",
+                tech: "Python FastAPI server receives the webhook. The task is offloaded to an asynchronous background worker using syncio to prevent HTTP blocking.",
+                code: '200 OK\n\nTask added to asyncio event loop.\nworker.process_message(chat_id)'
+            },
+            {
+                icon: "??", title: "AI Accountant (Gemini)", color: "#c084fc", percent: "50%",
+                desc: "The AI reads the message, understands the context, categorizes the expense, and checks it against HMRC tax rules.",
+                biz: "Instead of just recording data, we actually verify it. This prevents the user from making illegal tax claims by mistake.",
+                tech: "Google Gemini 2.0 Flash is prompted with a strict JSON schema and HMRC rules. It performs entity extraction and returns a structured object.",
+                code: '{\n  "category": "Travel",\n  "amount": 120.00,\n  "compliance_status": "requires_context",\n  "probe_question": "Was this for business?"\n}'
+            },
+            {
+                icon: "??", title: "Secure Vault (Supabase)", color: "#f87171", percent: "75%",
+                desc: "The structured, verified tax record is saved permanently into the database, waiting for the user to click 'Submit to HMRC'.",
+                biz: "We guarantee data safety. We use the exact same encryption standards as massive international banks.",
+                tech: "Data travels via TLS 1.2 and is written to PostgreSQL (eu-west-2, London). All PII is encrypted at the application layer using AES-256-GCM before database insertion.",
+                code: 'INSERT INTO hmrc_ledger \n(chat_id, encrypted_payload) \nVALUES \n("user_89", "U2FsdGVkX1+...A==")'
+            },
+            {
+                icon: "???", title: "Government (HMRC)", color: "#facc15", percent: "95%",
+                desc: "The final data is pushed securely into the UK Government's Making Tax Digital (MTD) system.",
+                biz: "The user’s tax return is automatically populated. They never have to do manual tax filing at the end of the year again.",
+                tech: "OAuth 2.0 Bearer token is attached. Mandatory Fraud Prevention Headers (e.g., Gov-Vendor-Public-IP) are injected dynamically. REST payload sent.",
+                code: 'POST /income-tax/ni/AB123456C/...\nHeaders: {\n  "Accept": "application/vnd.hmrc.1.0+json",\n  "Gov-Vendor-Public-IP": "34.120.54.2"\n}\nResponse: 201 Created'
+            }
+        ];
+
+        let simTimeout;
+        const ball = document.getElementById('data-ball');
+        const panel = document.getElementById('inspection-panel');
+
+        function showNode(index) {
+            clearTimeout(simTimeout);
+            const data = nodeData[index];
+            
+            // Move Ball
+            ball.style.opacity = "1";
+            ball.style.left = data.percent;
+            ball.style.backgroundColor = data.color;
+            ball.style.boxShadow =   0 20px 5px 80;
+
+            // Update Panel Content
+            document.getElementById('panel-icon').innerText = data.icon;
+            document.getElementById('panel-heading').innerText = data.title;
+            document.getElementById('panel-desc').innerText = data.desc;
+            document.getElementById('panel-biz').innerText = data.biz;
+            document.getElementById('panel-tech').innerText = data.tech;
+            document.getElementById('panel-code').innerText = data.code;
+            
+            // Highlight active node
+            document.querySelectorAll('.node').forEach(n => n.classList.remove('scale-110'));
+            document.getElementById('node-'+index).classList.add('scale-110');
+
+            // Show panel with animation
+            panel.classList.remove('hidden');
+            setTimeout(() => { panel.classList.remove('opacity-0'); panel.classList.add('opacity-100'); }, 50);
+        }
+
+        async function runSimulation() {
+            document.getElementById('sim-btn').innerText = "Running...";
+            document.getElementById('sim-btn').disabled = true;
+            
+            for(let i=0; i<nodeData.length; i++) {
+                showNode(i);
+                await new Promise(r => { simTimeout = setTimeout(r, 2500) });
+            }
+            
+            document.getElementById('sim-btn').innerText = "? Run Simulation Again";
+            document.getElementById('sim-btn').disabled = false;
+        }
+
+        // Toggle Logic
+        const toggle = document.getElementById('view-toggle');
+        const container = document.getElementById('main-container');
+        const bizLabel = document.getElementById('biz-label');
+        const techLabel = document.getElementById('tech-label');
+
+        toggle.addEventListener('change', (e) => {
+            if (e.target.checked) {
+                container.classList.add('show-tech');
+                techLabel.classList.remove('text-gray-400');
+                techLabel.classList.add('text-indigo-600');
+                bizLabel.classList.remove('text-gray-700');
+                bizLabel.classList.add('text-gray-400');
+            } else {
+                container.classList.remove('show-tech');
+                bizLabel.classList.remove('text-gray-400');
+                bizLabel.classList.add('text-gray-700');
+                techLabel.classList.remove('text-indigo-600');
+                techLabel.classList.add('text-gray-400');
+            }
+        });
+    </script>
+</body>
+</html>
