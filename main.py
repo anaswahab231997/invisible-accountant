@@ -371,11 +371,11 @@ async def callback(code: str, state: str):
     
     return HTMLResponse("<h1>Success! Your identity has been securely vaulted. You can return to WhatsApp.</h1>")
 
-# Mount the React dist directory (must be at the bottom to avoid route conflicts)
-# Ensure the directory exists to prevent FastAPI startup errors
-import os
-os.makedirs("frontend/dist", exist_ok=True)
-app.mount("/", StaticFiles(directory="frontend/dist", html=True), name="frontend")
+# Serve the landing page at the root URL
+@app.get("/")
+async def serve_landing_page():
+    from fastapi.responses import FileResponse
+    return FileResponse("landing_page.html")
 
 if __name__ == "__main__":
     uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=True)
