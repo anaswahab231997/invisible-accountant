@@ -96,7 +96,7 @@ async def create_chat_session(sender_id: str, message: str, media_urls: list[str
     async with get_connection() as conn:
         chat_id = await conn.fetchval('''
             INSERT INTO chat_sessions (timestamp, sender_id, raw_message, media_urls, turn_count, ttl_timestamp)
-            VALUES (, , , , , )
+            VALUES ($1, $2, $3, $4, $5, $6)
             RETURNING id
         ''', timestamp, sender_id, message, json.dumps(media_urls), turn_count, ttl)
         return chat_id
@@ -104,7 +104,7 @@ async def create_chat_session(sender_id: str, message: str, media_urls: list[str
 async def get_recent_intakes_by_sender(sender_id: str, limit: int = 5):
     async with get_connection() as conn:
         rows = await conn.fetch(
-            "SELECT raw_message FROM chat_sessions WHERE sender_id =  ORDER BY timestamp DESC LIMIT ",
+            "SELECT raw_message FROM chat_sessions WHERE sender_id = $1 ORDER BY timestamp DESC LIMIT $2",
             sender_id, limit
         )
         return [row["raw_message"] for row in reversed(rows)]
@@ -113,7 +113,7 @@ async def stage_expense(chat_id: int, payload: dict):
     payload_str = json.dumps(payload)
     async with get_connection() as conn:
         await conn.execute(
-            "UPDATE chat_sessions SET staging_payload =  WHERE id = ",
+            "UPDATE chat_sessions SET staging_payload = $1 WHERE id = $2",
             payload_str, chat_id
         )
 
@@ -123,7 +123,7 @@ async def get_unconfirmed_session(sender_id: str):
             """
             SELECT c.* FROM chat_sessions c
             LEFT JOIN hmrc_ledger h ON c.id = h.chat_id
-            WHERE c.sender_id =  AND c.staging_payload IS NOT NULL AND h.id IS NULL
+            WHERE c.sender_id = $1 AND c.staging_payload IS NOT NULL AND h.id IS NULL
             ORDER BY c.timestamp DESC LIMIT 1
             """,
             sender_id
@@ -133,14 +133,14 @@ async def get_unconfirmed_session(sender_id: str):
 async def confirm_and_queue_to_ledger(chat_id: int):
     timestamp = datetime.now().isoformat()
     async with get_connection() as conn:
-        row = await conn.fetchrow("SELECT staging_payload FROM chat_sessions WHERE id = ", chat_id)
+        row = await conn.fetchrow("SELECT staging_payload FROM chat_sessions WHERE id = $1", chat_id)
         if not row or not row["staging_payload"]:
             raise ValueError("No staged payload to confirm.")
             
         payload = json.loads(row["staging_payload"])
         
         status = await conn.execute(
-            "UPDATE chat_sessions SET staging_payload = NULL WHERE id =  AND staging_payload IS NOT NULL",
+            "UPDATE chat_sessions SET staging_payload = NULL WHERE id = $1 AND staging_payload IS NOT NULL",
             chat_id
         )
         if status == "UPDATE 0":
@@ -149,7 +149,7 @@ async def confirm_and_queue_to_ledger(chat_id: int):
         queue_id = await conn.fetchval(
             """
             INSERT INTO hmrc_ledger (chat_id, timestamp, vendor, amount, category, status)
-            VALUES (, , , , , )
+            VALUES ($1, $2, $3, $4, $5, $6)
             RETURNING id
             """,
             chat_id,
@@ -175,19 +175,19 @@ async def get_pending_hmrc_queue():
 async def mark_hmrc_submitted(queue_id):
     async with get_connection() as conn:
         await conn.execute(
-            "UPDATE hmrc_ledger SET status = 'SUBMITTED' WHERE id = ", queue_id
+            "UPDATE hmrc_ledger SET status = 'SUBMITTED' WHERE id = $1", queue_id
         )
 
 async def mark_hmrc_failed(queue_id):
     async with get_connection() as conn:
         await conn.execute(
-            "UPDATE hmrc_ledger SET status = 'FAILED' WHERE id = ", queue_id
+            "UPDATE hmrc_ledger SET status = 'FAILED' WHERE id = $1", queue_id
         )
 
 async def get_all_hmrc_queue(limit: int = 100, offset: int = 0):
     async with get_connection() as conn:
         rows = await conn.fetch(
-            "SELECT * FROM hmrc_ledger ORDER BY timestamp ASC LIMIT  OFFSET ",
+            "SELECT * FROM hmrc_ledger ORDER BY timestamp ASC LIMIT $1 OFFSET $2",
             limit, offset
         )
         return [dict(row) for row in rows]
@@ -195,7 +195,7 @@ async def get_all_hmrc_queue(limit: int = 100, offset: int = 0):
 async def get_hmrc_ledger_by_chat(chat_id: int):
     async with get_connection() as conn:
         row = await conn.fetchrow(
-            "SELECT * FROM hmrc_ledger WHERE chat_id = ", chat_id
+            "SELECT * FROM hmrc_ledger WHERE chat_id = $1", chat_id
         )
         return dict(row) if row else None
 
@@ -206,7 +206,7 @@ async def get_expiring_staged_sessions():
             """
             SELECT c.* FROM chat_sessions c
             LEFT JOIN hmrc_ledger h ON c.id = h.chat_id
-            WHERE c.staging_payload IS NOT NULL AND h.id IS NULL AND c.ttl_timestamp <= 
+            WHERE c.staging_payload IS NOT NULL AND h.id IS NULL AND c.ttl_timestamp <= $1
             """,
             now
         )
@@ -218,7 +218,7 @@ async def store_identity_in_vault(whatsapp_id: str, encrypted_blob: bytes):
         await conn.execute(
             """
             INSERT INTO hmrc_identity_vault (whatsapp_id, encrypted_blob, updated_at)
-            VALUES (, , )
+            VALUES ($1, $2, $3)
             ON CONFLICT (whatsapp_id) DO UPDATE SET 
                 encrypted_blob = EXCLUDED.encrypted_blob,
                 updated_at = EXCLUDED.updated_at
@@ -229,7 +229,7 @@ async def store_identity_in_vault(whatsapp_id: str, encrypted_blob: bytes):
 async def get_identity_from_vault(whatsapp_id: str) -> bytes:
     async with get_connection() as conn:
         row = await conn.fetchrow(
-            "SELECT encrypted_blob FROM hmrc_identity_vault WHERE whatsapp_id = ",
+            "SELECT encrypted_blob FROM hmrc_identity_vault WHERE whatsapp_id = $1",
             whatsapp_id
         )
         return row["encrypted_blob"] if row else None
@@ -240,7 +240,7 @@ async def create_oauth_state(whatsapp_id: str) -> str:
     timestamp = datetime.now().isoformat()
     async with get_connection() as conn:
         await conn.execute(
-            "INSERT INTO oauth_states (state_uuid, whatsapp_id, created_at) VALUES (, , )",
+            "INSERT INTO oauth_states (state_uuid, whatsapp_id, created_at) VALUES ($1, $2, $3)",
             state_uuid, whatsapp_id, timestamp
         )
     return state_uuid
@@ -248,10 +248,10 @@ async def create_oauth_state(whatsapp_id: str) -> str:
 async def consume_oauth_state(state_uuid: str) -> str:
     async with get_connection() as conn:
         row = await conn.fetchrow(
-            "SELECT whatsapp_id FROM oauth_states WHERE state_uuid = ",
+            "SELECT whatsapp_id FROM oauth_states WHERE state_uuid = $1",
             state_uuid
         )
         if row:
-            await conn.execute("DELETE FROM oauth_states WHERE state_uuid = ", state_uuid)
+            await conn.execute("DELETE FROM oauth_states WHERE state_uuid = $1", state_uuid)
             return row["whatsapp_id"]
         return None
