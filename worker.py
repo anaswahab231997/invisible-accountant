@@ -233,10 +233,9 @@ async def process_ttl_sweeper():
                             sender_id=item["sender_id"],
                         )
                         await conn.execute(
-                            "UPDATE chat_sessions SET ttl_timestamp = '9999-12-31' WHERE id = ?",
-                            (item["id"],),
+                            "UPDATE chat_sessions SET ttl_timestamp = '9999-12-31' WHERE id = $1",
+                            item["id"]
                         )
-                    await conn.commit()
 
             await asyncio.sleep(5)
         except Exception as e:
