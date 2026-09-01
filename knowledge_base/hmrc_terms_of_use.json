@@ -1,0 +1,60 @@
+{
+    "Terms of Use (General)": {
+        "Introduction": "The terms of use explain what HMRC expects from developers when creating and operating software services that use HMRC APIs hosted on the HMRC Developer Hub.",
+        "Applicability": "Applies to all users of the Developer Hub and covers all publicly accessible content, including your software, websites, and social media.",
+        "ComplianceMonitoring": "HMRC may carry out spot checks and retrospective assurance activity to confirm ongoing compliance.",
+        "LegalRelationship": "The terms of use is not a legal relationship between HMRC and any software developer.",
+        "AccessRevocation": "HMRC reserves the right to remove or revoke your access to the Developer Hub and its APIs temporarily or permanently for non-compliance.",
+        "ProductionAccessRequests": "Persistent non-compliance may result in the rejection of further production credential requests. Developers have six months to complete a request for production credentials; otherwise, progress is deleted."
+    },
+    "Developer Responsibilities": {
+        "OrganisationDetails": {
+            "ResponsibleIndividual": "Provide details for a responsible individual who ensures software conforms to the terms of use and understands consequences of non-conformity.",
+            "OrganisationURL": "Provide your organisation's URL (e.g., https://example.com).",
+            "OfficialRegistration": "Provide evidence that your organisation is officially registered (e.g., UTR, VAT registration number, PAYE reference, Corporation Tax UTR, Company registration number for UK; official registration evidence for non-UK organisations)."
+        },
+        "MarketingYourSoftware": {
+            "HMRCLogosAndBranding": "MUST NOT use HMRC logos or other crown copyright material and branding in any content (software application, website, marketing material).",
+            "AdvertisingCompliance": "Responsible for all marketing and promotional content. Advertising MUST follow Advertising Standards Authority Codes and UK marketing and advertising laws.",
+            "AdvertisingContentRestrictions": "MUST NOT mislead customers, claim readiness/compatibility/integration before live access, present planned features as available, include content contradicting HMRC's guidance, or use SEO/bulk generated content to promote inaccurate content.",
+            "HMRCRecognisedClaim": "MAY describe software as 'HMRC recognised' ONLY if it has successfully completed HMRC's formal recognition process. MUST NOT claim or imply 'HMRC recognised' otherwise, or use terms like 'approved', 'accredited', 'certified', or 'Kitemarked'.",
+            "CustomerDataForMarketing": "MUST NOT share customers' personal data for marketing without their consent (follow ICO Direct Marketing Guidance)."
+        },
+        "DevelopmentPractices": {
+            "DevelopmentGuidance": "MUST develop software following HMRC's development practices.",
+            "TechnicalSpecifications": "Software MUST be built and tested to meet HMRC's technical specifications before requesting live access. Understand specific API requirements.",
+            "ErrorHandling": "Software MUST be built to meet HMRC's error handling specification.",
+            "AccessibilityStandards": "Web-based software MUST meet Level AA of the Web Content Accessibility Guidelines (WCAG). Desktop software should follow equivalent offline standards. Evidence of compliance is required for Gov.UK listing."
+        },
+        "ServiceManagementPractices": {
+            "SecurityRiskReportingToCustomers": "MUST provide an easy contact method for customers or third parties to report security risks or incidents.",
+            "SecurityBreachNotificationToHMRC": "MUST have a clear process to report security incidents to HMRC immediately by logging a ticket within 72 hours, providing a breach contact name and telephone number.",
+            "SecurityBreachNotificationToICO": "MUST notify the ICO about personal data breaches within 72 hours of becoming aware of it, where personal data is involved."
+        },
+        "HandlingPersonalData": {
+            "UKGDPRCompliance": "MUST handle customer data in line with UK GDPR, being clear about data collected, why, legal basis, and responsibility for security.",
+            "DataEncryption": "MUST encrypt access tokens and personally identifiable data when stored and in transit.",
+            "CustomerDataSeparation": "MUST ensure that each customer's data is kept separate and cannot be accessed by unauthorised users.",
+            "EmployeeAccessControl": "MUST implement clear roles and access controls (e.g., Role Based Access Control) to ensure employees only access information relevant to their job.",
+            "DataPortability": "MUST allow customers to access, change, export, or delete their data if they choose to move to another provider or no longer use your service.",
+            "HMRCSignInDetailsStorage": "SHOULD NOT store customers' HMRC sign-in details; use OAuth 2.0 for authentication to avoid unnecessary security risks."
+        },
+        "SoftwareSecurity": {
+            "PenetrationTesting": "MUST test your software for security vulnerabilities before going live, including regular penetration testing using appropriate tools.",
+            "AuditSecurityControls": "MUST regularly check that your security controls are working and comply with data protection regulations, reviewing how customer data is protected."
+        },
+        "CustomersAuthorisingYourSoftware": {
+            "ServerLocation": "MUST know where customer data is processed and stored. Confirm cloud provider server location and ensure it meets data protection responsibilities.",
+            "PrivacyPolicyURL": "Commercial software MUST have a clear, accessible, and specific privacy policy that accurately reflects how your product works.",
+            "TermsAndConditionsURL": "MUST have clear and accessible terms and conditions for your software that sets out how your service works and the responsibilities of both you and your customers."
+        }
+    },
+    "API Restrictions": {
+        "FraudPreventionDataSubmission": {
+            "Requirement": "For VAT (MTD) or Income Tax Self Assessment (MTD) APIs, you MUST submit HMRC-specified fraud prevention header data in all API requests.",
+            "Testing": "MUST test your fraud prevention headers before going live using the Test Fraud Prevention Headers API to ensure correct submission and avoid production access rejection or delay."
+        },
+        "AccessControl": "HMRC reserves the right to remove or revoke your access to the Developer Hub and its APIs temporarily or permanently for non-compliance.",
+        "ProductionCredentialTimeline": "Production access requests must be completed within six months; otherwise, progress is deleted."
+    }
+}
