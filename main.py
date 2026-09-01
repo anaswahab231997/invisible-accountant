@@ -95,11 +95,7 @@ async def process_intake_task(
                     message="✅ All set! I've officially locked this into your tax ledger and it's queued for HMRC.",
                 )
                 from ws import manager
-                await manager.broadcast({
-                    "type": "INTAKE_UPDATE",
-                    "chat_id": chat_id,
-                    "result": {"status": "CONFIRMED"}
-                })
+                await manager.send_personal_message({"type": "INTAKE_UPDATE", "chat_id": chat_id, "result": {"status": "CONFIRMED"}}, sender_id)
                 return
             else:
                 logger.info("Outbound WhatsApp message", sender_id=sender_id, message="You don't have any pending expenses to proceed with.")
@@ -124,11 +120,7 @@ async def process_intake_task(
             
             # Broadcast the update via WebSocket
             from ws import manager
-            await manager.broadcast({
-                "type": "INTAKE_UPDATE",
-                "chat_id": chat_id,
-                "result": result
-            })
+            await manager.send_personal_message({"type": "INTAKE_UPDATE", "chat_id": chat_id, "result": result}, sender_id)
 
             if result.get("is_ambiguous"):
                 logger.info(
@@ -150,11 +142,7 @@ async def process_intake_task(
     except Exception as e:
         logger.error("Error processing intake", chat_id=chat_id, error=str(e))
         from ws import manager
-        await manager.broadcast({
-            "type": "INTAKE_UPDATE",
-            "chat_id": chat_id,
-            "result": {"is_ambiguous": True, "auditor_question": "An internal error occurred."}
-        })
+        await manager.send_personal_message({"type": "INTAKE_UPDATE", "chat_id": chat_id, "result": {"is_ambiguous": True, "auditor_question": "An internal error occurred."}}, sender_id)
         if not sender_id.startswith("demo_web_"):
             try:
                 from twilio.rest import Client
@@ -267,11 +255,7 @@ async def receive_twilio(
             reply_text = "[LOCKED] All set! I've officially locked this into your tax ledger and it's queued for HMRC."
             
             from ws import manager
-            await manager.broadcast({
-                "type": "INTAKE_UPDATE",
-                "chat_id": chat_id,
-                "result": {"status": "CONFIRMED"}
-            })
+            await manager.send_personal_message({"type": "INTAKE_UPDATE", "chat_id": chat_id, "result": {"status": "CONFIRMED"}}, sender_id)
         else:
             reply_text = "You don't have any pending expenses to proceed with."
         
@@ -295,11 +279,7 @@ async def receive_twilio(
         await stage_expense(chat_id, result)
         
         from ws import manager
-        await manager.broadcast({
-            "type": "INTAKE_UPDATE",
-            "chat_id": chat_id,
-            "result": result
-        })
+        await manager.send_personal_message({"type": "INTAKE_UPDATE", "chat_id": chat_id, "result": result}, sender_id)
 
         if result.get("is_ambiguous"):
             reply_text = result.get("auditor_question", "Could you clarify that?")
@@ -386,14 +366,14 @@ from fastapi import WebSocket, WebSocketDisconnect
 
 @app.websocket("/ws/{client_id}")
 async def websocket_endpoint(websocket: WebSocket, client_id: str):
-    await manager.connect(websocket)
+    await manager.connect(websocket, client_id)
     try:
         while True:
             await websocket.receive_text()
     except Exception:
         pass
     finally:
-        manager.disconnect(websocket)
+        manager.disconnect(client_id)
 
 @app.post("/api/simulate_whatsapp")
 async def api_simulate_whatsapp(

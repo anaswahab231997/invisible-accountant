@@ -2,17 +2,26 @@ from fastapi import WebSocket, WebSocketDisconnect
 
 class ConnectionManager:
     def __init__(self):
-        self.active_connections: list[WebSocket] = []
+        self.active_connections: dict[str, WebSocket] = {}
 
-    async def connect(self, websocket: WebSocket):
+    async def connect(self, websocket: WebSocket, client_id: str):
         await websocket.accept()
-        self.active_connections.append(websocket)
+        self.active_connections[client_id] = websocket
 
-    def disconnect(self, websocket: WebSocket):
-        self.active_connections.remove(websocket)
+    def disconnect(self, client_id: str):
+        if client_id in self.active_connections:
+            del self.active_connections[client_id]
+
+    async def send_personal_message(self, message: dict, client_id: str):
+        if client_id in self.active_connections:
+            connection = self.active_connections[client_id]
+            try:
+                await connection.send_json(message)
+            except Exception:
+                pass
 
     async def broadcast(self, message: dict):
-        for connection in self.active_connections.copy():
+        for client_id, connection in list(self.active_connections.items()):
             try:
                 await connection.send_json(message)
             except Exception:

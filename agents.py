@@ -7,6 +7,8 @@ from pydantic import BaseModel, Field
 
 from logger import get_logger
 from dotenv import load_dotenv
+from tenacity import retry, wait_exponential, stop_after_attempt, retry_if_exception_type
+from google.genai.errors import APIError
 
 load_dotenv()
 
@@ -83,6 +85,12 @@ def is_safe_url(url: str) -> bool:
         return False
 
 
+@retry(
+    wait=wait_exponential(multiplier=1, min=2, max=10),
+    stop=stop_after_attempt(5),
+    retry=retry_if_exception_type(Exception),
+    reraise=True
+)
 async def _call_gemini(
     system_instruction: str,
     user_input: str,
@@ -126,7 +134,7 @@ async def _call_gemini(
 
 
 async def process_expense_message(
-    raw_message: str, turn_count: int = 1, media_urls: list = None
+    raw_message: str, turn_count: int = 1, media_urls: list = None, previous_state: dict = None
 ):
     system_instruction = """
     You are Emma, an Invisible Accountant AI for UK Sole Traders.
@@ -173,6 +181,11 @@ async def process_expense_message(
 
     try:
         # Phase 1: Fast & Cheap (Gemini 2.5 Flash)
+        
+        if previous_state:
+            import json
+            raw_message = f"PREVIOUS STATE:\n{json.dumps(previous_state, indent=2)}\n\nUSER'S LATEST MESSAGE:\n{raw_message}\n\nINSTRUCTION: The user is replying to your previous question. Merge this new information with the PREVIOUS STATE. If they answered your question, update the missing fields (e.g. amount, vendor, category). If everything is now complete, set is_ambiguous to false."
+            
         result = await _call_gemini(
             system_instruction, raw_message, media_urls, model="gemini-2.5-flash"
         )
@@ -184,7 +197,7 @@ async def process_expense_message(
                 reason="Flash flagged as ambiguous",
             )
             pro_result = await _call_gemini(
-                system_instruction, raw_message, media_urls, model="gemini-3.5-flash"
+                system_instruction, raw_message, media_urls, model="gemini-2.5-pro"
             )
 
             # If Pro ALSO thinks it's ambiguous, or definitively categorizes it, trust Pro.
@@ -206,6 +219,12 @@ class AntiHallucinationCheck(BaseModel):
     hallucination_reason: str = Field(description="If hallucinated, why?")
     corrected_question: str = Field(description="If hallucinated, ask the user to clarify the missing information.")
 
+@retry(
+    wait=wait_exponential(multiplier=1, min=2, max=10),
+    stop=stop_after_attempt(5),
+    retry=retry_if_exception_type(Exception),
+    reraise=True
+)
 async def verify_expense_hallucination(raw_message: str, parsed_json: dict) -> dict:
     system_instruction = """
     You are an Anti-Hallucination Auditor. Your strict job is to compare the raw user text to the parsed JSON.
