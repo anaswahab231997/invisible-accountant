@@ -85,13 +85,32 @@ def is_safe_url(url: str) -> bool:
         return False
 
 
-@retry(
-    wait=wait_exponential(multiplier=2, min=2, max=65),
-    stop=stop_after_attempt(10),
-    retry=retry_if_exception_type(Exception),
-    reraise=True
-)
 async def _call_gemini(
+    system_instruction: str,
+    user_input: str,
+    media_urls: list = None,
+    model: str = "gemini-2.5-flash",
+    sender_id: str = None,
+):
+    import asyncio
+    from ws import manager
+    attempts = 0
+    while attempts < 10:
+        try:
+            return await _do_call_gemini(system_instruction, user_input, media_urls, model)
+        except Exception as e:
+            attempts += 1
+            if "429" in str(e) or "RESOURCE_EXHAUSTED" in str(e):
+                if sender_id and attempts == 1:
+                    await manager.send_personal_message({"type": "GRACEFUL_WARNING", "message": "I'm experiencing high traffic right now! Bear with me for a few seconds... ?"}, sender_id)
+                await asyncio.sleep(min(65, 2 ** attempts))
+            else:
+                if attempts >= 5:
+                    raise e
+                await asyncio.sleep(min(10, 2 ** attempts))
+    raise Exception("Max retries exceeded")
+
+async def _do_call_gemini(
     system_instruction: str,
     user_input: str,
     media_urls: list = None,
@@ -134,7 +153,7 @@ async def _call_gemini(
 
 
 async def process_expense_message(
-    raw_message: str, turn_count: int = 1, media_urls: list = None, previous_state: dict = None
+    raw_message: str, turn_count: int = 1, media_urls: list = None, previous_state: dict = None, sender_id: str = None
 ):
     system_instruction = """
     You are Emma, an Invisible Accountant AI for UK Sole Traders.
@@ -187,7 +206,7 @@ async def process_expense_message(
             raw_message = f"PREVIOUS STATE:\n{json.dumps(previous_state, indent=2)}\n\nUSER'S LATEST MESSAGE:\n{raw_message}\n\nINSTRUCTION: The user is replying to your previous question. Merge this new information with the PREVIOUS STATE. If they answered your question, update the missing fields (e.g. amount, vendor, category). If everything is now complete, set is_ambiguous to false."
             
         result = await _call_gemini(
-            system_instruction, raw_message, media_urls, model="gemini-2.5-flash"
+            system_instruction, raw_message, media_urls, model="gemini-2.5-flash", sender_id=sender_id
         )
 
         # Phase 2: Deep Audit Escalation (Gemini 2.5 Pro)
@@ -197,7 +216,7 @@ async def process_expense_message(
                 reason="Flash flagged as ambiguous",
             )
             pro_result = await _call_gemini(
-                system_instruction, raw_message, media_urls, model="gemini-2.5-flash"
+                system_instruction, raw_message, media_urls, model="gemini-2.5-flash", sender_id=sender_id
             )
 
             # If Pro ALSO thinks it's ambiguous, or definitively categorizes it, trust Pro.
@@ -219,13 +238,26 @@ class AntiHallucinationCheck(BaseModel):
     hallucination_reason: str = Field(description="If hallucinated, why?")
     corrected_question: str = Field(description="If hallucinated, ask the user to clarify the missing information.")
 
-@retry(
-    wait=wait_exponential(multiplier=2, min=2, max=65),
-    stop=stop_after_attempt(10),
-    retry=retry_if_exception_type(Exception),
-    reraise=True
-)
-async def verify_expense_hallucination(raw_message: str, parsed_json: dict) -> dict:
+async def verify_expense_hallucination(raw_message: str, parsed_json: dict, sender_id: str = None) -> dict:
+    import asyncio
+    from ws import manager
+    attempts = 0
+    while attempts < 10:
+        try:
+            return await _do_verify_expense_hallucination(raw_message, parsed_json)
+        except Exception as e:
+            attempts += 1
+            if "429" in str(e) or "RESOURCE_EXHAUSTED" in str(e):
+                if sender_id and attempts == 1:
+                    await manager.send_personal_message({"type": "GRACEFUL_WARNING", "message": "Still thinking... checking HMRC guidelines... ??"}, sender_id)
+                await asyncio.sleep(min(65, 2 ** attempts))
+            else:
+                if attempts >= 5:
+                    raise e
+                await asyncio.sleep(min(10, 2 ** attempts))
+    raise Exception("Max retries exceeded")
+
+async def _do_verify_expense_hallucination(raw_message: str, parsed_json: dict) -> dict:
     system_instruction = """
     You are an Anti-Hallucination Auditor. Your strict job is to compare the raw user text to the parsed JSON.
     Did the AI hallucinate an amount, vendor, or date that the user did NOT actually say?

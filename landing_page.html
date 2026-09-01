@@ -546,6 +546,16 @@
             
             ws.onmessage = function(event) {
                 const data = JSON.parse(event.data);
+                if (data.type === 'GRACEFUL_WARNING') {
+                    const typingIndicator = document.getElementById('typing-indicator');
+                    if (typingIndicator) {
+                        const warningDiv = document.createElement('div');
+                        warningDiv.className = 'text-xs text-slate mt-1 italic animate-pulse';
+                        warningDiv.innerText = data.message;
+                        typingIndicator.appendChild(warningDiv);
+                        document.getElementById('chatBody').scrollTop = document.getElementById('chatBody').scrollHeight;
+                    }
+                }
                 if (data.type === 'INTAKE_UPDATE') {
                     if (navigator.vibrate) navigator.vibrate([5]);
                     

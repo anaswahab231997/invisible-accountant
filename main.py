@@ -105,7 +105,7 @@ async def process_intake_task(
 
         if result:
             # Anti-Hallucination Pipeline
-            verification = await verify_expense_hallucination(message, result)
+            verification = await verify_expense_hallucination(message, result, sender_id=sender_id)
             if verification.get("is_hallucinated"):
                 result["is_ambiguous"] = True
                 result["auditor_question"] = verification.get("corrected_question", "I got confused. Could you repeat the amount and vendor?")
@@ -264,10 +264,10 @@ async def receive_twilio(
         return Response(content=twiml, media_type="application/xml")
     
     # Process AI
-    result = await process_expense_message(masked_message, 1, [])
+    result = await process_expense_message(masked_message, 1, [], sender_id=sender_id)
     
     if result:
-        verification = await verify_expense_hallucination(masked_message, result)
+        verification = await verify_expense_hallucination(masked_message, result, sender_id=sender_id)
         if verification.get("is_hallucinated"):
             result["is_ambiguous"] = True
             result["auditor_question"] = verification.get("corrected_question", "I got confused. Could you repeat the amount and vendor?")
