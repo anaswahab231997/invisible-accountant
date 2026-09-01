@@ -200,6 +200,8 @@ async def intake_worker():
 @app.on_event("startup")
 async def startup_event():
     await init_db()
+    from db import sweep_orphaned_processing
+    await sweep_orphaned_processing()
     
     # Spawn 5 dedicated AI workers for the persistent Waiting Room
     for _ in range(5):

@@ -186,6 +186,10 @@ async def confirm_and_queue_to_ledger(chat_id: int):
         )
         return queue_id
 
+async def sweep_orphaned_processing():
+    async with get_connection() as conn:
+        await conn.execute("UPDATE hmrc_ledger SET status = 'PENDING' WHERE status = 'PROCESSING'")
+
 async def get_pending_hmrc_queue():
     async with get_connection() as conn:
         rows = await conn.fetch(

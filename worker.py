@@ -185,10 +185,20 @@ async def submit_to_hmrc(item, identity):
             
         safe_payload = sanitize_pii(e.payload)
         logger.error("HMRC API Error", queue_id=item["id"], status=e.status_code, payload=safe_payload)
-        raise e
+        
+        if e.status_code in (401, 429, 500, 502, 503, 504):
+            logger.info("Transient/Auth error, reverting to PENDING for retry", queue_id=item["id"])
+            from db import get_connection
+            async with get_connection() as conn:
+                await conn.execute("UPDATE hmrc_ledger SET status = 'PENDING' WHERE id = $1", item["id"])
+        else:
+            from db import mark_hmrc_failed
+            await mark_hmrc_failed(item["id"])
     except Exception as e:
-        logger.error("Unknown HMRC Error", queue_id=item["id"], error=str(e))
-        raise e
+        logger.error("Unexpected error in worker", queue_id=item["id"], error=str(e))
+        from db import get_connection
+        async with get_connection() as conn:
+            await conn.execute("UPDATE hmrc_ledger SET status = 'PENDING' WHERE id = $1", item["id"])
 
 
 async def process_hmrc_queue():

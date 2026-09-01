@@ -1,6 +1,7 @@
 import os
 import asyncio
 import httpx
+import json
 import uuid
 import urllib.parse
 from logger import get_logger
@@ -19,6 +20,7 @@ def get_public_ip():
         return _cached_ip
     try:
         import httpx
+import json
         _cached_ip = httpx.get("https://api.ipify.org", timeout=2.0).text.strip()
     except Exception:
         _cached_ip = "127.0.0.1"
