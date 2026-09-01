@@ -5,6 +5,10 @@ import re
 
 from fastapi import HTTPException
 
+from cryptography.hazmat.primitives import padding
+from dotenv import load_dotenv
+load_dotenv()
+
 from aes_gcm_security import TokenEncryptionEngine
 
 
@@ -26,9 +30,13 @@ def verify_whatsapp_signature(
 
 # --- 2. AI Data Privacy (PII Masking / DLP) ---
 def mask_pii(text: str) -> str:
-    # Mask Emails
+    # Mask Emails (Fixed TLD limit)
     text = re.sub(
-        r"\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,7}\b", "<EMAIL>", text
+        r"\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}\b", "<EMAIL>", text
+    )
+    # Mask UK Postcodes
+    text = re.sub(
+        r"\b[A-Z]{1,2}[0-9][A-Z0-9]?\s?[0-9][A-Z]{2}\b", "<POSTCODE>", text, flags=re.IGNORECASE
     )
     # Mask UK Phone Numbers with optional spaces and dashes
     text = re.sub(r"(?:(?:\+44\s?|0)\d{4}\s?\d{6})", "<PHONE_NUMBER>", text)
@@ -54,11 +62,11 @@ if not _master_key:
 crypto_engine = TokenEncryptionEngine(master_key_b64=_master_key)
 
 
-def encrypt_token(token: str, associated_data: str = "HMRC_TOKEN") -> dict:
+def encrypt_token(token: str, associated_data: str) -> dict:
     return crypto_engine.encrypt_tokens(token, associated_data)
 
 
-def decrypt_token(encrypted_payload: dict, associated_data: str = "HMRC_TOKEN") -> str:
+def decrypt_token(encrypted_payload: dict, associated_data: str) -> str:
     return crypto_engine.decrypt_tokens(encrypted_payload, associated_data)
 
 

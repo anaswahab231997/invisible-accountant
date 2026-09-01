@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Privacy Policy | Invisible Accountant</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        heading: ['"DM Sans"', 'sans-serif'],
+                        body: ['Inter', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-gray-50 text-gray-800 font-body antialiased selection:bg-blue-100 selection:text-blue-900">
+    
+    <!-- Simple Header -->
+    <header class="bg-white border-b border-gray-100">
+        <div class="max-w-4xl mx-auto px-6 py-6 flex items-center justify-between">
+            <a href="/" class="flex items-center gap-2 group">
+                <div class="w-8 h-8 rounded-lg bg-blue-600 flex items-center justify-center text-white font-bold group-hover:bg-blue-700 transition-colors">IA</div>
+                <span class="font-heading font-semibold text-gray-900 text-xl tracking-tight">Invisible Accountant</span>
+            </a>
+            <a href="/" class="text-sm font-medium text-gray-500 hover:text-gray-900 transition-colors">Back to Home</a>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="max-w-4xl mx-auto px-6 py-16">
+        <div class="bg-white rounded-3xl shadow-sm border border-gray-100 p-8 md:p-12">
+            <h1 class="font-heading text-4xl md:text-5xl font-bold text-gray-900 tracking-tight mb-4">Privacy Policy</h1>
+            <p class="text-gray-500 text-sm font-medium uppercase tracking-wider mb-12">Last updated: September 2026</p>
+            
+            <div class="space-y-10">
+                <section>
+                    <h2 class="font-heading text-2xl font-semibold text-gray-900 mb-4">1. Introduction & How Our Product Works</h2>
+                    <p class="text-gray-600 leading-relaxed">Invisible Accountant ("we", "our") is a commercial software service that enables UK sole traders to manage their business expenses via WhatsApp. When you send a message or photo of a receipt, our AI extracts the vendor, amount, and category, and subsequently files this data with HM Revenue & Customs (HMRC) via their official Making Tax Digital (MTD) APIs.</p>
+                </section>
+
+                <section>
+                    <h2 class="font-heading text-2xl font-semibold text-gray-900 mb-4">2. Data We Collect & Legal Basis</h2>
+                    <p class="text-gray-600 leading-relaxed mb-4">To provide this service, we collect and process:</p>
+                    <ul class="list-disc pl-6 space-y-2 text-gray-600">
+                        <li><strong class="text-gray-900">WhatsApp Phone Number:</strong> Used as your unique identifier and to communicate with you.</li>
+                        <li><strong class="text-gray-900">HMRC OAuth Tokens:</strong> Used strictly to authenticate and transmit your data to HMRC APIs on your behalf. These tokens are granted for an 18-month duration.</li>
+                        <li><strong class="text-gray-900">Financial Data:</strong> The amounts, categories, and vendors of the expenses you submit to us.</li>
+                    </ul>
+                    <p class="text-gray-600 leading-relaxed mt-4">Our legal basis for processing this data under UK GDPR is the performance of our contract with you to deliver the Invisible Accountant service.</p>
+                </section>
+
+                <section>
+                    <h2 class="font-heading text-2xl font-semibold text-gray-900 mb-4">3. Data Security & Encryption</h2>
+                    <p class="text-gray-600 leading-relaxed mb-4">We implement rigorous security controls to protect your data. All personally identifiable information (PII) such as National Insurance Numbers (NINO) and Unique Taxpayer References (UTR) are actively masked and redacted before being saved to our databases. Your HMRC OAuth tokens and identity data are encrypted at rest using AES-256-GCM encryption, mathematically bound to your specific identity to ensure strict customer data separation.</p>
+                    <p class="text-gray-600 leading-relaxed">We process and store all customer data exclusively on secure cloud servers located within the United Kingdom (London region).</p>
+                </section>
+
+                <section>
+                    <h2 class="font-heading text-2xl font-semibold text-gray-900 mb-4">4. Your Data Rights (Portability, Access & Deletion)</h2>
+                    <p class="text-gray-600 leading-relaxed mb-4">Under UK GDPR, you maintain full control over your data. You have the right to access, amend, export, or permanently delete your data if you choose to move to another provider or stop using our service.</p>
+                    <p class="text-gray-600 leading-relaxed bg-blue-50 p-4 rounded-xl text-blue-900 border border-blue-100">You can exercise your "Right to be Forgotten" or request a data export at any time by texting <strong>"DELETE MY DATA"</strong> or <strong>"EXPORT MY DATA"</strong> to the Invisible Accountant WhatsApp bot, or by emailing our Data Protection Officer at privacy@invisibleaccountant.co.uk.</p>
+                </section>
+
+                <section>
+                    <h2 class="font-heading text-2xl font-semibold text-gray-900 mb-4">5. Third Parties & Data Sharing</h2>
+                    <p class="text-gray-600 leading-relaxed">We use Twilio Inc. exclusively to route your WhatsApp messages to our servers. We transmit your finalized tax data directly to HM Revenue & Customs (HMRC). We <strong>never</strong> sell or share your personal data with third parties for marketing purposes.</p>
+                </section>
+                
+                <section>
+                    <h2 class="font-heading text-2xl font-semibold text-gray-900 mb-4">6. Security Incident Reporting</h2>
+                    <p class="text-gray-600 leading-relaxed">If we become aware of a personal data breach, we will notify the Information Commissioner's Office (ICO) and HMRC within 72 hours, and we will inform affected users without undue delay. If you wish to report a security vulnerability, please email <a href="mailto:security@invisibleaccountant.co.uk" class="text-blue-600 hover:underline">security@invisibleaccountant.co.uk</a>.</p>
+                </section>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-gray-50 py-12 text-center">
+        <div class="max-w-4xl mx-auto px-6">
+            <div class="flex flex-col md:flex-row justify-center items-center gap-4 md:gap-8 mb-6">
+                <a href="/terms" class="text-sm font-medium text-gray-500 hover:text-blue-600 transition-colors">Terms & Conditions</a>
+                <a href="/privacy" class="text-sm font-medium text-gray-500 hover:text-blue-600 transition-colors">Privacy Policy</a>
+                <a href="mailto:security@invisibleaccountant.co.uk" class="text-sm font-medium text-gray-500 hover:text-blue-600 transition-colors">Report Security Issue</a>
+            </div>
+            <p class="text-sm text-gray-400">&copy; 2026 Invisible Accountant Ltd. Registered in England & Wales.</p>
+        </div>
+    </footer>
+</body>
+</html>

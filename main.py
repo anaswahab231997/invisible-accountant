@@ -357,7 +357,7 @@ async def view_hmrc_queue_bff(limit: int = 100, offset: int = 0):
 
 @app.get("/expense/{chat_id}", dependencies=[Depends(verify_api_key)])
 async def get_expense_status(chat_id: int):
-    record = await get_hmrc_queue_by_intake(chat_id)
+    record = await get_hmrc_ledger_by_chat(chat_id)
     if not record:
         raise HTTPException(status_code=404, detail="Not processed yet")
     return record
@@ -417,13 +417,14 @@ import hashlib
 @app.get("/auth")
 async def auth(whatsapp_id: str, response: Response):
     client_id = os.environ.get("HMRC_CLIENT_ID", "mock_client_id")
-    redirect_uri = os.environ.get("HMRC_REDIRECT_URI", "http://localhost:8000/callback")
+    redirect_uri = os.environ.get("HMRC_REDIRECT_URI", "https://invisibleaccountant.co.uk/callback")
+    base_url = os.environ.get("HMRC_BASE_URL", "https://test-api.service.hmrc.gov.uk")
     
     nonce = secrets.token_urlsafe(32)
     nonce_hash = hashlib.sha256(nonce.encode()).hexdigest()
     
     state_uuid = await create_oauth_state(whatsapp_id, nonce_hash)
-    url = f"https://test-api.service.hmrc.gov.uk/oauth/authorize?response_type=code&client_id={client_id}&scope=read:self-assessment write:self-assessment&state={state_uuid}&redirect_uri={redirect_uri}"
+    url = f"{base_url}/oauth/authorize?response_type=code&client_id={client_id}&scope=read:self-assessment write:self-assessment&state={state_uuid}&redirect_uri={redirect_uri}"
     
     res = RedirectResponse(url)
     res.set_cookie(key="oauth_nonce", value=nonce, httponly=True, secure=True, samesite="lax")
@@ -449,7 +450,7 @@ async def callback(request: Request, code: str, state: str):
         
     client_id = os.environ.get("HMRC_CLIENT_ID")
     client_secret = os.environ.get("HMRC_CLIENT_SECRET")
-    redirect_uri = os.environ.get("HMRC_REDIRECT_URI", "https://invisibleaccount.co.uk/callback")
+    redirect_uri = os.environ.get("HMRC_REDIRECT_URI", "https://invisibleaccountant.co.uk/callback")
     base_url = os.environ.get("HMRC_BASE_URL", "https://test-api.service.hmrc.gov.uk")
     
     async with httpx.AsyncClient() as client:
@@ -487,3 +488,15 @@ async def serve_landing_page():
 
 if __name__ == "__main__":
     uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=True)
+from fastapi.responses import HTMLResponse
+import os
+
+@app.get("/privacy", response_class=HTMLResponse)
+async def privacy_policy():
+    with open(os.path.join("templates", "privacy.html"), "r", encoding="utf-8") as f:
+        return f.read()
+
+@app.get("/terms", response_class=HTMLResponse)
+async def terms_and_conditions():
+    with open(os.path.join("templates", "terms.html"), "r", encoding="utf-8") as f:
+        return f.read()

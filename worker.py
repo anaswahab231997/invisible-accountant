@@ -187,10 +187,21 @@ async def submit_to_hmrc(item, identity):
         logger.error("HMRC API Error", queue_id=item["id"], status=e.status_code, payload=safe_payload)
         
         if e.status_code in (401, 429, 500, 502, 503, 504):
-            logger.info("Transient/Auth error, reverting to PENDING for retry", queue_id=item["id"])
+            logger.info("Transient/Auth error, applying exponential backoff", queue_id=item["id"])
             from db import get_connection
             async with get_connection() as conn:
-                await conn.execute("UPDATE hmrc_ledger SET status = 'PENDING' WHERE id = $1", item["id"])
+                if e.status_code == 401:
+                    logger.warning("401 Unauthorized - wiping token for re-auth", whatsapp_id=item["sender_id"])
+                    await conn.execute("DELETE FROM hmrc_identity_vault WHERE whatsapp_id = $1", item["sender_id"])
+                    await conn.execute("UPDATE hmrc_ledger SET status = 'FAILED_AUTH' WHERE id = $1", item["id"])
+                else:
+                    await conn.execute("""
+                        UPDATE hmrc_ledger 
+                        SET status = CASE WHEN retry_count >= 5 THEN 'FAILED' ELSE 'PENDING' END,
+                            retry_count = retry_count + 1,
+                            next_retry_at = NOW() + (INTERVAL '1 minute' * pow(2, retry_count))
+                        WHERE id = $1
+                    """, item["id"])
         else:
             from db import mark_hmrc_failed
             await mark_hmrc_failed(item["id"])
@@ -198,7 +209,13 @@ async def submit_to_hmrc(item, identity):
         logger.error("Unexpected error in worker", queue_id=item["id"], error=str(e))
         from db import get_connection
         async with get_connection() as conn:
-            await conn.execute("UPDATE hmrc_ledger SET status = 'PENDING' WHERE id = $1", item["id"])
+            await conn.execute("""
+                UPDATE hmrc_ledger 
+                SET status = CASE WHEN retry_count >= 5 THEN 'FAILED' ELSE 'PENDING' END,
+                    retry_count = retry_count + 1,
+                    next_retry_at = NOW() + (INTERVAL '1 minute' * pow(2, retry_count))
+                WHERE id = $1
+            """, item["id"])
 
 
 async def process_hmrc_queue():

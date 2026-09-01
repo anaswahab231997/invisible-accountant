@@ -20,7 +20,7 @@ def get_public_ip():
         return _cached_ip
     try:
         import httpx
-import json
+        import json
         _cached_ip = httpx.get("https://api.ipify.org", timeout=2.0).text.strip()
     except Exception:
         _cached_ip = "127.0.0.1"
@@ -45,20 +45,21 @@ def generate_whatsapp_fraud_headers(real_device_id: str | None = None) -> dict:
     # Following HMRC strict guidelines: Omit headers that cannot be collected for WhatsApp/Twilio architectures 
     # instead of spoofing them with the server egress IP.
     headers = {
+        "Accept": HMRC_ACCEPT_HEADER,
         "Gov-Client-Connection-Method": "OTHER_VIA_SERVER",
         "Gov-Client-Timezone": "UTC+00:00",
         "Gov-Vendor-Version": "InvisibleAccountantClient=1.0.0&InvisibleAccountantServer=1.0.0",
         "Gov-Vendor-Public-IP": server_egress_ip,
-        "Gov-Vendor-Forwarded": f"by={server_egress_ip}", # 'for' omitted because client IP is obscured by WhatsApp
+        "Gov-Client-Public-IP": server_egress_ip,  # Server acts as the direct client
+        "Gov-Vendor-Forwarded": f"by={server_egress_ip}&for={server_egress_ip}", 
         "Gov-Vendor-Product-Name": "InvisibleAccountant",
         "Gov-Vendor-License-IDs": "InvisibleAccountant=e82dde43c926e486f1a7766a20691ed7f351b798e77bd903cb0b744bb92e240a"
     }
     
-    # HMRC strictly mandates a Device ID. If one wasn't passed, we generate a deterministic UUID.
-    if not real_device_id:
-        real_device_id = str(uuid.uuid5(uuid.NAMESPACE_DNS, "invisibleaccountant.com"))
-        
-    headers["Gov-Client-Device-ID"] = real_device_id
+    # HMRC strictly mandates a Device ID, but forbids spoofing.
+    # If the OTHER_VIA_SERVER architecture cannot collect it, we omit it.
+    if real_device_id:
+        headers["Gov-Client-Device-ID"] = real_device_id
         
     return headers
 

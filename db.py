@@ -5,6 +5,7 @@ from datetime import datetime, timedelta
 import asyncpg
 from contextlib import asynccontextmanager
 from dotenv import load_dotenv
+from security import mask_pii
 
 load_dotenv()
 
@@ -65,6 +66,19 @@ async def init_db():
                 FOREIGN KEY(chat_id) REFERENCES chat_sessions(id)
             )
         """)
+        
+        # Retrofit exponential backoff and compliance columns securely
+        await conn.execute("""
+            ALTER TABLE hmrc_ledger 
+            ADD COLUMN IF NOT EXISTS retry_count INTEGER DEFAULT 0,
+            ADD COLUMN IF NOT EXISTS next_retry_at TIMESTAMP,
+            ADD COLUMN IF NOT EXISTS client_ip TEXT;
+        """)
+        
+        await conn.execute("""
+            ALTER TABLE intake_queue
+            ADD COLUMN IF NOT EXISTS client_ip TEXT;
+        """)
 
         await conn.execute("""
             CREATE TABLE IF NOT EXISTS hmrc_identity_vault (
@@ -114,12 +128,14 @@ async def create_chat_session(sender_id: str, message: str, media_urls: list[str
     ttl = (datetime.now() + timedelta(hours=24)).isoformat()
     is_demo = sender_id.startswith("demo_web_")
     
+    safe_message = mask_pii(message)
+    
     async with get_connection() as conn:
         chat_id = await conn.fetchval('''
             INSERT INTO chat_sessions (timestamp, sender_id, raw_message, media_urls, turn_count, ttl_timestamp, is_demo)
             VALUES ($1, $2, $3, $4, $5, $6, $7)
             RETURNING id
-        ''', timestamp, sender_id, message, json.dumps(media_urls), turn_count, ttl, is_demo)
+        ''', timestamp, sender_id, safe_message, json.dumps(media_urls), turn_count, ttl, is_demo)
         return chat_id
 
 async def get_recent_intakes_by_sender(sender_id: str, limit: int = 5):
@@ -131,7 +147,7 @@ async def get_recent_intakes_by_sender(sender_id: str, limit: int = 5):
         return [row["raw_message"] for row in reversed(rows)]
 
 async def stage_expense(chat_id: int, payload: dict):
-    payload_str = json.dumps(payload)
+    payload_str = mask_pii(json.dumps(payload))
     async with get_connection() as conn:
         await conn.execute(
             "UPDATE chat_sessions SET staging_payload = $1 WHERE id = $2",
@@ -190,7 +206,7 @@ async def sweep_orphaned_processing():
     async with get_connection() as conn:
         await conn.execute("UPDATE hmrc_ledger SET status = 'PENDING' WHERE status = 'PROCESSING'")
 
-async def get_pending_hmrc_queue():
+async def get_pending_hmrc_queue(limit: int = 100):
     async with get_connection() as conn:
         rows = await conn.fetch(
             '''
@@ -200,12 +216,14 @@ async def get_pending_hmrc_queue():
                 SELECT id 
                 FROM hmrc_ledger 
                 WHERE status = 'PENDING' 
+                  AND (next_retry_at IS NULL OR next_retry_at <= NOW())
                 ORDER BY timestamp ASC 
-                LIMIT 100 
+                LIMIT $1 
                 FOR UPDATE SKIP LOCKED
             )
             RETURNING *
-            '''
+            ''',
+            limit
         )
         if not rows:
             return []
@@ -232,14 +250,6 @@ async def mark_hmrc_failed(queue_id):
         await conn.execute(
             "UPDATE hmrc_ledger SET status = 'FAILED' WHERE id = $1", queue_id
         )
-
-async def get_all_hmrc_queue(limit: int = 100, offset: int = 0):
-    async with get_connection() as conn:
-        rows = await conn.fetch(
-            "SELECT * FROM hmrc_ledger ORDER BY timestamp ASC LIMIT $1 OFFSET $2",
-            limit, offset
-        )
-        return [dict(row) for row in rows]
 
 async def get_hmrc_ledger_by_chat(chat_id: int):
     async with get_connection() as conn:
@@ -308,13 +318,14 @@ async def consume_oauth_state(state_uuid: str) -> dict:
 
 async def push_intake_queue(chat_id: int, sender_id: str, message: str, media_urls: list, turn_count: int):
     timestamp = datetime.now().isoformat()
+    safe_message = mask_pii(message)
     async with get_connection() as conn:
         await conn.execute(
             """
             INSERT INTO intake_queue (chat_id, timestamp, sender_id, message, media_urls, turn_count, status)
             VALUES ($1, $2, $3, $4, $5, $6, 'PENDING')
             """,
-            chat_id, timestamp, sender_id, message, json.dumps(media_urls), turn_count
+            chat_id, timestamp, sender_id, safe_message, json.dumps(media_urls), turn_count
         )
 
 import json
@@ -344,3 +355,10 @@ async def pop_intake_queue():
 async def mark_intake_done(item_id: int):
     async with get_connection() as conn:
         await conn.execute("UPDATE intake_queue SET status = 'DONE' WHERE id = $1", item_id)
+async def get_all_hmrc_queue(limit: int = 100, offset: int = 0):
+    async with get_connection() as conn:
+        rows = await conn.fetch(
+            "SELECT * FROM hmrc_ledger ORDER BY timestamp DESC LIMIT $1 OFFSET $2",
+            limit, offset
+        )
+        return [dict(row) for row in rows]
