@@ -43,7 +43,8 @@ async def init_db():
                 media_urls TEXT,
                 turn_count INTEGER DEFAULT 1,
                 ttl_timestamp TEXT,
-                staging_payload TEXT
+                staging_payload TEXT,
+                is_demo BOOLEAN DEFAULT FALSE
             )
         """)
 
@@ -56,6 +57,7 @@ async def init_db():
                 amount FLOAT,
                 category TEXT,
                 status TEXT,
+                is_demo BOOLEAN DEFAULT FALSE,
                 FOREIGN KEY(chat_id) REFERENCES chat_sessions(id)
             )
         """)
@@ -92,13 +94,14 @@ async def init_db():
 async def create_chat_session(sender_id: str, message: str, media_urls: list[str], turn_count: int) -> int:
     timestamp = datetime.now().isoformat()
     ttl = (datetime.now() + timedelta(hours=24)).isoformat()
+    is_demo = sender_id.startswith("demo_web_")
     
     async with get_connection() as conn:
         chat_id = await conn.fetchval('''
-            INSERT INTO chat_sessions (timestamp, sender_id, raw_message, media_urls, turn_count, ttl_timestamp)
-            VALUES ($1, $2, $3, $4, $5, $6)
+            INSERT INTO chat_sessions (timestamp, sender_id, raw_message, media_urls, turn_count, ttl_timestamp, is_demo)
+            VALUES ($1, $2, $3, $4, $5, $6, $7)
             RETURNING id
-        ''', timestamp, sender_id, message, json.dumps(media_urls), turn_count, ttl)
+        ''', timestamp, sender_id, message, json.dumps(media_urls), turn_count, ttl, is_demo)
         return chat_id
 
 async def get_recent_intakes_by_sender(sender_id: str, limit: int = 5):
@@ -133,11 +136,12 @@ async def get_unconfirmed_session(sender_id: str):
 async def confirm_and_queue_to_ledger(chat_id: int):
     timestamp = datetime.now().isoformat()
     async with get_connection() as conn:
-        row = await conn.fetchrow("SELECT staging_payload FROM chat_sessions WHERE id = $1", chat_id)
+        row = await conn.fetchrow("SELECT staging_payload, is_demo FROM chat_sessions WHERE id = $1", chat_id)
         if not row or not row["staging_payload"]:
             raise ValueError("No staged payload to confirm.")
             
         payload = json.loads(row["staging_payload"])
+        is_demo = row["is_demo"]
         
         status = await conn.execute(
             "UPDATE chat_sessions SET staging_payload = NULL WHERE id = $1 AND staging_payload IS NOT NULL",
@@ -146,10 +150,12 @@ async def confirm_and_queue_to_ledger(chat_id: int):
         if status == "UPDATE 0":
             raise ValueError("Already confirmed by another request.")
         
+        queue_status = "DEMO_SAVED" if is_demo else "PENDING"
+        
         queue_id = await conn.fetchval(
             """
-            INSERT INTO hmrc_ledger (chat_id, timestamp, vendor, amount, category, status)
-            VALUES ($1, $2, $3, $4, $5, $6)
+            INSERT INTO hmrc_ledger (chat_id, timestamp, vendor, amount, category, status, is_demo)
+            VALUES ($1, $2, $3, $4, $5, $6, $7)
             RETURNING id
             """,
             chat_id,
@@ -157,7 +163,8 @@ async def confirm_and_queue_to_ledger(chat_id: int):
             payload.get("vendor"),
             float(payload.get("amount")),
             payload.get("category"),
-            "PENDING"
+            queue_status,
+            is_demo
         )
         return queue_id
 
