@@ -349,8 +349,8 @@ async def get_expense_status(chat_id: int):
 from ws import manager
 from fastapi import WebSocket, WebSocketDisconnect
 
-@app.websocket("/ws/queue")
-async def websocket_endpoint(websocket: WebSocket):
+@app.websocket("/ws/{client_id}")
+async def websocket_endpoint(websocket: WebSocket, client_id: str):
     await manager.connect(websocket)
     try:
         while True:
