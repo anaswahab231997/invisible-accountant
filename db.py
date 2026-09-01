@@ -10,20 +10,24 @@ load_dotenv()
 
 DATABASE_URL = os.getenv("DATABASE_URL")
 
+import asyncio
 db_pool = None
+_pool_lock = asyncio.Lock()
 
 async def init_pool():
     global db_pool
     if not DATABASE_URL:
         raise ValueError("DATABASE_URL environment variable is required")
-    if db_pool is None:
-        db_pool = await asyncpg.create_pool(DATABASE_URL, min_size=1, max_size=5)
+    async with _pool_lock:
+        if db_pool is None:
+            db_pool = await asyncpg.create_pool(DATABASE_URL, min_size=1, max_size=25)
 
 async def close_pool():
     global db_pool
-    if db_pool:
-        await db_pool.close()
-        db_pool = None
+    async with _pool_lock:
+        if db_pool:
+            await db_pool.close()
+            db_pool = None
 
 @asynccontextmanager
 async def get_connection():
@@ -74,7 +78,21 @@ async def init_db():
             CREATE TABLE IF NOT EXISTS oauth_states (
                 state_uuid TEXT PRIMARY KEY,
                 whatsapp_id TEXT,
+                nonce_hash TEXT,
                 created_at TEXT
+            )
+        """)
+
+        await conn.execute("""
+            CREATE TABLE IF NOT EXISTS intake_queue (
+                id SERIAL PRIMARY KEY,
+                chat_id INTEGER,
+                timestamp TEXT,
+                sender_id TEXT,
+                message TEXT,
+                media_urls TEXT,
+                turn_count INTEGER,
+                status TEXT DEFAULT 'PENDING'
             )
         """)
 
@@ -171,13 +189,33 @@ async def confirm_and_queue_to_ledger(chat_id: int):
 async def get_pending_hmrc_queue():
     async with get_connection() as conn:
         rows = await conn.fetch(
-            '''SELECT h.*, c.sender_id 
-               FROM hmrc_ledger h 
-               JOIN chat_sessions c ON h.chat_id = c.id 
-               WHERE h.status = 'PENDING' 
-               ORDER BY h.timestamp ASC LIMIT 100'''
+            '''
+            UPDATE hmrc_ledger 
+            SET status = 'PROCESSING' 
+            WHERE id IN (
+                SELECT id 
+                FROM hmrc_ledger 
+                WHERE status = 'PENDING' 
+                ORDER BY timestamp ASC 
+                LIMIT 100 
+                FOR UPDATE SKIP LOCKED
+            )
+            RETURNING *
+            '''
         )
-        return [dict(row) for row in rows]
+        if not rows:
+            return []
+            
+        result_items = []
+        for r in rows:
+            sender_id = await conn.fetchval(
+                "SELECT sender_id FROM chat_sessions WHERE id = $1", r["chat_id"]
+            )
+            item_dict = dict(r)
+            item_dict["sender_id"] = sender_id
+            result_items.append(item_dict)
+            
+        return result_items
 
 async def mark_hmrc_submitted(queue_id):
     async with get_connection() as conn:
@@ -241,24 +279,64 @@ async def get_identity_from_vault(whatsapp_id: str) -> bytes:
         )
         return row["encrypted_blob"] if row else None
 
-async def create_oauth_state(whatsapp_id: str) -> str:
+async def create_oauth_state(whatsapp_id: str, nonce_hash: str = None) -> str:
     import uuid
     state_uuid = str(uuid.uuid4())
     timestamp = datetime.now().isoformat()
     async with get_connection() as conn:
         await conn.execute(
-            "INSERT INTO oauth_states (state_uuid, whatsapp_id, created_at) VALUES ($1, $2, $3)",
-            state_uuid, whatsapp_id, timestamp
+            "INSERT INTO oauth_states (state_uuid, whatsapp_id, nonce_hash, created_at) VALUES ($1, $2, $3, $4)",
+            state_uuid, whatsapp_id, nonce_hash, timestamp
         )
     return state_uuid
 
-async def consume_oauth_state(state_uuid: str) -> str:
+async def consume_oauth_state(state_uuid: str) -> dict:
     async with get_connection() as conn:
         row = await conn.fetchrow(
-            "SELECT whatsapp_id FROM oauth_states WHERE state_uuid = $1",
+            "SELECT whatsapp_id, nonce_hash FROM oauth_states WHERE state_uuid = $1",
             state_uuid
         )
         if row:
             await conn.execute("DELETE FROM oauth_states WHERE state_uuid = $1", state_uuid)
-            return row["whatsapp_id"]
+            return dict(row)
         return None
+
+
+async def push_intake_queue(chat_id: int, sender_id: str, message: str, media_urls: list, turn_count: int):
+    timestamp = datetime.now().isoformat()
+    async with get_connection() as conn:
+        await conn.execute(
+            """
+            INSERT INTO intake_queue (chat_id, timestamp, sender_id, message, media_urls, turn_count, status)
+            VALUES ($1, $2, $3, $4, $5, $6, 'PENDING')
+            """,
+            chat_id, timestamp, sender_id, message, json.dumps(media_urls), turn_count
+        )
+
+import json
+async def pop_intake_queue():
+    async with get_connection() as conn:
+        row = await conn.fetchrow(
+            """
+            UPDATE intake_queue 
+            SET status = 'PROCESSING' 
+            WHERE id = (
+                SELECT id 
+                FROM intake_queue 
+                WHERE status = 'PENDING' 
+                ORDER BY timestamp ASC 
+                LIMIT 1 
+                FOR UPDATE SKIP LOCKED
+            )
+            RETURNING *
+            """
+        )
+        if row:
+            d = dict(row)
+            d["media_urls"] = json.loads(d["media_urls"]) if d.get("media_urls") else []
+            return d
+        return None
+
+async def mark_intake_done(item_id: int):
+    async with get_connection() as conn:
+        await conn.execute("UPDATE intake_queue SET status = 'DONE' WHERE id = $1", item_id)

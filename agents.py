@@ -93,22 +93,22 @@ async def _call_gemini(
 
     if media_urls:
         async with httpx.AsyncClient() as http_client:
-            for url in media_urls:
+            async def fetch_media(url):
                 if not is_safe_url(url):
                     logger.warning("SSRF mitigation blocked URL", url=url)
-                    continue
+                    return None
                 try:
-                    # Fetch image from URL
                     resp = await http_client.get(url, timeout=5.0)
                     resp.raise_for_status()
-                    # Determine mime type from headers if possible, default to jpeg
                     mime_type = resp.headers.get("content-type", "image/jpeg")
-
-                    contents.append(
-                        types.Part.from_bytes(data=resp.content, mime_type=mime_type)
-                    )
+                    return types.Part.from_bytes(data=resp.content, mime_type=mime_type)
                 except Exception as e:
                     logger.error("Error fetching media", url=url, error=str(e))
+                    return None
+                    
+            tasks = [fetch_media(url) for url in media_urls]
+            parts = await asyncio.gather(*tasks)
+            contents.extend([p for p in parts if p is not None])
 
     # Always append text at the end
     contents.append(user_input)

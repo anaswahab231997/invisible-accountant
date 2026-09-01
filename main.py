@@ -7,7 +7,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 import uvicorn
-from fastapi import (
+from fastapi import (Response,
     BackgroundTasks,
     Depends,
     FastAPI,
@@ -155,6 +155,20 @@ async def process_intake_task(
             "chat_id": chat_id,
             "result": {"is_ambiguous": True, "auditor_question": "An internal error occurred."}
         })
+        if not sender_id.startswith("demo_web_"):
+            try:
+                from twilio.rest import Client
+                account_sid = os.environ.get('TWILIO_ACCOUNT_SID')
+                auth_token = os.environ.get('TWILIO_AUTH_TOKEN')
+                if account_sid and auth_token:
+                    client = Client(account_sid, auth_token)
+                    client.messages.create(
+                        body="I'm sorry, my systems are currently experiencing an internal error. Please try again later.",
+                        from_='whatsapp:+14155238886', # Typical Twilio sandbox number; update in prod
+                        to=f"whatsapp:{sender_id}" if not sender_id.startswith("whatsapp:") else sender_id
+                    )
+            except Exception as twilio_err:
+                logger.error("Failed to send Twilio error fallback", error=str(twilio_err))
 
 
 from security import mask_pii, verify_whatsapp_signature, encrypt_token
@@ -170,37 +184,36 @@ if not API_KEY:
 
 api_key_header = APIKeyHeader(name="X-API-Key")
 
-# The "Waiting Room" Queue
-intake_queue = None
-
+# We are using a persistent DB queue instead of an in-memory queue.
 async def intake_worker():
-    """Consumes incoming WhatsApp messages from the queue to prevent API/DB overload."""
+    """Consumes incoming WhatsApp messages from the DB queue."""
+    from db import pop_intake_queue, mark_intake_done
     while True:
         try:
-            task = await intake_queue.get()
+            task = await pop_intake_queue()
+            if not task:
+                await asyncio.sleep(1)
+                continue
             try:
-                chat_id, sender_id, message, turn_count, media_urls = task
-                await process_intake_task(chat_id, sender_id, message, turn_count, media_urls)
+                # task keys: chat_id, sender_id, message, turn_count, media_urls
+                media = json.loads(task.get("media_urls", "[]")) if isinstance(task.get("media_urls"), str) else task.get("media_urls", [])
+                await process_intake_task(
+                    task["chat_id"], task["sender_id"], task["message"], task["turn_count"], media
+                )
             finally:
-                intake_queue.task_done()
+                await mark_intake_done(task["id"])
         except asyncio.CancelledError:
             break
         except Exception as e:
             logger.error("Queue worker error", error=str(e))
+            await asyncio.sleep(1)
 
 
 @app.on_event("startup")
 async def startup_event():
-    global intake_queue
-    intake_queue = asyncio.Queue()
-    
     await init_db()
-    task1 = asyncio.create_task(process_hmrc_queue())
-    task2 = asyncio.create_task(process_ttl_sweeper())
-    _background_tasks.add(task1)
-    _background_tasks.add(task2)
     
-    # Spawn 5 dedicated AI workers for the Waiting Room
+    # Spawn 5 dedicated AI workers for the persistent Waiting Room
     for _ in range(5):
         worker = asyncio.create_task(intake_worker())
         _background_tasks.add(worker)
@@ -224,6 +237,18 @@ async def receive_twilio(
     Body: str = Form(""),
     NumMedia: int = Form(0),
 ):
+    from twilio.request_validator import RequestValidator
+    validator = RequestValidator(os.environ.get("TWILIO_AUTH_TOKEN", ""))
+    
+    # Render proxies might change the scheme, ensure it matches Twilio's expected URL
+    url = str(request.url).replace("http://", "https://")
+    signature = request.headers.get("X-Twilio-Signature", "")
+    form_data = await request.form()
+    
+    # Validate HMAC signature
+    if not validator.validate(url, form_data, signature):
+        raise HTTPException(status_code=403, detail="Invalid Twilio signature")
+        
     sender_id = From.replace("whatsapp:", "")
     masked_message = mask_pii(Body)
     chat_id = await create_chat_session(sender_id, masked_message, [], 1)
@@ -307,14 +332,15 @@ async def receive_whatsapp(
         )
         llm_message = "\n---\n".join(history)
 
-    # Place the message into the Waiting Room queue instead of unbounded background tasks
-    await intake_queue.put((
+    # Place the message into the durable database queue
+    from db import push_intake_queue
+    await push_intake_queue(
         chat_id,
         payload.sender_id,
         llm_message,
-        payload.turn_count,
-        payload.media_urls or []
-    ))
+        payload.media_urls or [],
+        payload.turn_count
+    )
 
     return {
         "status": "success",
@@ -323,9 +349,11 @@ async def receive_whatsapp(
     }
 
 
-def verify_api_key(api_key: str = Security(api_key_header)):
-    if api_key != API_KEY:
-        raise HTTPException(status_code=401, detail="Invalid API Key")
+import secrets
+async def verify_api_key(api_key_header: str = Security(api_key_header)):
+    if not API_KEY or not secrets.compare_digest(api_key_header, API_KEY):
+        raise HTTPException(status_code=403, detail="Could not validate credentials")
+    return api_key_header
 
 
 @app.get("/queue", dependencies=[Depends(verify_api_key)])
@@ -379,13 +407,14 @@ async def api_simulate_whatsapp(
         )
         llm_message = "\n---\n".join(history)
 
-    await intake_queue.put((
+    from db import push_intake_queue
+    await push_intake_queue(
         chat_id,
         payload.sender_id,
         llm_message,
-        payload.turn_count,
-        payload.media_urls or []
-    ))
+        payload.media_urls or [],
+        payload.turn_count
+    )
 
     return {
         "status": "success",
@@ -395,20 +424,39 @@ async def api_simulate_whatsapp(
 
 from db import create_oauth_state, consume_oauth_state
 
+import hashlib
 @app.get("/auth")
-async def auth(whatsapp_id: str):
+async def auth(whatsapp_id: str, response: Response):
     client_id = os.environ.get("HMRC_CLIENT_ID", "mock_client_id")
     redirect_uri = os.environ.get("HMRC_REDIRECT_URI", "http://localhost:8000/callback")
     
-    state_uuid = await create_oauth_state(whatsapp_id)
+    nonce = secrets.token_urlsafe(32)
+    nonce_hash = hashlib.sha256(nonce.encode()).hexdigest()
+    
+    state_uuid = await create_oauth_state(whatsapp_id, nonce_hash)
     url = f"https://test-api.service.hmrc.gov.uk/oauth/authorize?response_type=code&client_id={client_id}&scope=read:self-assessment write:self-assessment&state={state_uuid}&redirect_uri={redirect_uri}"
-    return RedirectResponse(url)
+    
+    res = RedirectResponse(url)
+    res.set_cookie(key="oauth_nonce", value=nonce, httponly=True, secure=True, samesite="lax")
+    return res
 
 @app.get("/callback")
-async def callback(code: str, state: str):
-    whatsapp_id = await consume_oauth_state(state)
-    if not whatsapp_id:
+async def callback(request: Request, code: str, state: str):
+    state_data = await consume_oauth_state(state)
+    if not state_data:
         raise HTTPException(status_code=400, detail="Invalid or expired OAuth state")
+        
+    nonce = request.cookies.get("oauth_nonce")
+    if not nonce:
+        raise HTTPException(status_code=400, detail="Missing OAuth nonce cookie")
+        
+    expected_hash = state_data.get("nonce_hash")
+    actual_hash = hashlib.sha256(nonce.encode()).hexdigest()
+    
+    if not expected_hash or not secrets.compare_digest(expected_hash, actual_hash):
+        raise HTTPException(status_code=403, detail="CSRF token mismatch. Session fixation attempt prevented.")
+        
+    whatsapp_id = state_data["whatsapp_id"]
         
     client_id = os.environ.get("HMRC_CLIENT_ID")
     client_secret = os.environ.get("HMRC_CLIENT_SECRET")
@@ -434,7 +482,10 @@ async def callback(code: str, state: str):
         token_data = resp.json()
         
     # Store the actual tokens securely in the vault
-    encrypted_dict = encrypt_token(json.dumps(token_data))
+    encrypted_dict = encrypt_token(
+        json.dumps(token_data), 
+        associated_data=f"hmrc_identity_{whatsapp_id}"
+    )
     await store_identity_in_vault(whatsapp_id, json.dumps(encrypted_dict).encode("utf-8"))
     
     return HTMLResponse("<h1>Success! Your identity has been securely vaulted. You can return to WhatsApp.</h1>")

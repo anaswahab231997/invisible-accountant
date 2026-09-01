@@ -40,8 +40,9 @@ class OAuthManager:
         if not encrypted_blob:
             raise Exception("No identity found in secure vault for this user.")
             
+        encrypted_payload = json.loads(encrypted_blob.decode("utf-8"))
         decrypted_json = token_engine.decrypt_tokens(
-            encrypted_blob, 
+            encrypted_payload, 
             associated_data=f"hmrc_identity_{whatsapp_id}"
         )
         identity = json.loads(decrypted_json)
@@ -175,7 +176,14 @@ async def submit_to_hmrc(item, identity):
         await mark_hmrc_submitted(item["id"])
     except HMRCApiError as e:
         # Sanitize PII from the payload before logging
-        safe_payload = {k: v for k, v in e.payload.items() if k.lower() not in ['nino', 'utr', 'password', 'name', 'address']}
+        def sanitize_pii(data):
+            if isinstance(data, dict):
+                return {k: sanitize_pii(v) for k, v in data.items() if k.lower() not in ['nino', 'utr', 'password', 'name', 'address', 'vrn']}
+            elif isinstance(data, list):
+                return [sanitize_pii(v) for v in data]
+            return data
+            
+        safe_payload = sanitize_pii(e.payload)
         logger.error("HMRC API Error", queue_id=item["id"], status=e.status_code, payload=safe_payload)
         raise e
     except Exception as e:
