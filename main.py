@@ -496,6 +496,12 @@ async def privacy_policy():
     with open(os.path.join("templates", "privacy.html"), "r", encoding="utf-8") as f:
         return f.read()
 
+
+@app.get("/accessibility", response_class=HTMLResponse)
+async def serve_accessibility():
+    with open(os.path.join("templates", "accessibility.html"), "r", encoding="utf-8") as f:
+        return f.read()
+
 @app.get("/terms", response_class=HTMLResponse)
 async def terms_and_conditions():
     with open(os.path.join("templates", "terms.html"), "r", encoding="utf-8") as f:
