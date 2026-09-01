@@ -375,7 +375,7 @@ async def websocket_endpoint(websocket: WebSocket, client_id: str):
     except Exception:
         pass
     finally:
-        manager.disconnect(client_id)
+        manager.disconnect(websocket, client_id)
 
 @app.post("/api/simulate_whatsapp")
 async def api_simulate_whatsapp(
