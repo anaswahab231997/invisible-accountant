@@ -197,7 +197,7 @@ async def process_expense_message(
                 reason="Flash flagged as ambiguous",
             )
             pro_result = await _call_gemini(
-                system_instruction, raw_message, media_urls, model="gemini-2.5-pro"
+                system_instruction, raw_message, media_urls, model="gemini-2.5-flash"
             )
 
             # If Pro ALSO thinks it's ambiguous, or definitively categorizes it, trust Pro.
