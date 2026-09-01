@@ -116,6 +116,52 @@
             position: absolute; top: -20px; left: 50%; width: 2px; height: 20px;
             background: #E5E7EB; transform: translateX(-50%);
         }
+        
+        /* Fullscreen Mobile Transitions */
+        .phone-wrapper {
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .phone {
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        @media (max-width: 767px) {
+            .phone-wrapper:not(.is-fullscreen) {
+                cursor: pointer;
+            }
+        }
+        .phone-wrapper.is-fullscreen {
+            position: fixed;
+            inset: 0;
+            width: 100%;
+            height: 100dvh;
+            z-index: 50;
+            margin: 0;
+            padding: 0;
+            border-radius: 0;
+            transform: none !important;
+            background: transparent;
+            box-shadow: none;
+        }
+        .phone-wrapper.is-fullscreen .phone {
+            width: 100%;
+            height: 100dvh;
+            border-width: 0;
+            border-radius: 0;
+        }
+        .phone-wrapper.is-fullscreen::before,
+        .phone-wrapper.is-fullscreen::after,
+        .phone-wrapper.is-fullscreen .dynamic-island,
+        .phone-wrapper.is-fullscreen .glass-glare {
+            display: none !important;
+        }
+        @media (max-width: 767px) {
+            .phone-wrapper.is-fullscreen .top-bar-container {
+                padding-top: env(safe-area-inset-top, 20px) !important;
+            }
+            .phone-wrapper.is-fullscreen .footer-container {
+                padding-bottom: env(safe-area-inset-bottom, 20px) !important;
+            }
+        }
     </style>
 </head>
 <body class="font-body min-h-screen selection:bg-ukblue selection:text-white">
@@ -185,12 +231,12 @@
             <div class="absolute inset-0 bg-gradient-to-tr from-ukblue/5 to-wapp/10 rounded-full blur-3xl -z-10 transform scale-110"></div>
             
             <!-- Premium iPhone 15 Frame -->
-            <div class="phone-wrapper phone-hardware-buttons transform scale-[0.85] sm:scale-100 origin-top mb-[-10%] sm:mb-0">
+            <div class="phone-wrapper phone-hardware-buttons transform scale-[0.85] sm:scale-100 origin-top mb-[-10%] sm:mb-0" onclick="expandPhone(event)">
                 <div class="phone">
                     <div class="glass-glare"></div>
                     
                     <!-- Combined Top Bar (Status + WhatsApp Header) ensuring structural integrity -->
-                    <div class="bg-[#F6F6F6]/95 backdrop-blur-xl z-20 flex-shrink-0 border-b border-gray-200 shadow-sm relative pt-3">
+                    <div class="bg-[#F6F6F6]/95 backdrop-blur-xl z-20 flex-shrink-0 border-b border-gray-200 shadow-sm relative pt-3 top-bar-container transition-all">
                         
                         <!-- iOS Status Bar -->
                         <div class="px-6 flex justify-between items-center text-charcoal mb-3">
@@ -212,7 +258,7 @@
                         <!-- Modern iOS WhatsApp Header -->
                         <div class="pb-2 px-4 flex items-center justify-between">
                             <div class="flex items-center gap-2">
-                                <i data-lucide="chevron-left" class="w-7 h-7 text-[#007AFF] -ml-1"></i>
+                                <i data-lucide="chevron-left" class="w-7 h-7 text-[#007AFF] -ml-1 cursor-pointer" onclick="dismissPhone(event)"></i>
                                 <div class="relative">
                                     <div class="w-9 h-9 rounded-full bg-ukblue flex items-center justify-center text-white font-heading font-bold text-[15px] shadow-inner">E</div>
                                     <div class="absolute bottom-0 right-0 w-2.5 h-2.5 bg-[#25D366] border-2 border-[#F6F6F6] rounded-full"></div>
@@ -240,7 +286,7 @@
                     </div>
 
                     <!-- Modern iOS WhatsApp Footer (flex-shrink-0 keeps it firmly at the bottom) -->
-                    <div class="bg-[#F6F6F6] px-3 py-2 flex gap-2 items-center z-20 flex-shrink-0 border-t border-gray-200">
+                    <div class="bg-[#F6F6F6] px-3 py-2 flex gap-2 items-center z-20 flex-shrink-0 border-t border-gray-200 footer-container transition-all">
                         <button class="text-[#007AFF] p-1"><i data-lucide="plus" class="w-6 h-6"></i></button>
                         <input type="text" id="demoInput" placeholder="Message" class="flex-1 bg-white text-charcoal rounded-full px-4 py-[6px] border border-gray-300 text-base outline-none shadow-sm focus:border-gray-400 transition-all" onkeypress="if(event.key==='Enter') submitDemo()">
                         <button onclick="submitDemo()" class="text-[#007AFF] p-1"><i data-lucide="mic" class="w-6 h-6"></i></button>
@@ -407,6 +453,35 @@
             document.getElementById('quiz-step-' + step).classList.remove('hidden');
         }
 
+        // Phone Fullscreen Logic
+        function expandPhone(e) {
+            if (window.innerWidth >= 768) return; // Only on mobile
+            const wrapper = document.querySelector('.phone-wrapper');
+            if (wrapper.classList.contains('is-fullscreen')) return;
+            
+            if (navigator.vibrate) navigator.vibrate([5]);
+            wrapper.classList.add('is-fullscreen');
+            history.pushState({ phoneExpanded: true }, '');
+        }
+
+        function dismissPhone(e) {
+            e.stopPropagation();
+            const wrapper = document.querySelector('.phone-wrapper');
+            if (wrapper && wrapper.classList.contains('is-fullscreen')) {
+                if (navigator.vibrate) navigator.vibrate([5]);
+                wrapper.classList.remove('is-fullscreen');
+                history.back();
+            }
+        }
+
+        window.addEventListener('popstate', (e) => {
+            const wrapper = document.querySelector('.phone-wrapper');
+            if (wrapper && wrapper.classList.contains('is-fullscreen')) {
+                wrapper.classList.remove('is-fullscreen');
+                if (navigator.vibrate) navigator.vibrate([5]);
+            }
+        });
+
         // Scroll-driven Inference Engine Logic
         window.addEventListener('scroll', () => {
             const wrapper = document.getElementById('inference-wrapper');
@@ -472,6 +547,8 @@
             ws.onmessage = function(event) {
                 const data = JSON.parse(event.data);
                 if (data.type === 'INTAKE_UPDATE') {
+                    if (navigator.vibrate) navigator.vibrate([5]);
+                    
                     const typingIndicator = document.getElementById('typing-indicator');
                     if (typingIndicator) typingIndicator.remove();
                     
@@ -514,6 +591,9 @@
             const inp = document.getElementById('demoInput');
             const val = inp.value.trim();
             if(!val) return;
+            
+            if (navigator.vibrate) navigator.vibrate([5]);
+            
             inp.value = ''; inp.disabled = true;
             
             const chat = document.getElementById('chatBody');
