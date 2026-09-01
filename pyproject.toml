@@ -13,6 +13,7 @@ dependencies = [
     "prometheus-fastapi-instrumentator>=8.1.0",
     "pydantic>=2.13.4",
     "python-dotenv>=1.2.3",
+    "python-multipart>=0.0.32",
     "respx>=0.23.1",
     "slowapi>=0.1.10",
     "structlog>=26.1.0",
