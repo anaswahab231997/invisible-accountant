@@ -217,6 +217,13 @@ async def startup_event():
     for _ in range(5):
         worker = asyncio.create_task(intake_worker())
         _background_tasks.add(worker)
+        
+    # Re-enable the HMRC submission queue and TTL sweeper
+    hmrc_worker = asyncio.create_task(process_hmrc_queue())
+    _background_tasks.add(hmrc_worker)
+    
+    ttl_worker = asyncio.create_task(process_ttl_sweeper())
+    _background_tasks.add(ttl_worker)
 
 
 @app.on_event("shutdown")
