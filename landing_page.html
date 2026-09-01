@@ -7,6 +7,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://unpkg.com/@studio-freight/lenis@1.0.39/dist/lenis.min.js"></script>
     <script>
         tailwind.config = {
             theme: {
@@ -33,6 +34,35 @@
         }
     </script>
     <style>
+
+        /* Lenis Smooth Scroll Recommended CSS */
+        html.lenis, html.lenis body {
+            height: auto;
+        }
+        .lenis.lenis-smooth {
+            scroll-behavior: auto !important;
+        }
+        .lenis.lenis-smooth [data-lenis-prevent] {
+            overscroll-behavior: contain;
+        }
+        .lenis.lenis-stopped {
+            overflow: hidden;
+        }
+        .lenis.lenis-scrolling iframe {
+            pointer-events: none;
+        }
+        
+        /* High-end reveal animations */
+        .reveal {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: all 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .reveal.active {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
         body { background-color: #F9FAFB; color: #1F2937; -webkit-font-smoothing: antialiased; }
         
         /* Premium iPhone 15 Pro Mockup */
@@ -306,7 +336,7 @@
                     <p class="text-sm md:text-lg text-slate font-body max-w-2xl mx-auto hidden sm:block">Scroll down to watch our AI dynamically deconstruct an everyday text message into a pristine, HMRC-compliant payload.</p>
                 </div>
                 
-                <div class="bg-cardbg rounded-2xl p-4 md:p-8 border border-gray-200 shadow-soft max-w-4xl mx-auto relative overflow-hidden">
+                <div class="bg-cardbg rounded-2xl p-4 md:p-8 border border-gray-200 shadow-soft max-w-4xl mx-auto reveal" relative overflow-hidden">
                     <div class="mb-6 md:mb-12 relative z-10 text-center">
                         <div class="text-[10px] md:text-xs font-bold text-slate mb-2 md:mb-3 uppercase tracking-wider flex items-center justify-center gap-2">
                             <i data-lucide="message-square" class="w-3 h-3 md:w-4 md:h-4"></i> Raw WhatsApp Input
@@ -437,6 +467,54 @@
 
     <script>
         lucide.createIcons();
+
+
+        // Initialize High-End Smooth Scrolling (Lenis)
+        const lenis = new Lenis({
+            duration: 1.2,
+            easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)), 
+            direction: 'vertical', 
+            gestureDirection: 'vertical', 
+            smooth: true,
+            mouseMultiplier: 1,
+            smoothTouch: false,
+            touchMultiplier: 2,
+            infinite: false,
+        });
+
+        function raf(time) {
+            lenis.raf(time);
+            requestAnimationFrame(raf);
+        }
+        requestAnimationFrame(raf);
+
+        // High-end Intersection Observer for Fade-Ins
+        document.addEventListener("DOMContentLoaded", () => {
+            const reveals = document.querySelectorAll(".reveal");
+            const revealObserver = new IntersectionObserver((entries, observer) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add("active");
+                        observer.unobserve(entry.target);
+                    }
+                });
+            }, {
+                root: null,
+                threshold: 0.1,
+                rootMargin: "0px 0px -50px 0px"
+            });
+            
+            reveals.forEach(reveal => {
+                revealObserver.observe(reveal);
+            });
+            
+            // Immediately activate the first section so it doesn't wait for scroll
+            setTimeout(() => {
+                if(reveals[0]) reveals[0].classList.add("active");
+            }, 100);
+        });
+
+
         
         // Live UK Time Updater
         function updateLiveTime() {
@@ -593,6 +671,54 @@
                     
                     chat.innerHTML += html;
                     lucide.createIcons();
+
+
+        // Initialize High-End Smooth Scrolling (Lenis)
+        const lenis = new Lenis({
+            duration: 1.2,
+            easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)), 
+            direction: 'vertical', 
+            gestureDirection: 'vertical', 
+            smooth: true,
+            mouseMultiplier: 1,
+            smoothTouch: false,
+            touchMultiplier: 2,
+            infinite: false,
+        });
+
+        function raf(time) {
+            lenis.raf(time);
+            requestAnimationFrame(raf);
+        }
+        requestAnimationFrame(raf);
+
+        // High-end Intersection Observer for Fade-Ins
+        document.addEventListener("DOMContentLoaded", () => {
+            const reveals = document.querySelectorAll(".reveal");
+            const revealObserver = new IntersectionObserver((entries, observer) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add("active");
+                        observer.unobserve(entry.target);
+                    }
+                });
+            }, {
+                root: null,
+                threshold: 0.1,
+                rootMargin: "0px 0px -50px 0px"
+            });
+            
+            reveals.forEach(reveal => {
+                revealObserver.observe(reveal);
+            });
+            
+            // Immediately activate the first section so it doesn't wait for scroll
+            setTimeout(() => {
+                if(reveals[0]) reveals[0].classList.add("active");
+            }, 100);
+        });
+
+
                     chat.scrollTop = chat.scrollHeight;
                     inp.disabled = false; inp.focus();
                 }
