@@ -42,19 +42,14 @@ def generate_whatsapp_fraud_headers(real_device_id: str | None = None) -> dict:
         
     # Since this is OTHER_VIA_SERVER (WhatsApp), the client IP is effectively the server's egress IP or Twilio's IP.
     # Hardcoding 127.0.0.1 triggers fraud filters. We use the server egress.
-    client_ip = server_egress_ip
-    
+    # Following HMRC strict guidelines: Omit headers that cannot be collected for WhatsApp/Twilio architectures 
+    # instead of spoofing them with the server egress IP.
     headers = {
         "Gov-Client-Connection-Method": "OTHER_VIA_SERVER",
         "Gov-Client-Timezone": "UTC+00:00",
-        "Gov-Client-Local-IPs": client_ip,
-        "Gov-Client-Local-IPs-Timestamp": now,
-        "Gov-Client-Public-IP": client_ip, # Must match 'for'
-        "Gov-Client-Public-IP-Timestamp": now,
-        "Gov-Client-User-Agent": "os-family=Unknown&os-version=Unknown&device-manufacturer=Unknown&device-model=Unknown",
         "Gov-Vendor-Version": "InvisibleAccountantClient=1.0.0&InvisibleAccountantServer=1.0.0",
-        "Gov-Vendor-Public-IP": server_egress_ip, # Must match 'by'
-        "Gov-Vendor-Forwarded": f"by={server_egress_ip}&for={client_ip}",
+        "Gov-Vendor-Public-IP": server_egress_ip,
+        "Gov-Vendor-Forwarded": f"by={server_egress_ip}", # 'for' omitted because client IP is obscured by WhatsApp
         "Gov-Vendor-Product-Name": "InvisibleAccountant",
         "Gov-Vendor-License-IDs": "InvisibleAccountant=e82dde43c926e486f1a7766a20691ed7f351b798e77bd903cb0b744bb92e240a"
     }
