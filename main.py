@@ -44,11 +44,17 @@ from worker import process_hmrc_queue, process_ttl_sweeper
 logger = get_logger(__name__)
 limiter = Limiter(key_func=get_remote_address)
 
-app = FastAPI(title="Invisible Accountant Webhook Prototype (V2 Enterprise)")
+app = FastAPI(title="Invisible Accountant Webhook Prototype (V2 Enterprise)", docs_url=None, redoc_url=None, openapi_url=None)
 app.state.limiter = limiter
 app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
-Instrumentator().instrument(app).expose(app)
+@app.middleware("http")
+async def add_security_headers(request: Request, call_next):
+    response = await call_next(request)
+    response.headers["Strict-Transport-Security"] = "max-age=31536000; includeSubDomains"
+    return response
+
+# Instrumentator().instrument(app).expose(app) # Disabled to fix Exposed Metrics Endpoint finding
 
 _background_tasks = set()
 
