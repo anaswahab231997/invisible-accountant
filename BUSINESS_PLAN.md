@@ -30,3 +30,13 @@ Invisible Accountant is not a localized lifestyle business; it is a globally sca
     *   *Year 1:* Hire 2 UK-based Senior AI/Backend Engineers and 1 Head of Accountancy Partnerships.
     *   *Year 2:* Expand GTM team, hiring UK-based B2B sales representatives to onboard regional accountancy networks.
     *   *Year 3:* Establish a localized compliance and legal team to oversee our international expansion into the EU and US markets from our UK headquarters.
+
+---
+
+## 4. Technical & Regulatory Execution (Traction)
+Invisible Accountant has progressed rapidly from concept to a derisked, enterprise-ready infrastructure, successfully clearing some of the strictest bureaucratic and technical hurdles required by the UK Government.
+
+*   **HMRC Production Approval (In Progress):** We have successfully submitted our formal application for Production API Credentials to the HMRC Developer Hub for MTD IT & VAT (Ticket Reference: 2026-OUP153). By preemptively clearing Identity Verification as a foreign pre-incorporation founder, we have proven exceptional operational and bureaucratic competence.
+*   **Enterprise-Grade Security (ISO 27001 Ready):** The infrastructure has successfully passed an automated, CREST-accredited Infrastructure Penetration Test via Intruder.io. The perimeter is fortified by a strict Cloudflare Web Application Firewall (WAF) with HSTS enforced, ensuring our architecture is compliant with enterprise security standards from day zero.
+*   **UK GDPR & Data Compliance:** We have architected privacy by design, heavily anonymizing user PII. Sensitive data like WhatsApp numbers are secured using SHA-256 hashing prior to any interaction with HMRC networks.
+*   **Architectural Innovation (Headless Compliance):** We have engineered a proprietary solution to HMRC’s strict Fraud Prevention Headers using the `OTHER_VIA_SERVER` specification. This definitively proves that our "headless WhatsApp chatbot" is capable of passing enterprise-grade tax fraud validations without relying on the physical device telemetry required by legacy competitors, establishing a massive competitive moat.
