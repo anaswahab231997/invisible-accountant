@@ -41,7 +41,24 @@
             }
         }
     </script>
-    <style>body { background-color: #F9FAFB; color: #1F2937; -webkit-font-smoothing: antialiased; }</style>
+    <style>body { background-color: #F9FAFB; color: #1F2937; -webkit-font-smoothing: antialiased; }
+        /* Lenis Smooth Scroll Recommended CSS */
+        html.lenis, html.lenis body {
+            height: auto;
+        }
+        .lenis.lenis-smooth {
+            scroll-behavior: auto !important;
+        }
+        .lenis.lenis-smooth [data-lenis-prevent] {
+            overscroll-behavior: contain;
+        }
+        .lenis.lenis-stopped {
+            overflow: hidden;
+        }
+        .lenis.lenis-scrolling iframe {
+            pointer-events: none;
+        }
+        </style>
 </head>
 <body class="font-body min-h-screen selection:bg-ukblue selection:text-white">
 
@@ -125,5 +142,23 @@
         </div>
     </footer>
 
+<script>
+        // Initialize High-End Smooth Scrolling (Lenis)
+        const lenis = new Lenis({
+            duration: 1.2,
+            easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)), 
+            direction: 'vertical', 
+            gestureDirection: 'vertical', 
+            smooth: true,
+            mouseMultiplier: 1,
+            smoothTouch: false,
+            touchMultiplier: 2,
+            infinite: false,
+        });
+
+        function raf(time) {
+            lenis.raf(time);
+            requestAnimationFrame(raf);
+    </script>
 </body>
 </html>
