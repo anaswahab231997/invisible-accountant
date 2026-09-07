@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 160" width="100%" height="100%" fill="none">
+  <rect width="160" height="160" fill="#0B0F19"/>
+  <rect x="8" y="8" width="144" height="144" stroke="#1E293B" stroke-width="1"/>
+  <rect x="12" y="12" width="136" height="136" stroke="#C5A880" stroke-width="0.5" stroke-opacity="0.3"/>
+
+  <!-- THE BALANCED LEDGER CIPHER: Dual Architectural Columns + Golden Ratio Aperture -->
+  <!-- Left Pillar (Debit / Invisible 'I'): x=44..52 -->
+  <rect x="44" y="36" width="8" height="88" fill="#FFFFFF"/>
+  <line x1="38" y1="36" x2="58" y2="36" stroke="#FFFFFF" stroke-width="2"/>
+  <line x1="38" y1="124" x2="58" y2="124" stroke="#FFFFFF" stroke-width="2"/>
+
+  <!-- Right Pillar (Credit / Authority 'A' Stem): x=108..116 -->
+  <rect x="108" y="36" width="8" height="88" fill="#FFFFFF"/>
+  <line x1="102" y1="36" x2="122" y2="36" stroke="#FFFFFF" stroke-width="2"/>
+  <line x1="102" y1="124" x2="122" y2="124" stroke="#FFFFFF" stroke-width="2"/>
+
+  <!-- The Architectural Lintel Chevron: Forming the Apex of 'A' -->
+  <!-- Rises from both columns to meet at apex (80, 24) -->
+  <path d="M 52 36 L 80 24 L 108 36" stroke="#FFFFFF" stroke-width="3" stroke-linecap="square" stroke-linejoin="miter"/>
+
+  <!-- The Golden Ratio Ledger Fulcrum Beam: Hallmarked Antique Gilt -->
+  <!-- Spans the central aperture (52 to 108) at Golden Ratio cut y = 78 -->
+  <line x1="44" y1="78" x2="116" y2="78" stroke="#C5A880" stroke-width="2.5" stroke-linecap="square"/>
+
+  <!-- Central Sanctuary Aperture: Width = 56, Height = 56 * 1.618 = 90 (matches overall height!) -->
+  <!-- Golden Keystone -->
+  <polygon points="80,24 76,32 84,32" fill="#C5A880"/>
+  <rect x="78.5" y="76.5" width="3" height="3" fill="#1D4ED8"/>
+</svg>

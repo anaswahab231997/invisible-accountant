@@ -1,0 +1,809 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Invisible Accountant: Investor Jury</title>
+    <link href="https://api.fontshare.com/v2/css?f[]=cabinet-grotesk@800,500,700,400&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        /* Geist alternative since it requires custom loading, using system-ui for highly legible UI */
+        @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600&display=swap');
+        
+        :root {
+            --oxford-blue: #0F172A;
+            --deep-slate: #1E293B;
+            --heritage-blue: #1D4ED8;
+            --crisp-white: #FFFFFF;
+            --off-white: #F9FAFB;
+            --subtle-silver: #E2E8F0;
+            --muted-slate: #64748B;
+        }
+
+        body, html {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            overflow: hidden;
+            background-color: var(--off-white);
+            color: var(--oxford-blue);
+        }
+
+        h1, h2, h3, h4, h5, h6 {
+            font-family: 'Cabinet Grotesk', sans-serif;
+            margin-top: 0;
+            color: var(--oxford-blue);
+        }
+
+        h1 {
+            font-size: 3rem;
+            letter-spacing: -0.02em;
+            font-weight: 500;
+            margin-bottom: 24px;
+        }
+
+        h2 {
+            font-size: 2.25rem;
+            letter-spacing: -0.01em;
+            font-weight: 500;
+            margin-bottom: 24px;
+        }
+
+        p {
+            font-size: 1rem;
+            line-height: 1.6;
+            margin-bottom: 24px;
+            color: var(--deep-slate);
+        }
+
+        .caption {
+            font-size: 0.875rem;
+            color: var(--muted-slate);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        /* Iframe Background */
+        #bg-iframe {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            border: none;
+            z-index: -2;
+        }
+
+        #bg-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background-color: rgba(15, 23, 42, 0.12); /* Oxford Blue 0.12 opacity */
+            z-index: -1;
+            backdrop-filter: blur(2px);
+        }
+
+        /* Presentation Container */
+        #deck {
+            position: relative;
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 64px;
+            box-sizing: border-box;
+        }
+
+        .slide {
+            position: absolute;
+            width: calc(100% - 128px);
+            height: calc(100% - 128px);
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.5s cubic-bezier(0.2, 0.8, 0.2, 1), transform 0.5s cubic-bezier(0.2, 0.8, 0.2, 1);
+            transform: translateY(16px);
+            display: grid;
+            grid-template-columns: repeat(12, 1fr);
+            gap: 32px;
+            align-items: center;
+        }
+
+        .slide.active {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+
+        .card {
+            background-color: rgba(255, 255, 255, 0.95);
+            border: 1px solid var(--subtle-silver);
+            padding: 48px;
+            box-shadow: 0 4px 24px rgba(15, 23, 42, 0.04);
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .card-dark {
+            background-color: var(--oxford-blue);
+            color: var(--crisp-white);
+            border: none;
+        }
+
+        .card-dark h1, .card-dark h2, .card-dark p {
+            color: var(--crisp-white);
+        }
+
+        .card-dark .caption {
+            color: var(--subtle-silver);
+        }
+
+        .col-left-5 { grid-column: span 5; }
+        .col-left-6 { grid-column: span 6; }
+        .col-left-7 { grid-column: span 7; }
+        
+        .col-right-7 { grid-column: 6 / 13; }
+        .col-right-6 { grid-column: 7 / 13; }
+        .col-right-5 { grid-column: 8 / 13; }
+
+        .visual-box {
+            background-color: var(--off-white);
+            border: 1px solid var(--subtle-silver);
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 48px;
+            text-align: center;
+        }
+
+        .moat-highlight {
+            border-left: 4px solid var(--heritage-blue);
+            padding-left: 24px;
+            margin: 32px 0;
+            background-color: rgba(29, 78, 216, 0.03);
+            padding: 24px;
+        }
+
+        ul {
+            padding-left: 20px;
+            margin-bottom: 24px;
+        }
+
+        li {
+            font-size: 1rem;
+            line-height: 1.6;
+            margin-bottom: 16px;
+            color: var(--deep-slate);
+        }
+
+        .card-dark li {
+            color: var(--crisp-white);
+        }
+
+        .controls {
+            position: fixed;
+            bottom: 32px;
+            right: 64px;
+            display: flex;
+            gap: 16px;
+            z-index: 10;
+        }
+
+        button {
+            background-color: transparent;
+            color: var(--oxford-blue);
+            border: 1px solid var(--oxford-blue);
+            padding: 12px 24px;
+            font-family: inherit;
+            font-size: 0.875rem;
+            font-weight: 500;
+            cursor: pointer;
+            border-radius: 2px;
+            transition: all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+        }
+
+        button:hover {
+            background-color: rgba(15, 23, 42, 0.05);
+        }
+
+        .btn-primary {
+            background-color: var(--oxford-blue);
+            color: var(--crisp-white);
+        }
+
+        .btn-primary:hover {
+            background-color: var(--deep-slate);
+            border-color: var(--deep-slate);
+        }
+
+        .script-notes {
+            margin-top: 32px;
+            padding-top: 24px;
+            border-top: 1px solid var(--subtle-silver);
+            font-size: 0.9rem;
+            color: var(--muted-slate);
+            font-style: italic;
+        }
+
+        .card-dark .script-notes {
+            border-top-color: rgba(255,255,255,0.2);
+            color: rgba(255,255,255,0.7);
+        }
+
+        /* Specific visual elements */
+        .big-number {
+            font-family: 'Cabinet Grotesk', sans-serif;
+            font-size: 5rem;
+            font-weight: 700;
+            color: var(--heritage-blue);
+            line-height: 1;
+            margin-bottom: 16px;
+        }
+
+        .comparison {
+            display: flex;
+            width: 100%;
+            gap: 24px;
+        }
+
+        .comp-item {
+            flex: 1;
+            padding: 24px;
+            border: 1px solid var(--subtle-silver);
+            background: #fff;
+        }
+
+        .comp-header {
+            font-family: 'Cabinet Grotesk', sans-serif;
+            font-weight: 500;
+            margin-bottom: 16px;
+            border-bottom: 1px solid var(--subtle-silver);
+            padding-bottom: 8px;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Background Iframe & Overlay -->
+    <iframe id="bg-iframe" src="http://127.0.0.1:58596" title="Mindwalk 3D Codebase"></iframe>
+    <div id="bg-overlay"></div>
+
+    <!-- Presentation Deck -->
+    <div id="deck">
+
+        <!-- Slide 1 -->
+        <div class="slide active">
+            <div class="card card-dark col-left-7" style="display: flex; flex-direction: column; justify-content: space-between; padding: 48px; border: 1px solid rgba(255,255,255,0.12); background: radial-gradient(circle at top left, #1E293B 0%, #0F172A 100%);">
+                <div>
+                    <div style="display: inline-flex; align-items: center; gap: 8px; background: rgba(16, 185, 129, 0.12); border: 1px solid rgba(16, 185, 129, 0.3); border-radius: 999px; padding: 6px 14px; margin-bottom: 24px;">
+                        <span style="width: 8px; height: 8px; border-radius: 50%; background: #10B981; box-shadow: 0 0 8px #10B981;"></span>
+                        <span style="font-family: 'Geist Mono', monospace; font-size: 0.75rem; font-weight: 600; letter-spacing: 0.12em; color: #10B981; text-transform: uppercase;">HMRC MTD 2026 Production Ready</span>
+                    </div>
+                    <h1 style="font-size: 3.25rem; font-weight: 700; letter-spacing: -0.03em; color: #FFFFFF; line-height: 1.1; margin: 0 0 16px 0;">Invisible<br><span style="color: #38BDF8;">Accountant</span></h1>
+                    <p style="font-size: 1.35rem; color: #94A3B8; line-height: 1.5; margin: 0; max-width: 520px;">
+                        The end of tax anxiety. Just send a text.
+                    </p>
+                </div>
+
+                <div class="script-notes" style="margin-top: 24px; padding-top: 16px;">
+                    "Ladies and gentlemen of the jury, good morning. Welcome to Invisible Accountant. Our core proposition to the consumer is simple: 'The end of tax anxiety. Just send a text.' However, over the next ten minutes, we will demonstrate that what appears to be a frictionless consumer application is, in fact, a deeply entrenched B2B2C enterprise powerhouse..."
+                </div>
+
+                <div style="margin-top: 24px; padding-top: 20px; border-top: 1px solid rgba(255,255,255,0.1); display: flex; justify-content: space-between; align-items: flex-end;">
+                    <div>
+                        <div style="font-family: 'Geist Mono', monospace; font-size: 0.75rem; color: #64748B; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 4px;">Investment Thesis</div>
+                        <div style="font-size: 0.95rem; color: #E2E8F0; font-weight: 500;">The B2C illusion masking a B2B2C enterprise powerhouse.</div>
+                    </div>
+                    <div style="background: rgba(212, 175, 55, 0.1); border: 1px solid rgba(212, 175, 55, 0.3); border-radius: 6px; padding: 6px 12px; text-align: right;">
+                        <span style="font-family: 'Geist Mono', monospace; font-size: 0.7rem; color: #D4AF37; font-weight: 600;">SEIS/EIS ADVANCE ASSURANCE</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Column: Institutional Brand Mark Showcase -->
+            <div class="visual-box col-right-5" style="background: #0B1120; border: 1px solid rgba(29, 78, 216, 0.3); padding: 40px; display: flex; flex-direction: column; justify-content: center; align-items: center; position: relative; overflow: hidden; box-shadow: 0 20px 50px rgba(0,0,0,0.5);">
+                <!-- Ambient Brand Glow -->
+                <div style="position: absolute; width: 260px; height: 260px; background: radial-gradient(circle, rgba(29, 78, 216, 0.35) 0%, rgba(15, 23, 42, 0) 70%); top: 50%; left: 50%; transform: translate(-50%, -50%); pointer-events: none;"></div>
+                
+                <!-- Embedded Production SVG Logo Crest -->
+                <div style="width: 200px; height: 200px; z-index: 2; margin-bottom: 20px;">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 160" width="100%" height="100%" fill="none">
+                      <defs>
+                        <linearGradient id="cBg" x1="0%" y1="0%" x2="100%" y2="100%">
+                          <stop offset="0%" stop-color="#172554"/>
+                          <stop offset="50%" stop-color="#0F172A"/>
+                          <stop offset="100%" stop-color="#050811"/>
+                        </linearGradient>
+                        <linearGradient id="cBorder" x1="0%" y1="0%" x2="100%" y2="100%">
+                          <stop offset="0%" stop-color="#38BDF8" stop-opacity="0.9"/>
+                          <stop offset="50%" stop-color="#1D4ED8" stop-opacity="0.4"/>
+                          <stop offset="100%" stop-color="#D4AF37" stop-opacity="0.7"/>
+                        </linearGradient>
+                        <linearGradient id="cRoyal" x1="0%" y1="0%" x2="100%" y2="100%">
+                          <stop offset="0%" stop-color="#60A5FA"/>
+                          <stop offset="40%" stop-color="#2563EB"/>
+                          <stop offset="100%" stop-color="#1D4ED8"/>
+                        </linearGradient>
+                        <linearGradient id="cFacet" x1="0%" y1="0%" x2="100%" y2="100%">
+                          <stop offset="0%" stop-color="#1D4ED8"/>
+                          <stop offset="100%" stop-color="#172554"/>
+                        </linearGradient>
+                        <linearGradient id="cGold" x1="0%" y1="0%" x2="100%" y2="100%">
+                          <stop offset="0%" stop-color="#FEF08A"/>
+                          <stop offset="40%" stop-color="#FACC15"/>
+                          <stop offset="100%" stop-color="#CA8A04"/>
+                        </linearGradient>
+                        <linearGradient id="cEmerald" x1="0%" y1="0%" x2="100%" y2="100%">
+                          <stop offset="0%" stop-color="#34D399"/>
+                          <stop offset="100%" stop-color="#059669"/>
+                        </linearGradient>
+                        <filter id="cGlow" x="-20%" y="-20%" width="140%" height="140%" filterUnits="userSpaceOnUse">
+                          <feDropShadow dx="0" dy="6" stdDeviation="10" flood-color="#1D4ED8" flood-opacity="0.45"/>
+                        </filter>
+                        <filter id="cSpark" x="-60%" y="-60%" width="220%" height="220%" filterUnits="userSpaceOnUse">
+                          <feDropShadow dx="0" dy="0" stdDeviation="4" flood-color="#FACC15" flood-opacity="0.8"/>
+                        </filter>
+                      </defs>
+                      <rect x="10" y="10" width="140" height="140" rx="32" fill="url(#cBg)" stroke="url(#cBorder)" stroke-width="2" filter="url(#cGlow)"/>
+                      <rect x="16" y="16" width="128" height="128" rx="26" fill="none" stroke="rgba(255, 255, 255, 0.08)" stroke-width="1"/>
+                      <line x1="30" y1="80" x2="130" y2="80" stroke="#1E293B" stroke-width="0.8" stroke-dasharray="3 3"/>
+                      <line x1="80" y1="30" x2="80" y2="130" stroke="#1E293B" stroke-width="0.8" stroke-dasharray="3 3"/>
+                      <rect x="36" y="46" width="18" height="66" rx="4" fill="url(#cRoyal)"/>
+                      <rect x="36" y="46" width="6" height="66" rx="2" fill="#93C5FD" fill-opacity="0.45"/>
+                      <circle cx="45" cy="33" r="6.5" fill="url(#cGold)" filter="url(#cSpark)"/>
+                      <circle cx="45" cy="33" r="2.5" fill="#FFFFFF"/>
+                      <path d="M 68 112 L 89 46 L 107 46 L 128 112 L 112 112 L 105 88 L 91 88 L 84 112 Z" fill="url(#cRoyal)"/>
+                      <path d="M 98 46 L 107 46 L 128 112 L 112 112 L 105 88 Z" fill="url(#cFacet)" fill-opacity="0.5"/>
+                      <polygon points="98,61 90,81 106,81" fill="#0F172A"/>
+                      <circle cx="98" cy="72" r="4" fill="url(#cGold)" filter="url(#cSpark)"/>
+                      <path d="M 54 112 L 68 112" stroke="url(#cGold)" stroke-width="2.5" stroke-linecap="round"/>
+                      <path d="M 120 120 L 128 128 L 136 116" fill="none" stroke="url(#cEmerald)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                </div>
+
+                <div style="text-align: center; z-index: 2;">
+                    <div style="font-family: 'Cabinet Grotesk', sans-serif; font-size: 1.25rem; font-weight: 700; color: #FFFFFF; letter-spacing: 0.12em;">THE INVISIBLE LEDGER</div>
+                    <div style="font-family: 'Geist Mono', monospace; font-size: 0.75rem; color: #64748B; margin-top: 6px; letter-spacing: 0.16em;">LONDON TAX ENGINE • EST. 2026</div>
+                </div>
+
+                <!-- Telemetry Status Pills -->
+                <div style="display: flex; gap: 10px; margin-top: 20px; z-index: 2;">
+                    <span style="font-family: 'Geist Mono', monospace; font-size: 0.7rem; color: #94A3B8; background: rgba(255,255,255,0.05); padding: 4px 10px; border-radius: 4px; border: 1px solid rgba(255,255,255,0.08);">RESTful JSON</span>
+                    <span style="font-family: 'Geist Mono', monospace; font-size: 0.7rem; color: #94A3B8; background: rgba(255,255,255,0.05); padding: 4px 10px; border-radius: 4px; border: 1px solid rgba(255,255,255,0.08);">AES-256-GCM</span>
+                    <span style="font-family: 'Geist Mono', monospace; font-size: 0.7rem; color: #10B981; background: rgba(16,185,129,0.1); padding: 4px 10px; border-radius: 4px; border: 1px solid rgba(16,185,129,0.3);">MTD Ready</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 2 -->
+        <div class="slide">
+            <div class="card col-left-5">
+                <div class="caption">Slide 2: The Hook</div>
+                <h2>The MTD 2026 Mandate</h2>
+                <p>In April 2026, HMRC’s Making Tax Digital (MTD) mandate comes into full force.</p>
+                <p>This legislation effectively outlaws 'shoebox accounting'. It enforces mandatory digital record-keeping and strict quarterly updates.</p>
+                <div class="script-notes">
+                    "The urgency of our proposition is driven by a massive, unavoidable government mandate. In April 2026, HMRC’s Making Tax Digital (MTD) mandate comes into full force for 3.2 million UK sole traders. This is not a gradual market shift; it is a forced-adoption event of unprecedented scale..."
+                </div>
+            </div>
+            <div class="card col-right-7">
+                <div class="visual-box" style="flex-direction: column; border: none; background: transparent; padding:0;">
+                    <div class="big-number">April 2026</div>
+                    <h2 style="margin-top: 24px;">3.2 Million UK Sole Traders</h2>
+                    <p style="color: var(--muted-slate); font-size: 1.25rem;">A forced-adoption event of unprecedented scale.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 3 -->
+        <div class="slide">
+            <div class="card col-left-5">
+                <div class="caption">Slide 3: Behavioral Architecture</div>
+                <h2>Meet 'Emma': Behavioral UX</h2>
+                <p>Traditional accounting software imposes corporate double-entry bookkeeping on sole traders, triggering the <strong>'Shoebox Avoidance Loop'</strong>—administrative dread that leads to missed deductions and HMRC penalties.</p>
+                <p>Emma lives entirely inside <strong>WhatsApp</strong>. By attaching receipt capture to an existing physical micro-habit at the trade counter, we achieve zero switching friction.</p>
+                <div class="moat-highlight" style="margin: 16px 0; padding: 14px 18px; border-left-color: #10B981; background: rgba(16, 185, 129, 0.04);">
+                    <div style="font-family: 'Geist Mono', monospace; font-size: 0.75rem; color: #10B981; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 4px;">Loss Aversion (Kahneman & Tversky)</div>
+                    <div style="font-size: 0.95rem; color: var(--deep-slate); font-weight: 500;">
+                        Logging £48.50 at Screwfix preserves <strong style="color: #10B981;">£12.61 in cash tax relief</strong> (20% Income Tax + 6% Class 4 NIC). Emma turns a boring chore into an active wealth defense tool.
+                    </div>
+                </div>
+                <div class="script-notes">
+                    "Traditional solutions force 3.2 million tradespeople and freelancers to become corporate bookkeepers. Navigating 50-item Chart of Accounts dropdowns induces administrative dread. Emma eliminates the interface entirely..."
+                </div>
+            </div>
+            <div class="col-right-7" style="height: 100%;">
+                <div class="comparison" style="height: 100%;">
+                    <div class="comp-item" style="background-color: var(--off-white); display: flex; flex-direction: column;">
+                        <div class="comp-header" style="color: var(--muted-slate); font-weight: 600; display: flex; justify-content: space-between;">
+                            <span>Traditional (Xero / QuickBooks)</span>
+                            <span style="color: #EF4444; font-size: 0.75rem; font-family: monospace;">Cognitive Dread • 50+ Dropdowns</span>
+                        </div>
+                        <div style="width:100%; flex: 1; border: 1px solid #e2e8f0; overflow: hidden; border-radius: 4px; background: #F8FAFC;">
+                            <img src="traditional_dashboard.jpg" alt="Complex Dashboard" style="width: 100%; height: 100%; object-fit: cover; object-position: top left;">
+                        </div>
+                    </div>
+                    <div class="comp-item" style="border-color: var(--heritage-blue); box-shadow: 0 4px 16px rgba(29, 78, 216, 0.15); display: flex; flex-direction: column;">
+                        <div class="comp-header" style="color: var(--heritage-blue); font-weight: 600; display: flex; justify-content: space-between;">
+                            <span>Invisible Accountant (Emma)</span>
+                            <span style="color: #10B981; font-size: 0.75rem; font-family: monospace;">BIM37000 • £12.61 Tax Relief</span>
+                        </div>
+                        <div style="width:100%; flex: 1; border: 1px solid #bfdbfe; overflow: hidden; border-radius: 4px; background: #0B1120;">
+                            <img src="whatsapp_interface.jpg" alt="WhatsApp Interface" style="width: 100%; height: 100%; object-fit: contain;">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 4 -->
+        <div class="slide">
+            <div class="card col-left-6">
+                <div class="caption">Slide 4: Statutory Defensibility</div>
+                <h2>The Statutory Tax Engine</h2>
+                <p>Generic LLMs hallucinate and fail UK tax tribunals. Our inference engine is custom fine-tuned on HMRC's <strong>Business Income Manual (BIM)</strong>.</p>
+                <ul style="margin: 16px 0 20px 0; padding-left: 20px;">
+                    <li style="margin-bottom: 10px;"><strong>Allowable Deductions:</strong> Automatically approves trade purchases under <em>BIM37000</em> (e.g. Screwfix tools/materials).</li>
+                    <li style="margin-bottom: 10px;"><strong>Statutory Disallowances:</strong> Strictly disallows client hospitality under <em>BIM45000</em> & <em>s.45 ITTOIA 2005</em>, protecting users from Schedule 24 FA 2007 careless error penalties.</li>
+                    <li style="margin-bottom: 10px;"><strong>Unbroken Digital Link:</strong> Programmatically seals transaction hashes under <em>SI 2021/1076</em> for direct quarterly MTD ITSA staging.</li>
+                </ul>
+                <div class="script-notes">
+                    "Investors ask: 'Is this just a wrapper?' The answer is categorically no. A generic LLM cannot navigate UK tax law. Emma enforces HMRC statutory rules, protecting sole traders from penalties while unlocking guaranteed tax relief..."
+                </div>
+            </div>
+            <div class="card col-right-6 card-dark" style="padding: 32px; display: flex; flex-direction: column;">
+                <div class="caption" style="color: var(--subtle-silver); margin-bottom: 16px;">Live Telemetry: HMRC Rules Engine</div>
+                
+                <div style="display: flex; gap: 24px; height: 100%;">
+                    <!-- Receipt visual -->
+                    <div style="flex: 1; position: relative; background: #fff; border-radius: 4px; overflow: hidden;">
+                        <div style="padding: 16px; color: #000; font-family: monospace; font-size: 0.75rem; border-bottom: 1px dashed #ccc;">
+                            <div style="text-align: center; font-weight: bold; font-size: 0.95rem;">SCREWFIX DIRECT</div>
+                            <div style="text-align: center; color: #666; font-size: 0.65rem;">London Bishopsgate • EC2M</div>
+                            <br>
+                            <div>1x Stanley Knife ..... £16.50</div>
+                            <div>1x Masonry Fixings ... £18.00</div>
+                            <div>1x 5m Tape Measure ... £14.00</div>
+                            <br>
+                            <div style="font-weight: bold; font-size: 0.9rem; border-top: 1px solid #000; padding-top: 6px;">TOTAL: £48.50 GBP</div>
+                            <div style="font-size: 0.65rem; color: #10b981; margin-top: 4px;">Verified Paper POS Receipt</div>
+                        </div>
+                        <!-- Scanner Line -->
+                        <div id="scanner-line" style="position: absolute; top: 0; left: 0; width: 100%; height: 2px; background: #00f0ff; box-shadow: 0 0 10px #00f0ff; animation: scan 3s infinite linear;"></div>
+                    </div>
+                    
+                    <!-- JSON Output -->
+                    <div style="flex: 1.2; background: #0F172A; border: 1px solid rgba(255,255,255,0.2); border-radius: 4px; padding: 14px; font-family: monospace; color: #00f0ff; font-size: 0.75rem; position: relative; overflow: hidden;">
+                        <pre id="json-output" style="margin: 0; white-space: pre-wrap; line-height: 1.4;"></pre>
+                    </div>
+                </div>
+                
+                <style>
+                    @keyframes scan {
+                        0% { top: 0; opacity: 1; }
+                        90% { top: 100%; opacity: 1; }
+                        100% { top: 100%; opacity: 0; }
+                    }
+                    .typing-cursor::after {
+                        content: '|';
+                        animation: blink 1s step-start infinite;
+                    }
+                    @keyframes blink { 50% { opacity: 0; } }
+                </style>
+                <script>
+                    const payload = '{\n  "vendor": "Screwfix Direct",\n  "amount": 48.50,\n  "currency": "GBP",\n  "hmrc_manual": "BIM37000",\n  "status": "100% Allowable",\n  "tax_saved": 12.61,\n  "digital_link": "SI-2021-1076"\n}';
+                    let i = 0;
+                    const el = document.getElementById('json-output');
+                    function typeWriter() {
+                        if (i < payload.length) {
+                            el.innerHTML = payload.substring(0, i+1) + '<span class="typing-cursor"></span>';
+                            i++;
+                            setTimeout(typeWriter, 35);
+                        } else {
+                            setTimeout(() => { i = 0; el.innerHTML = ''; typeWriter(); }, 2500);
+                        }
+                    }
+                    setTimeout(typeWriter, 500);
+                </script>
+            </div>
+        </div>
+
+        <!-- Slide 5 -->
+        <div class="slide">
+            <div class="card col-left-5">
+                <div class="caption">Slide 5: Go-To-Market</div>
+                <h2>The B2B2C Trojan Horse</h2>
+                <p>Pure B2C financial apps burn millions on CAC. We bypass this entirely with a <strong>B2B2C Enterprise White-labeling</strong> strategy.</p>
+                <p>By selling an enterprise licence to one accountancy firm, we drop 'Emma' into the pockets of 1,000 to 5,000 end-users overnight.</p>
+                <div class="script-notes">
+                    "Our core model is a B2B2C Enterprise White-labeling strategy. We sell directly to high-street accountancy firms. These firms are desperate; they spend countless non-billable hours chasing clients for crumpled receipts. This Trojan Horse strategy bypasses B2C CAC..."
+                </div>
+            </div>
+            <div class="card col-right-7">
+                <div class="visual-box card-dark" style="flex-direction: column; position: relative; overflow: hidden; padding: 0;">
+                    <div style="position: absolute; top: 24px; left: 24px; font-family: monospace; font-size: 1.2rem; color: #10b981;">
+                        CAC: £<span id="cac-counter">150.00</span>
+                    </div>
+                    
+                    <div style="position: relative; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center;">
+                        <!-- Central B2B Node -->
+                        <div style="position: absolute; width: 64px; height: 64px; background: var(--heritage-blue); border-radius: 50%; z-index: 2; box-shadow: 0 0 24px var(--heritage-blue); display: flex; align-items: center; justify-content: center; font-size: 0.7rem; font-weight: bold; color: white;">B2B</div>
+                        
+                        <!-- Animated Pulse -->
+                        <div class="pulse-ring" style="position: absolute; width: 64px; height: 64px; border: 2px solid var(--heritage-blue); border-radius: 50%; z-index: 1;"></div>
+                        
+                        <!-- Spawning B2C Nodes -->
+                        <div class="b2c-nodes" style="position: absolute; width: 100%; height: 100%;">
+                            <!-- Nodes created via JS for radial pattern -->
+                        </div>
+                    </div>
+                    
+                    <style>
+                        .pulse-ring {
+                            animation: pulse 3s infinite cubic-bezier(0.2, 0.8, 0.2, 1);
+                        }
+                        @keyframes pulse {
+                            0% { transform: scale(1); opacity: 1; }
+                            100% { transform: scale(6); opacity: 0; }
+                        }
+                        .b2c-node {
+                            position: absolute;
+                            width: 8px;
+                            height: 8px;
+                            background: white;
+                            border-radius: 50%;
+                            box-shadow: 0 0 8px white;
+                            opacity: 0;
+                            transition: opacity 0.5s ease-out;
+                        }
+                    </style>
+                    <script>
+                        const container = document.querySelector('.b2c-nodes');
+                        const cacCounter = document.getElementById('cac-counter');
+                        
+                        // Generate radial nodes
+                        for(let i=0; i<40; i++) {
+                            const node = document.createElement('div');
+                            node.className = 'b2c-node';
+                            const angle = Math.random() * Math.PI * 2;
+                            const distance = 80 + Math.random() * 120;
+                            node.style.left = `calc(50% + ${Math.cos(angle) * distance}px)`;
+                            node.style.top = `calc(50% + ${Math.sin(angle) * distance}px)`;
+                            container.appendChild(node);
+                        }
+                        
+                        // Animation loop
+                        setInterval(() => {
+                            const nodes = document.querySelectorAll('.b2c-node');
+                            // Reset
+                            nodes.forEach(n => n.style.opacity = '0');
+                            cacCounter.innerText = '150.00';
+                            
+                            // Pulse
+                            setTimeout(() => {
+                                nodes.forEach(n => n.style.opacity = Math.random() * 0.5 + 0.3);
+                                // Animate CAC drop
+                                let currentCac = 150.00;
+                                const dropInterval = setInterval(() => {
+                                    currentCac -= 15;
+                                    if(currentCac <= 0.30) {
+                                        currentCac = 0.30;
+                                        clearInterval(dropInterval);
+                                    }
+                                    cacCounter.innerText = currentCac.toFixed(2);
+                                }, 30);
+                            }, 500);
+                        }, 3000);
+                    </script>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 6 -->
+        <div class="slide">
+            <div class="card col-left-7">
+                <div class="caption">Slide 6: Defensibility</div>
+                <h2>The Technical Moat: Enterprise Rigour</h2>
+                <p>This is not a ChatGPT wrapper. Our moat is built on deep HMRC integration.</p>
+                <ul>
+                    <li><strong>HMRC Compliance:</strong> Submitted for Production API Credentials (Ticket 2026-OUP153). Fully compliant HMRC JSON payloads.</li>
+                    <li><strong>Infrastructure:</strong> HMRC Fraud Prevention Headers (`Gov-Client-Connection-Method`), Static Egress IPs, robust OAuth token management.</li>
+                    <li><strong>Security Vault:</strong> Bank-level AES-256-GCM encryption and SHA-256 hashing for all PII.</li>
+                    <li><strong>Validation:</strong> Passed rigorous CREST-accredited penetration test (Intruder.io).</li>
+                </ul>
+                <div class="script-notes">
+                    "To pre-empt the inevitable question: 'Is this just a ChatGPT wrapper?' Let me be unequivocally clear: it is not. Our technical moat is built on enterprise-grade rigour..."
+                </div>
+            </div>
+            <div class="col-right-5 card-dark" style="position: relative; overflow: hidden; padding: 32px; display: flex; flex-direction: column; justify-content: center; height: 100%; border-radius: 4px;">
+                <div class="caption" style="color: var(--subtle-silver); margin-bottom: 24px;">Telemetry: Security Pipeline</div>
+                
+                <div style="flex: 1; position: relative; display: flex; align-items: center; justify-content: space-between;">
+                    <!-- Unstructured Input -->
+                    <div style="flex: 1; text-align: left; font-family: monospace; font-size: 0.7rem; color: var(--muted-slate);">
+                        <div class="chaos-text" style="animation: float 2s infinite;">{raw_msg_xyz}</div>
+                        <div class="chaos-text" style="animation: float 2.5s infinite reverse;">[img_bin_88]</div>
+                        <div class="chaos-text" style="animation: float 1.8s infinite;">"coffee 45"</div>
+                    </div>
+                    
+                    <!-- The Vault -->
+                    <div style="width: 100px; height: 100px; border: 2px dashed #10b981; border-radius: 8px; display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative; z-index: 10; background: var(--oxford-blue);">
+                        <div style="font-size: 0.7rem; color: #10b981; font-weight: bold; text-align: center;">AES-256<br>Air-Gap</div>
+                        <div style="position: absolute; top: 110%; font-size: 0.6rem; color: var(--subtle-silver); width: 150px; text-align: center;">OAuth 2.0 PKCE</div>
+                    </div>
+                    
+                    <!-- Structured Output Packets -->
+                    <div style="flex: 1; position: relative; height: 100%;">
+                        <div class="packet" style="position: absolute; top: 30%; font-size: 0.6rem; background: var(--heritage-blue); color: white; padding: 4px 8px; border-radius: 4px;">Gov-Vendor-Public-IP</div>
+                        <div class="packet packet-delay" style="position: absolute; top: 60%; font-size: 0.6rem; background: #10b981; color: white; padding: 4px 8px; border-radius: 4px;">Valid JSON</div>
+                    </div>
+                </div>
+                
+                <style>
+                    @keyframes float { 0% { transform: translateY(0); opacity: 0; } 50% { opacity: 1; } 100% { transform: translateY(20px) translateX(20px); opacity: 0; } }
+                    .packet { animation: shoot 2s infinite cubic-bezier(0.4, 0, 0.2, 1); opacity: 0; left: 0; }
+                    .packet-delay { animation-delay: 1s; }
+                    @keyframes shoot { 0% { left: -20px; opacity: 0; } 20% { opacity: 1; } 80% { opacity: 1; } 100% { left: 100%; opacity: 0; } }
+                </style>
+            </div>
+        </div>
+
+        <!-- Slide 7 -->
+        <div class="slide">
+            <div class="card col-left-7">
+                <div class="caption">Slide 7: Roadmap</div>
+                <h2>The "Zero-Friction" Compliance Roadmap</h2>
+                <div style="display: flex; flex-direction: column; gap: 24px;">
+                    <div style="border-left: 4px solid var(--heritage-blue); padding-left: 24px; background-color: rgba(29, 78, 216, 0.03); padding: 24px;">
+                        <h3 style="margin-top: 0; color: var(--heritage-blue);">Phase 1: Launch Day (OCR)</h3>
+                        <p style="margin-bottom: 0;">Bypass the FCA bottleneck entirely. Users WhatsApp a photo of a receipt. Our AI extracts the data and stages it for HMRC. <strong>£0 in licensing. Immediate product-market fit.</strong></p>
+                    </div>
+                    <div style="border-left: 4px solid var(--oxford-blue); padding-left: 24px; background-color: rgba(15, 23, 42, 0.03); padding: 24px;">
+                        <h3 style="margin-top: 0;">Phase 2: Premium (Open Banking)</h3>
+                        <p style="margin-bottom: 0;">Partner with TrueLayer (BaaS). They absorb the FCA compliance risk; we plug in their API to match WhatsApp receipts to live bank feeds. <strong>Enterprise-grade auto-reconciliation.</strong></p>
+                    </div>
+                </div>
+                <div class="script-notes">
+                    "We are bypassing the FCA regulatory delay entirely for our V1 launch. HMRC mandates that taking a photo of a physical receipt constitutes a compliant 'digital link'... Once we capture the market, Phase 2 introduces Auto-Reconciliation via TrueLayer."
+                </div>
+            </div>
+            <div class="card card-dark col-right-5" style="display:flex; flex-direction:column; justify-content:center; align-items:center; text-align:center; position: relative; overflow: hidden; padding: 0;">
+                <div class="caption" style="color: var(--subtle-silver); position: absolute; top: 24px; left: 24px;">Phase 2: Auto-Reconciliation</div>
+                
+                <div style="width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; position: relative;">
+                    <!-- Data Streams -->
+                    <div style="position: absolute; width: 100%; height: 100%;">
+                        <svg width="100%" height="100%" viewBox="0 0 400 300" preserveAspectRatio="none">
+                            <path class="stream stream-top" d="M -50 100 C 150 100, 150 150, 200 150" fill="none" stroke="var(--heritage-blue)" stroke-width="4" stroke-dasharray="10 10"/>
+                            <path class="stream stream-bot" d="M -50 200 C 150 200, 150 150, 200 150" fill="none" stroke="#10b981" stroke-width="4" stroke-dasharray="10 10"/>
+                        </svg>
+                        <!-- Stream Labels -->
+                        <div style="position: absolute; top: 25%; left: 10%; font-size: 0.6rem; color: var(--heritage-blue); font-family: monospace;">WhatsApp OCR</div>
+                        <div style="position: absolute; top: 70%; left: 10%; font-size: 0.6rem; color: #10b981; font-family: monospace;">TrueLayer API</div>
+                    </div>
+                    
+                    <!-- The Merger Node -->
+                    <div class="merge-node" style="position: absolute; left: 50%; width: 40px; height: 40px; background: white; border-radius: 50%; transform: translateX(-50%); box-shadow: 0 0 20px white; z-index: 2;"></div>
+                    
+                    <!-- Reconciled Output -->
+                    <div class="reconciled-box" style="position: absolute; left: 65%; background: rgba(16, 185, 129, 0.1); border: 1px solid #10b981; padding: 12px; border-radius: 4px; text-align: left; opacity: 0;">
+                        <div style="color: #10b981; font-weight: bold; font-size: 0.8rem; margin-bottom: 4px;">✓ RECONCILED</div>
+                        <div id="hash-text" style="font-family: monospace; font-size: 0.6rem; color: var(--subtle-silver);">SHA-256: ...</div>
+                    </div>
+                </div>
+                
+                <style>
+                    .stream { animation: flow 1s linear infinite; }
+                    .stream-top { stroke-dashoffset: 20; }
+                    .stream-bot { stroke-dashoffset: 20; animation-duration: 0.8s; }
+                    @keyframes flow { to { stroke-dashoffset: 0; } }
+                    
+                    .merge-node { animation: pulse-node 2s infinite; }
+                    @keyframes pulse-node { 0%, 100% { transform: translateX(-50%) scale(1); box-shadow: 0 0 10px white; } 50% { transform: translateX(-50%) scale(1.2); box-shadow: 0 0 30px #10b981; } }
+                    
+                    .reconciled-box { animation: appear-hash 2s infinite; }
+                    @keyframes appear-hash { 0%, 40% { opacity: 0; transform: translateX(-10px); } 50%, 90% { opacity: 1; transform: translateX(0); } 100% { opacity: 0; } }
+                </style>
+                <script>
+                    const hashEl = document.getElementById('hash-text');
+                    setInterval(() => {
+                        const hash = Array.from({length: 12}, () => Math.floor(Math.random()*16).toString(16)).join('');
+                        hashEl.innerText = 'SHA-256: ' + hash + '...';
+                    }, 2000);
+                </script>
+            </div>
+        </div>
+
+        <!-- Slide 8 -->
+        <div class="slide">
+            <div class="card col-left-6">
+                <div class="caption">Slide 8: Investment</div>
+                <h2>The Ask & Exit Strategy</h2>
+                <div class="big-number" style="font-size: 3rem;">£350k - £500k</div>
+                <p style="font-size: 1.25rem; font-weight: 500; margin-top: -8px;">Pre-Seed Round (SEIS/EIS Eligible)</p>
+                
+                <div class="moat-highlight" style="margin-top: 24px; margin-bottom: 24px;">
+                    <h4 style="margin-bottom: 8px;">The Roadmap</h4>
+                    <p style="margin-bottom: 0;">Targeting <strong>£9.6M ARR</strong> within 5 years. Scaling globally (US 1099s, AUS/CAN GST) while the WhatsApp interface remains constant.</p>
+                </div>
+
+                <div class="script-notes">
+                    "We are raising a Pre-Seed round of £350k to £500k... Crucially, this investment is SEIS/EIS Eligible, providing significant tax relief... We are targeting a 10x to 20x return, building the prime acquisition target for legacy platforms like Xero or neo-banks like Monzo."
+                </div>
+            </div>
+            <div class="card col-right-6">
+                <div class="caption">Exit Landscape</div>
+                <h3 style="margin-top: 8px;">10x to 20x Return Target</h3>
+                <p>We are building the prime acquisition target for:</p>
+                <div style="display: flex; flex-direction: column; gap: 16px; margin-top: 24px;">
+                    <div style="border: 1px solid var(--subtle-silver); padding: 24px;">
+                        <h4 style="margin:0 0 8px 0;">Legacy Platforms</h4>
+                        <p style="margin:0; font-size:0.9rem; color:var(--muted-slate);">Xero, Intuit (Desperate to catch up to AI-native standard)</p>
+                    </div>
+                    <div style="border: 1px solid var(--subtle-silver); padding: 24px;">
+                        <h4 style="margin:0 0 8px 0;">Neo-Banks</h4>
+                        <p style="margin:0; font-size:0.9rem; color:var(--muted-slate);">Monzo, Revolut (Aggressively maneuvering to own sole-trader ecosystem)</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Presentation Controls -->
+    <div class="controls">
+        <button id="prevBtn">Previous</button>
+        <button id="nextBtn" class="btn-primary">Next</button>
+    </div>
+
+    <script>
+        const slides = document.querySelectorAll('.slide');
+        let currentSlide = 0;
+
+        function showSlide(index) {
+            slides.forEach((slide, i) => {
+                slide.classList.remove('active');
+                if (i === index) {
+                    slide.classList.add('active');
+                }
+            });
+        }
+
+        document.getElementById('prevBtn').addEventListener('click', () => {
+            if (currentSlide > 0) {
+                currentSlide--;
+                showSlide(currentSlide);
+            }
+        });
+
+        document.getElementById('nextBtn').addEventListener('click', () => {
+            if (currentSlide < slides.length - 1) {
+                currentSlide++;
+                showSlide(currentSlide);
+            }
+        });
+
+        // Keyboard navigation
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowRight' || e.key === ' ') {
+                if (currentSlide < slides.length - 1) {
+                    currentSlide++;
+                    showSlide(currentSlide);
+                }
+            } else if (e.key === 'ArrowLeft') {
+                if (currentSlide > 0) {
+                    currentSlide--;
+                    showSlide(currentSlide);
+                }
+            }
+        });
+    </script>
+</body>
+</html>

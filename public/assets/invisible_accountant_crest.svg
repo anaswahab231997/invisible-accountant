@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100%" height="100%" fill="none">
+  <!-- Friendly, approachable blue background for the icon -->
+  <rect width="100" height="100" rx="20" fill="#F3F6FD"/>
+  <rect x="4" y="4" width="92" height="92" rx="16" stroke="#BFDBFE" stroke-width="1.5"/>
+  
+  <!-- The Sovereign Monoline Ledger translated into high-trust HMRC Blue -->
+  <g transform="translate(15, 15)">
+    <g stroke="#1D70B8" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round">
+      <!-- Pillar I -->
+      <line x1="25" y1="15" x2="25" y2="55"/>
+      <line x1="18" y1="15" x2="32" y2="15"/>
+      <line x1="18" y1="55" x2="32" y2="55"/>
+
+      <!-- Chevron A -->
+      <line x1="50" y1="15" x2="35" y2="55"/>
+      <line x1="50" y1="15" x2="65" y2="55"/>
+      <line x1="28" y1="55" x2="42" y2="55"/>
+      <line x1="58" y1="55" x2="72" y2="55"/>
+      <line x1="43" y1="15" x2="57" y2="15"/>
+    </g>
+
+    <!-- Success Green Crossbar (Psychological relief / completion) -->
+    <line x1="23" y1="35" x2="62" y2="35" stroke="#25D366" stroke-width="3.5" stroke-linecap="round"/>
+    <circle cx="42.5" cy="35" r="2.5" fill="#1D70B8"/>
+  </g>
+</svg>

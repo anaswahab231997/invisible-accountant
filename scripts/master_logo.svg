@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 160" width="100%" height="100%" fill="none">
+  <!-- Obsidian Slate Ground (Mayfair Plaque) -->
+  <rect width="160" height="160" fill="#0B0F19"/>
+  <rect x="8" y="8" width="144" height="144" stroke="#1E293B" stroke-width="1"/>
+  <rect x="12" y="12" width="136" height="136" stroke="#C5A880" stroke-width="0.5" stroke-opacity="0.35"/>
+
+  <!-- THE SOVEREIGN MONOLINE LEDGER (Interlocking IA Monogram) -->
+  <!-- Pure Architectural Monoline (Stroke Width: 3.5px) -->
+  <g stroke="#FFFFFF" stroke-width="3.5" stroke-linecap="square" stroke-linejoin="miter">
+    <!-- Pillar I (The 'I' of Invisible & Institutional Integrity): x=46, y=38..122 -->
+    <line x1="46" y1="38" x2="46" y2="122"/>
+    <!-- Architectural Plinths on 'I' -->
+    <line x1="36" y1="38" x2="56" y2="38"/>
+    <line x1="36" y1="122" x2="56" y2="122"/>
+
+    <!-- The 'A' (Accountant & Asset Authority) -->
+    <!-- Apex centered at x=96, y=38 -->
+    <!-- Left diagonal strut descends across aperture to baseline at x=68 -->
+    <line x1="96" y1="38" x2="68" y2="122"/>
+    <!-- Right leg descends to baseline at x=114 -->
+    <line x1="96" y1="38" x2="114" y2="122"/>
+    
+    <!-- Architectural Plinths on 'A' -->
+    <line x1="60" y1="122" x2="76" y2="122"/>
+    <line x1="106" y1="122" x2="122" y2="122"/>
+    <line x1="88" y1="38" x2="104" y2="38"/>
+  </g>
+
+  <!-- The Golden Section Ledger Beam: Hallmarked Antique Gilt (#C5A880) -->
+  <!-- Perfectly horizontal, bridging between Pillar I (x=46) and the 'A' (x=114) at y=80 -->
+  <line x1="46" y1="80" x2="114" y2="80" stroke="#C5A880" stroke-width="2.5" stroke-linecap="square"/>
+
+  <!-- Central Trust Pivot: Admiralty Blue (#1D4ED8) -->
+  <rect x="74" y="78.5" width="3" height="3" fill="#1D4ED8"/>
+</svg>

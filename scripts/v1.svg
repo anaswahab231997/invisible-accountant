@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 160" width="100%" height="100%" fill="none">
+  <!-- Precision Plaque Boundary -->
+  <rect width="160" height="160" fill="#0B0F19"/>
+  <rect x="8" y="8" width="144" height="144" stroke="#1E293B" stroke-width="1"/>
+  <rect x="12" y="12" width="136" height="136" stroke="#C5A880" stroke-width="0.5" stroke-opacity="0.35"/>
+
+  <!-- MATHEMATICAL GEOMETRY: Golden Ratio Ledger Monogram -->
+  <!-- Two stately vertical columns: Left (x=46..54), Right (x=106..114) -->
+  <!-- Left Pillar: The "I" of Invisible / Institutional Integrity -->
+  <rect x="46" y="38" width="8" height="84" fill="#FFFFFF"/>
+  <!-- Architectural Terminals on "I" (Monoline Hairlines) -->
+  <line x1="40" y1="38" x2="60" y2="38" stroke="#FFFFFF" stroke-width="1.5"/>
+  <line x1="40" y1="122" x2="60" y2="122" stroke="#FFFFFF" stroke-width="1.5"/>
+
+  <!-- The "A" Structure: Apex at (102, 38), Left Leg descends to meet base at x=78, Right Leg is vertical column (x=106..114) -->
+  <!-- Right Vertical Column: Stately counterpart column -->
+  <rect x="106" y="58" width="8" height="64" fill="#FFFFFF"/>
+  <line x1="100" y1="122" x2="120" y2="122" stroke="#FFFFFF" stroke-width="1.5"/>
+
+  <!-- Diagonal Strut of "A" connecting Apex to Left Baseline -->
+  <path d="M 110 38 L 76 122" stroke="#FFFFFF" stroke-width="8" stroke-linecap="square"/>
+
+  <!-- The Golden Ratio Aperture: Inner void framed between x=54 and x=106 -->
+  <!-- Hallmarked Antique Gilt Horizontal Ledger Rule at Phi Division (y = 80) -->
+  <line x1="54" y1="80" x2="106" y2="80" stroke="#C5A880" stroke-width="2"/>
+  
+  <!-- Subtle Admiralty Blue Anchor Node -->
+  <circle cx="80" cy="80" r="2.5" fill="#1D4ED8"/>
+</svg>

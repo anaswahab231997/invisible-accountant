@@ -1,0 +1,34 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 160" width="100%" height="100%" fill="none">
+  <!-- Obsidian Slate Foundation -->
+  <rect width="160" height="160" fill="#0B0F19"/>
+  <rect x="8" y="8" width="144" height="144" stroke="#1E293B" stroke-width="1"/>
+  <rect x="12" y="12" width="136" height="136" stroke="#C5A880" stroke-width="0.5" stroke-opacity="0.3"/>
+
+  <!-- THE GOLDEN RATIO APERTURE & TWIN STATELY COLUMNS -->
+  <!-- Left Column (I): Twin-line precision pillar -->
+  <g stroke="#FFFFFF" stroke-width="2" stroke-linecap="square">
+    <line x1="46" y1="41" x2="46" y2="119"/>
+    <line x1="54" y1="41" x2="54" y2="119"/>
+    <!-- Top & Bottom Plinth of I -->
+    <line x1="40" y1="41" x2="60" y2="41"/>
+    <line x1="40" y1="119" x2="60" y2="119"/>
+    
+    <!-- Right Column (A Right Leg): Twin-line precision pillar -->
+    <line x1="106" y1="41" x2="106" y2="119"/>
+    <line x1="114" y1="41" x2="114" y2="119"/>
+    <line x1="100" y1="119" x2="120" y2="119"/>
+
+    <!-- Chevron Apex of A: Bridging from Column 1 to Column 2 -->
+    <!-- Apex rises centered at (80, 26), descending to outer edges -->
+    <line x1="54" y1="41" x2="80" y2="26"/>
+    <line x1="106" y1="41" x2="80" y2="26"/>
+  </g>
+
+  <!-- The Golden Section Crossbar: Hallmarked Antique Gilt (#C5A880) -->
+  <!-- Positioned at Golden Cut: y = 119 - (78 / phi) = 119 - 48.2 = 70.8 ~ 71 -->
+  <line x1="46" y1="71" x2="114" y2="71" stroke="#C5A880" stroke-width="2" stroke-linecap="square"/>
+
+  <!-- Pure Geometric Monogram Core Accent -->
+  <circle cx="80" cy="71" r="3" fill="#1D4ED8"/>
+  <circle cx="80" cy="71" r="1.2" fill="#FFFFFF"/>
+</svg>

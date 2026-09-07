@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 160" width="100%" height="100%" fill="none">
+  <rect width="160" height="160" fill="#0B0F19"/>
+  <rect x="8" y="8" width="144" height="144" stroke="#1E293B" stroke-width="1"/>
+  <rect x="12" y="12" width="136" height="136" stroke="#C5A880" stroke-width="0.5" stroke-opacity="0.3"/>
+
+  <!-- Left Stately Pillar 'I' -->
+  <g stroke="#FFFFFF" stroke-width="3.6" stroke-linecap="square" stroke-linejoin="miter">
+    <line x1="44" y1="36" x2="44" y2="124"/>
+    <!-- Architectural Plinths -->
+    <line x1="34" y1="36" x2="54" y2="36"/>
+    <line x1="34" y1="124" x2="54" y2="124"/>
+
+    <!-- 'A' Apex and Columns -->
+    <line x1="98" y1="36" x2="70" y2="124"/>
+    <line x1="98" y1="36" x2="120" y2="124"/>
+    <!-- 'A' Plinths -->
+    <line x1="62" y1="124" x2="78" y2="124"/>
+    <line x1="112" y1="124" x2="128" y2="124"/>
+    <line x1="90" y1="36" x2="106" y2="36"/>
+  </g>
+
+  <!-- Hallmarked Antique Gilt Ledger Beam at Golden Section y = 82 -->
+  <!-- Anchored from I (x=44) across A (to x=116) -->
+  <line x1="44" y1="82" x2="116" y2="82" stroke="#C5A880" stroke-width="2.5" stroke-linecap="square"/>
+
+  <!-- Sovereign Trust Anchor: Admiralty Blue Pivot -->
+  <rect x="76" y="80.5" width="3" height="3" fill="#1D4ED8"/>
+</svg>

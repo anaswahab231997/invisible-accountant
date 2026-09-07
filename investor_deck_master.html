@@ -1,0 +1,652 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Invisible Accountant - Investor Deck</title>
+    <style>
+        body, html {
+            margin: 0; 
+            padding: 0; 
+            width: 100%; 
+            height: 100%; 
+            overflow: hidden;
+            font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto, Helvetica, Arial, sans-serif;
+            background: #000;
+        }
+        
+        .bg-iframe {
+            position: absolute; 
+            top: 0; left: 0; 
+            width: 100%; height: 100%;
+            border: none; 
+            z-index: 1; 
+            pointer-events: none; 
+        }
+        
+        .overlay {
+            position: absolute; 
+            top: 0; left: 0; 
+            width: 100%; height: 100%;
+            z-index: 2; 
+            display: flex; 
+            flex-direction: row; 
+            pointer-events: none;
+        }
+        
+        .slides-container {
+            flex: 1; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center;
+            padding: 50px;
+            transition: all 0.5s ease;
+        }
+        
+        .slide {
+            display: none;
+            background: rgba(13, 17, 23, 0.65);
+            backdrop-filter: blur(25px);
+            -webkit-backdrop-filter: blur(25px);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 24px;
+            padding: 50px 60px;
+            max-width: 800px;
+            width: 100%;
+            color: #f0f6fc;
+            pointer-events: auto;
+            box-shadow: 0 40px 80px -10px rgba(0, 0, 0, 0.8), inset 0 1px 0 rgba(255,255,255,0.2);
+            transition: opacity 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+            opacity: 0;
+            max-height: 85vh;
+            overflow-y: auto;
+        }
+        
+        /* Hide scrollbar for slide */
+        .slide::-webkit-scrollbar { display: none; }
+        .slide { -ms-overflow-style: none; scrollbar-width: none; }
+
+        .slide.active { 
+            display: block; 
+        }
+        
+        .slide-title { 
+            font-size: 14px; 
+            color: #58a6ff; 
+            text-transform: uppercase; 
+            letter-spacing: 3px; 
+            margin-bottom: 16px; 
+            font-weight: 600;
+        }
+        
+        .slide h2 { 
+            font-size: 38px; 
+            margin-top: 0; 
+            margin-bottom: 24px; 
+            font-weight: 300; 
+            line-height: 1.2; 
+            letter-spacing: -0.5px;
+        }
+        
+        .slide-section { 
+            margin-bottom: 20px; 
+            background: rgba(255, 255, 255, 0.03);
+            padding: 15px 20px;
+            border-radius: 12px;
+            border-left: 4px solid #30363d;
+        }
+
+        .slide-section-title { 
+            font-weight: 600; 
+            color: #8b949e; 
+            font-size: 14px; 
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 8px; 
+        }
+
+        .slide p { 
+            font-size: 18px; 
+            line-height: 1.6; 
+            color: #c9d1d9; 
+            font-weight: 300; 
+            margin: 0;
+        }
+
+        .slide ul { 
+            font-size: 17px; 
+            line-height: 1.5; 
+            color: #c9d1d9; 
+            font-weight: 300; 
+            padding-left: 20px; 
+            margin-top: 5px; 
+            margin-bottom: 0px; 
+        }
+
+        .slide li { 
+            margin-bottom: 8px; 
+        }
+        
+        .slide li strong {
+            color: #e6edf3;
+            font-weight: 500;
+        }
+
+        /* Navigation Controls */
+        .nav-controls {
+            position: absolute; 
+            bottom: 40px; 
+            right: 50px; 
+            display: flex; 
+            gap: 15px; 
+            pointer-events: auto;
+            z-index: 10;
+        }
+        
+        .nav-btn {
+            background: rgba(13, 17, 23, 0.6); 
+            border: 1px solid rgba(255,255,255,0.2);
+            color: white; 
+            padding: 12px 24px; 
+            border-radius: 12px; 
+            cursor: pointer;
+            backdrop-filter: blur(10px); 
+            -webkit-backdrop-filter: blur(10px);
+            font-size: 16px;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+        
+        .nav-btn:hover { 
+            background: rgba(88, 166, 255, 0.2); 
+            border-color: #58a6ff;
+            transform: translateY(-2px);
+        }
+        
+        .progress-indicator {
+            position: absolute; 
+            bottom: 50px; 
+            left: 50%; 
+            transform: translateX(-50%);
+            display: flex; 
+            gap: 12px; 
+            pointer-events: auto;
+            z-index: 10;
+        }
+        
+        .dot { 
+            width: 8px; 
+            height: 8px; 
+            border-radius: 50%; 
+            background: rgba(255,255,255,0.2); 
+            cursor: pointer;
+            transition: 0.3s; 
+        }
+        
+        .dot.active { 
+            background: #58a6ff; 
+            box-shadow: 0 0 12px #58a6ff; 
+            transform: scale(1.3);
+        }
+
+        /* Visualization Pane */
+        .viz-container {
+            flex: 1; 
+            display: none; 
+            align-items: center; 
+            justify-content: center; 
+            pointer-events: auto;
+            padding: 20px;
+            animation: fadeIn 1s ease-out;
+        }
+        
+        .viz-container.active { 
+            display: flex; 
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateX(20px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+        
+        #canvas { 
+            width: 100%; 
+            max-width: 900px; 
+            filter: drop-shadow(0 20px 40px rgba(0,0,0,0.5));
+        }
+        
+        /* Interactive Data Flow Styles */
+        .node-rect { 
+            fill: rgba(22, 27, 34, 0.85); 
+            stroke: rgba(48, 54, 61, 0.9); 
+            stroke-width: 2; 
+            rx: 12; 
+            transition: all 0.4s ease; 
+        }
+        
+        .node-text { 
+            fill: #e6edf3; 
+            font-size: 16px; 
+            font-weight: 600; 
+            text-anchor: middle; 
+            pointer-events: none; 
+        }
+        
+        .node-subtext { 
+            fill: #8b949e; 
+            font-size: 13px; 
+            text-anchor: middle; 
+            pointer-events: none; 
+        }
+        
+        .path-line { 
+            fill: none; 
+            stroke: rgba(255,255,255,0.15); 
+            stroke-width: 3; 
+            stroke-dasharray: 8, 8; 
+        }
+        
+        .glow-active { 
+            stroke: #58a6ff; 
+            stroke-width: 3; 
+            filter: drop-shadow(0 0 20px rgba(88, 166, 255, 0.6)); 
+            fill: rgba(13, 42, 70, 0.95); 
+        }
+        
+        .glow-active-fraud { 
+            stroke: #ff7b72; 
+            stroke-width: 3; 
+            filter: drop-shadow(0 0 20px rgba(255, 123, 114, 0.6)); 
+            fill: rgba(59, 29, 31, 0.95); 
+        }
+        
+        #packet { 
+            fill: #00ff80; 
+            filter: drop-shadow(0 0 15px #00ff80); 
+            opacity: 0; 
+            transition: opacity 0.3s; 
+        }
+    </style>
+</head>
+<body>
+    <!-- Fullscreen 3D Background -->
+    <iframe class="bg-iframe" src="http://127.0.0.1:58596"></iframe>
+
+    <div class="overlay">
+        <!-- Text Slides Content -->
+        <div class="slides-container" id="slides-container">
+            <!-- Slide 1 -->
+            <div class="slide" id="slide-0">
+                <div class="slide-title">Slide 1</div>
+                <h2>The Administrative Challenge</h2>
+                <div class="slide-section">
+                    <div class="slide-section-title">Visual</div>
+                    <p>Side-by-side comparison. Left side: The current landscape of independent tax administration—manual data entry, disparate record-keeping, and complex HMRC portals. Right side: A streamlined alternative using established communication platforms like WhatsApp for real-time record capture.</p>
+                </div>
+                <div class="slide-section">
+                    <div class="slide-section-title">Data</div>
+                    <p>"Independent professionals dedicate an average of Y hours monthly to statutory tax administration. Our solution significantly minimizes this operational overhead."</p>
+                </div>
+                <div class="slide-section" style="border-left-color: #58a6ff;">
+                    <div class="slide-section-title" style="color: #58a6ff;">Key Message</div>
+                    <p>Tax compliance should be a seamless, integrated process, reducing administrative burden and ensuring accurate real-time record-keeping.</p>
+                </div>
+            </div>
+
+            <!-- Slide 2 -->
+            <div class="slide" id="slide-1">
+                <div class="slide-title">Slide 2</div>
+                <h2>Automated Ledger Integration (Demonstration)</h2>
+                <div class="slide-section">
+                    <div class="slide-section-title">Visual</div>
+                    <p>A procedural overview demonstrating the user journey:<br>
+                    1. User captures a receipt via WhatsApp.<br>
+                    2. System confirms receipt automatically: "Transaction recorded: £4.50 categorized as Travel & Subsistence for the 2026 tax year."<br>
+                    3. A clear, real-time dashboard displaying current estimated tax liabilities and statutory deductions.</p>
+                </div>
+                <div class="slide-section">
+                    <div class="slide-section-title">Data</div>
+                    <p>"Average processing time per transaction is reduced to seconds."</p>
+                </div>
+                <div class="slide-section" style="border-left-color: #58a6ff;">
+                    <div class="slide-section-title" style="color: #58a6ff;">Key Message</div>
+                    <p>By leveraging existing infrastructure, we deliver an exceptionally intuitive experience, ensuring consistent compliance without requiring additional software adoption.</p>
+                </div>
+            </div>
+
+            <!-- Slide 3 -->
+            <div class="slide" id="slide-2">
+                <div class="slide-title">Slide 3</div>
+                <h2>Streamlined Statutory Submission</h2>
+                <div class="slide-section">
+                    <div class="slide-section-title">Visual</div>
+                    <p>A concise summary message: "Tax year summary. Total income: £X, Allowable expenses: £Y, Estimated tax liability: £Z. Proceed with HMRC submission?" accompanied by a secure confirmation prompt.</p>
+                </div>
+                <div class="slide-section">
+                    <div class="slide-section-title">Data</div>
+                    <p>"Systematic notifications ensure timely submissions, substantially mitigating the risk of late filing penalties."</p>
+                </div>
+                <div class="slide-section" style="border-left-color: #58a6ff;">
+                    <div class="slide-section-title" style="color: #58a6ff;">Key Message</div>
+                    <p>We streamline the complexities of the Self Assessment framework into a straightforward, compliant submission process.</p>
+                </div>
+            </div>
+
+            <!-- Slide 4 -->
+            <div class="slide" id="slide-3">
+                <div class="slide-title">Slide 4</div>
+                <h2>Architectural Integrity and Infrastructure</h2>
+                <div class="slide-section">
+                    <div class="slide-section-title">Visual</div>
+                    <p>A structural diagram illustrating the front-end user experience operating seamlessly atop our robust, enterprise-grade data processing and security architecture.</p>
+                </div>
+                <div class="slide-section" style="border-left-color: #58a6ff;">
+                    <div class="slide-section-title" style="color: #58a6ff;">Key Message</div>
+                    <p>Our intuitive user interface is underpinned by a resilient, secure, and scalable infrastructure designed for institutional reliability and long-term defensibility.</p>
+                </div>
+            </div>
+
+            <!-- Slide 5 -->
+            <div class="slide" id="slide-4">
+                <div class="slide-title">Slide 5</div>
+                <h2>Secure Data Ingestion and Privacy Protocol</h2>
+                <div class="slide-section">
+                    <div class="slide-section-title">Visual</div>
+                    <p>A process flow detailing the secure transition of data from WhatsApp through our cryptographic validation layers.</p>
+                </div>
+                <div class="slide-section">
+                    <div class="slide-section-title">Specs</div>
+                    <ul>
+                        <li><strong>HMAC Cryptographic Validation:</strong> All incoming data is rigorously authenticated via HMAC signatures, ensuring only legitimate traffic is processed and discarding invalid requests immediately.</li>
+                        <li><strong>Systematic PII Obfuscation:</strong> Personally Identifiable Information (PII) is automatically redacted prior to any algorithmic processing, guaranteeing strict adherence to GDPR and data privacy regulations.</li>
+                    </ul>
+                </div>
+                <div class="slide-section" style="border-left-color: #58a6ff;">
+                    <div class="slide-section-title" style="color: #58a6ff;">Key Message</div>
+                    <p>Data integrity and user privacy are foundational, with robust security measures implemented at the point of ingestion.</p>
+                </div>
+            </div>
+
+            <!-- Slide 6 -->
+            <div class="slide" id="slide-5">
+                <div class="slide-title">Slide 6</div>
+                <h2>Algorithmic Precision and Deterministic Accuracy</h2>
+                <div class="slide-section">
+                    <div class="slide-section-title">Visual</div>
+                    <p>A schematic of our data processing pipeline, highlighting our proprietary validation protocol that cross-references algorithmic outputs against original source documents.</p>
+                </div>
+                <div class="slide-section">
+                    <div class="slide-section-title">Specs</div>
+                    <ul>
+                        <li><strong>Rigorous Validation Protocol:</strong> Our system enforces strict cross-referencing of extracted data (financial values, vendors, dates) against the original receipt imagery.</li>
+                        <li><strong>Deterministic Financial Output:</strong> This uncompromising validation ensures that only precise, verified data is committed to the financial ledger, completely mitigating the risk of algorithmic inaccuracies.</li>
+                    </ul>
+                </div>
+                <div class="slide-section" style="border-left-color: #58a6ff;">
+                    <div class="slide-section-title" style="color: #58a6ff;">Key Message</div>
+                    <p>We combine advanced processing capabilities with the deterministic precision required for statutory financial compliance.</p>
+                </div>
+            </div>
+
+            <!-- Slide 7 -->
+            <div class="slide" id="slide-6">
+                <div class="slide-title">Slide 7</div>
+                <h2>Secure Storage and HMRC Integration</h2>
+                <div class="slide-section">
+                    <div class="slide-section-title">Visual</div>
+                    <p>A representation of our encrypted database architecture interfacing securely with HMRC's digital infrastructure.</p>
+                </div>
+                <div class="slide-section">
+                    <div class="slide-section-title">Specs</div>
+                    <ul>
+                        <li><strong>AES-GCM Encryption Standards:</strong> Sensitive credentials, including OAuth tokens and National Insurance Numbers, are secured at rest using industry-standard AES-GCM encryption within our PostgreSQL infrastructure.</li>
+                        <li><strong>HMRC-Compliant API Architecture:</strong> Outbound transmissions are carefully managed via rate limiters and automatically incorporate HMRC's mandatory Fraud Prevention Headers (<code>OTHER_VIA_SERVER</code>), ensuring full regulatory alignment.</li>
+                    </ul>
+                </div>
+                <div class="slide-section" style="border-left-color: #58a6ff;">
+                    <div class="slide-section-title" style="color: #58a6ff;">Key Message</div>
+                    <p>Our platform maintains institutional-grade security for user data and ensures flawless, compliant integration with government tax systems.</p>
+                </div>
+            </div>
+
+            <!-- Slide 8 -->
+            <div class="slide" id="slide-7">
+                <div class="slide-title">Slide 8</div>
+                <h2>Value Proposition and Strategic Execution</h2>
+                <div class="slide-section">
+                    <div class="slide-section-title">Visual</div>
+                    <p>A comprehensive summary detailing the dual advantage of our platform: Operational efficiency for the end-user and structural reliability for the enterprise.</p>
+                </div>
+                <div class="slide-section">
+                    <div class="slide-section-title">Data</div>
+                    <p>Projected operational metrics, customer acquisition efficiency, and capital requirements to scale our backend infrastructure.</p>
+                </div>
+                <div class="slide-section" style="border-left-color: #58a6ff;">
+                    <div class="slide-section-title" style="color: #58a6ff;">Key Message</div>
+                    <p>We are establishing a highly secure, efficient, and compliant tax administration platform. It combines an exceptionally accessible user interface with a robust, enterprise-grade foundation.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Interactive SVG Container (Visible on Slides 4-7) -->
+        <div class="viz-container" id="viz-container">
+            <svg id="canvas" viewBox="0 0 1000 600">
+                <defs>
+                    <marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                        <path d="M 0 2 L 8 5 L 0 8 z" fill="rgba(255,255,255,0.4)" />
+                    </marker>
+                </defs>
+                <path class="path-line" d="M 250 150 L 735 150" marker-end="url(#arrow)" />
+                <path class="path-line" d="M 850 200 L 850 385" marker-end="url(#arrow)" />
+                <path class="path-line" d="M 750 450 L 265 450" marker-end="url(#arrow)" />
+
+                <g class="node" id="node1">
+                    <rect class="node-rect" x="50" y="100" width="200" height="100" />
+                    <text class="node-text" x="150" y="145">WhatsApp Webhook</text>
+                    <text class="node-subtext" x="150" y="165">→ PII Masking</text>
+                </g>
+                <g class="node" id="node2">
+                    <rect class="node-rect" x="750" y="100" width="200" height="100" />
+                    <text class="node-text" x="850" y="145">Gemini AI Engine</text>
+                    <text class="node-subtext" x="850" y="165">Anti-Hallucination Auditor</text>
+                </g>
+                <g class="node" id="node3">
+                    <rect class="node-rect" x="750" y="400" width="200" height="100" />
+                    <text class="node-text" x="850" y="445">PostgreSQL Vault</text>
+                    <text class="node-subtext" x="850" y="465">AES-GCM Encryption</text>
+                </g>
+                <g class="node" id="node4">
+                    <rect class="node-rect" x="50" y="400" width="200" height="100" />
+                    <text class="node-text" x="150" y="445">HMRC API</text>
+                    <text class="node-subtext" x="150" y="465">(with Fraud Headers)</text>
+                </g>
+                <circle id="packet" r="8" cx="150" cy="150" />
+            </svg>
+        </div>
+    </div>
+
+    <!-- Navigation -->
+    <div class="nav-controls">
+        <button class="nav-btn" id="prev-btn">Prev</button>
+        <button class="nav-btn" id="next-btn">Next</button>
+    </div>
+    
+    <div class="progress-indicator" id="progress-indicator">
+        <!-- dots added via JS -->
+    </div>
+
+    <script>
+        const totalSlides = 8;
+        let currentSlide = 0;
+        let isPacketAnimating = false;
+        
+        const vizContainer = document.getElementById('viz-container');
+        const slidesContainer = document.getElementById('slides-container');
+        const nodes = [
+            document.getElementById('node1').querySelector('.node-rect'),
+            document.getElementById('node2').querySelector('.node-rect'),
+            document.getElementById('node3').querySelector('.node-rect'),
+            document.getElementById('node4').querySelector('.node-rect')
+        ];
+        
+        function updateSlides() {
+            // Update Text Slides
+            for (let i=0; i<totalSlides; i++) {
+                const slide = document.getElementById('slide-'+i);
+                if (i === currentSlide) {
+                    slide.classList.add('active');
+                    setTimeout(() => slide.style.opacity = 1, 20); // allow display:block to apply
+                } else {
+                    slide.classList.remove('active');
+                    slide.style.opacity = 0;
+                }
+            }
+            
+            // Update dots
+            const dots = document.querySelectorAll('.dot');
+            dots.forEach((dot, i) => {
+                dot.classList.toggle('active', i === currentSlide);
+            });
+            
+            // Trigger Visualization logic
+            updateVisualization();
+        }
+        
+        function updateVisualization() {
+            // Show viz only on slides 4, 5, 6, 7 (indexes 3, 4, 5, 6)
+            if (currentSlide >= 3 && currentSlide <= 6) {
+                vizContainer.classList.add('active');
+                
+                // Reset all highlights
+                nodes.forEach(n => {
+                    n.classList.remove('glow-active');
+                    n.classList.remove('glow-active-fraud');
+                });
+                
+                // Highlight nodes based on the current slide content
+                if (currentSlide === 4) { // Slide 5: Data Ingestion
+                    nodes[0].classList.add('glow-active');
+                } else if (currentSlide === 5) { // Slide 6: AI Accuracy
+                    nodes[1].classList.add('glow-active');
+                } else if (currentSlide === 6) { // Slide 7: Data Vault & Core
+                    nodes[2].classList.add('glow-active');
+                    nodes[3].classList.add('glow-active-fraud');
+                }
+                
+                // Start packet animation if it's not already running
+                if (!isPacketAnimating) {
+                    isPacketAnimating = true;
+                    runPacketAnimation();
+                }
+            } else {
+                vizContainer.classList.remove('active');
+                isPacketAnimating = false;
+            }
+        }
+
+        async function runPacketAnimation() {
+            const journey = [
+                { x: 150, y: 150 }, // Node 1
+                { x: 850, y: 150 }, // Node 2
+                { x: 850, y: 450 }, // Node 3
+                { x: 150, y: 450 }  // Node 4
+            ];
+            const packet = document.getElementById('packet');
+            
+            function animatePacket(startX, startY, endX, endY, duration) {
+                return new Promise(resolve => {
+                    const startTime = performance.now();
+                    packet.style.opacity = 1;
+
+                    function step(currentTime) {
+                        if (!isPacketAnimating) { resolve(); return; } // exit if stopped
+                        
+                        const elapsed = currentTime - startTime;
+                        let progress = Math.min(elapsed / duration, 1);
+                        // ease in out
+                        progress = progress < 0.5 ? 2 * progress * progress : -1 + (4 - 2 * progress) * progress;
+                        
+                        const currentX = startX + (endX - startX) * progress;
+                        const currentY = startY + (endY - startY) * progress;
+                        
+                        packet.setAttribute('cx', currentX);
+                        packet.setAttribute('cy', currentY);
+
+                        if (progress < 1) {
+                            requestAnimationFrame(step);
+                        } else {
+                            resolve();
+                        }
+                    }
+                    requestAnimationFrame(step);
+                });
+            }
+            
+            while(isPacketAnimating) {
+                packet.style.fill = '#00ff80';
+                packet.style.filter = 'drop-shadow(0 0 15px #00ff80)';
+                
+                packet.setAttribute('cx', journey[0].x);
+                packet.setAttribute('cy', journey[0].y);
+                packet.style.opacity = 1;
+                await new Promise(r => setTimeout(r, 800));
+                if (!isPacketAnimating) break;
+                
+                // Move 1 -> 2
+                await animatePacket(journey[0].x, journey[0].y, journey[1].x, journey[1].y, 1000);
+                await new Promise(r => setTimeout(r, 800));
+                if (!isPacketAnimating) break;
+                
+                // Move 2 -> 3
+                await animatePacket(journey[1].x, journey[1].y, journey[2].x, journey[2].y, 1000);
+                await new Promise(r => setTimeout(r, 800));
+                if (!isPacketAnimating) break;
+                
+                // Move 3 -> 4
+                packet.style.fill = '#ff7b72';
+                packet.style.filter = 'drop-shadow(0 0 15px #ff7b72)';
+                await animatePacket(journey[2].x, journey[2].y, journey[3].x, journey[3].y, 1000);
+                await new Promise(r => setTimeout(r, 800));
+                
+                packet.style.opacity = 0;
+                await new Promise(r => setTimeout(r, 1500));
+            }
+            
+            // cleanup if animation stops
+            packet.style.opacity = 0;
+        }
+
+        // Event Listeners
+        document.getElementById('prev-btn').addEventListener('click', () => {
+            if (currentSlide > 0) { currentSlide--; updateSlides(); }
+        });
+        
+        document.getElementById('next-btn').addEventListener('click', () => {
+            if (currentSlide < totalSlides - 1) { currentSlide++; updateSlides(); }
+        });
+        
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowRight' || e.key === ' ' || e.key === 'PageDown') {
+                if (currentSlide < totalSlides - 1) { currentSlide++; updateSlides(); }
+            } else if (e.key === 'ArrowLeft' || e.key === 'PageUp') {
+                if (currentSlide > 0) { currentSlide--; updateSlides(); }
+            }
+        });
+        
+        // Initialize Pagination Dots
+        const progressContainer = document.getElementById('progress-indicator');
+        for(let i=0; i<totalSlides; i++){
+            const dot = document.createElement('div');
+            dot.className = 'dot';
+            dot.addEventListener('click', () => {
+                currentSlide = i;
+                updateSlides();
+            });
+            progressContainer.appendChild(dot);
+        }
+        
+        // Initial setup on load
+        updateSlides();
+    </script>
+</body>
+</html>

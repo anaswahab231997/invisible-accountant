@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Invisible Accountant | Stress-Free UK Taxes</title>
+    <link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/lucide@latest"></script>
@@ -23,7 +24,14 @@
                         charcoal: '#1F2937',    
                         slate: '#4B5563',       
                         offwhite: '#F9FAFB',    
-                        cardbg: '#FFFFFF'
+                        cardbg: '#FFFFFF',
+                        hmrcblue: '#1D70B8',      
+                        deepslate: '#0F172A',        
+                        sagesuccess: '#2E8555',        
+                        anxietymint: '#E8F3EB',    
+                        warmcaution: '#F47738',       
+                        calmstone: '#F3F4F6'
+
                     },
                     boxShadow: {
                         'soft': '0 10px 40px -10px rgba(0,0,0,0.08)',
@@ -192,21 +200,28 @@
                 padding-bottom: env(safe-area-inset-bottom, 20px) !important;
             }
         }
+    /* Mock Receipt Style */
+        .receipt-paper {
+            background-color: #fdfcf9;
+            background-image: 
+                linear-gradient(90deg, transparent 95%, rgba(0,0,0,0.02) 100%),
+                linear-gradient(0deg, transparent 95%, rgba(0,0,0,0.02) 100%);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+            font-family: 'Courier New', Courier, monospace;
+            position: relative;
+        }
     </style>
 </head>
 <body class="font-body min-h-screen selection:bg-ukblue selection:text-white">
 
     <div class="bg-ukblue text-white text-sm font-medium py-3 text-center px-4 font-heading tracking-wide">
-        Making Tax Digital (MTD) becomes mandatory for UK Sole Traders in April 2026. <a href="#waitlist" class="underline hover:text-blue-200">Assess your readiness.</a>
+        Making Tax Digital (MTD) becomes mandatory for UK Sole Traders earning over £50k in April 2026. <a href="#waitlist" class="underline hover:text-blue-200">Assess your readiness.</a>
     </div>
 
     <nav class="max-w-7xl mx-auto px-6 md:px-12 py-6 flex justify-between items-center">
-        <div class="font-heading font-bold text-2xl text-charcoal flex items-center gap-2">
-            <div class="w-8 h-8 bg-ukblue rounded-lg flex items-center justify-center text-white">
-                <i data-lucide="calculator" class="w-5 h-5"></i>
-            </div>
-            Invisible Accountant
-        </div>
+        <a href="/" class="block">
+            <img src="assets/invisible_accountant_logo.svg" alt="Invisible Accountant" class="h-16 sm:h-20 md:h-24 lg:h-28 w-auto max-w-full">
+        </a>
     </nav>
 
     <main class="max-w-7xl mx-auto px-6 md:px-12 pt-8 md:pt-16 pb-16 md:pb-24 grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-16 items-center">
@@ -221,16 +236,16 @@
             </h1>
             
             <p class="text-xl text-slate font-body mb-10 leading-relaxed max-w-2xl">
-                Stop stressing over spreadsheets and shoeboxes of receipts. Snap a photo, send it to Emma on WhatsApp, and our AI securely categorises and vaults it directly to HMRC for you.
+                Stop stressing over spreadsheets and shoeboxes of receipts. Snap a photo, send it to Emma on WhatsApp, and our AI securely categorises and vaults it securely in your digital ledger for your quarterly updates.
             </p>
 
             <div id="waitlist" class="bg-cardbg p-8 rounded-2xl shadow-soft border border-gray-100 max-w-xl min-h-[300px]">
                 <div id="quiz-step-1" class="quiz-step">
                     <h3 class="font-heading font-bold text-xl mb-2 text-charcoal">MTD Readiness Assessment</h3>
                     <p class="text-slate mb-6 text-sm">To qualify for the beta vault, please confirm your estimated annual revenue.</p>
-                    <button class="quiz-btn" onclick="nextQuizStep(2)">Under £50,000 <i data-lucide="chevron-right" class="w-4 h-4 text-gray-400"></i></button>
-                    <button class="quiz-btn" onclick="nextQuizStep(2)">£50,000 - £85,000 <i data-lucide="chevron-right" class="w-4 h-4 text-gray-400"></i></button>
-                    <button class="quiz-btn" onclick="nextQuizStep(2)">Over £85,000 <i data-lucide="chevron-right" class="w-4 h-4 text-gray-400"></i></button>
+                    <button class="quiz-btn" onclick="setRevenue('under50'); nextQuizStep(2)">Under £50,000 <i data-lucide="chevron-right" class="w-4 h-4 text-gray-400"></i></button>
+                    <button class="quiz-btn" onclick="setRevenue('over50'); nextQuizStep(2)">£50,000 - £85,000 <i data-lucide="chevron-right" class="w-4 h-4 text-gray-400"></i></button>
+                    <button class="quiz-btn" onclick="setRevenue('over85'); nextQuizStep(2)">Over £85,000 <i data-lucide="chevron-right" class="w-4 h-4 text-gray-400"></i></button>
                 </div>
                 <div id="quiz-step-2" class="quiz-step hidden">
                     <h3 class="font-heading font-bold text-xl mb-2 text-charcoal">Current Workflow</h3>
@@ -243,8 +258,8 @@
                     <div class="flex items-center gap-2 text-emerald-700 bg-mint px-3 py-1 rounded-full text-sm font-bold w-max mb-4">
                         <i data-lucide="check-circle-2" class="w-4 h-4"></i> Qualified for Beta
                     </div>
-                    <h3 class="font-heading font-bold text-xl mb-2 text-charcoal">You are required to comply with MTD.</h3>
-                    <p class="text-slate mb-6 text-sm leading-relaxed">Based on your profile, you will face quarterly mandatory updates by April 2026. Secure your spot in the Invisible Accountant Beta vault now.</p>
+                    <h3 id="quiz-result-title" class="font-heading font-bold text-xl mb-2 text-charcoal">You are required to comply with MTD.</h3>
+                    <p id="quiz-result-desc" class="text-slate mb-6 text-sm leading-relaxed">Based on your profile, you will face quarterly mandatory updates by April 2026. Secure your spot in the Invisible Accountant Beta vault now.</p>
                     <div class="flex items-center justify-between mb-4 bg-gray-50 rounded-lg p-3 border border-gray-200">
                         <span class="text-slate font-medium text-sm">Queue Position</span>
                         <span class="font-mono font-bold text-ukblue text-lg">#143 / 250</span>
@@ -311,7 +326,7 @@
                             Messages and calls are end-to-end encrypted.
                         </div>
                         <div class="msg-ai px-3 py-2 text-[15px] shadow-sm max-w-[85%] leading-snug">
-                            Hello! Send me a business expense (like a train ticket or lunch) and I'll categorise it for HMRC. 👇
+                            Hello! Snap a photo of a receipt, forward an invoice PDF, or just type a business expense. I'll categorise it for HMRC. 👇
                         </div>
                     </div>
 
@@ -326,72 +341,91 @@
         </div>
     </main>
 
-    <!-- LIVE INFERENCE DECRYPTOR SECTION (SCROLL-DRIVEN) -->
-    <section id="inference-wrapper" class="bg-white border-y border-gray-100 h-[250vh] relative">
+    <section id="inference-wrapper" class="bg-calmstone border-y border-gray-200 h-[250vh] relative">
         <div class="sticky top-0 h-screen flex flex-col justify-center overflow-hidden py-4 md:py-12">
-            <div class="max-w-7xl mx-auto px-4 md:px-12 w-full">
+            <div class="max-w-7xl mx-auto px-6 md:px-12 w-full">
                 
-                <div class="text-center mb-6 md:mb-16">
-                    <h2 class="font-heading font-bold text-2xl md:text-4xl text-charcoal mb-2 md:mb-4">The Live Inference Engine</h2>
-                    <p class="text-sm md:text-lg text-slate font-body max-w-2xl mx-auto hidden sm:block">Scroll down to watch our AI dynamically deconstruct an everyday text message into a pristine, HMRC-compliant payload.</p>
+                <div class="text-center mb-10 md:mb-20">
+                    <h2 class="font-heading font-bold text-3xl md:text-4xl text-deepslate mb-4">How we keep you compliant</h2>
+                    <p class="text-base md:text-lg text-gray-600 font-body max-w-2xl mx-auto hidden sm:block">Scroll to see how our system seamlessly understands your uploaded receipts and files them accurately.</p>
                 </div>
                 
-                <div class="bg-cardbg rounded-2xl p-4 md:p-8 border border-gray-200 shadow-soft max-w-4xl mx-auto reveal" relative overflow-hidden">
-                    <div class="mb-6 md:mb-12 relative z-10 text-center">
-                        <div class="text-[10px] md:text-xs font-bold text-slate mb-2 md:mb-3 uppercase tracking-wider flex items-center justify-center gap-2">
-                            <i data-lucide="message-square" class="w-3 h-3 md:w-4 md:h-4"></i> Raw WhatsApp Input
+                <div class="bg-white rounded-[2rem] p-6 md:p-12 shadow-soft max-w-6xl mx-auto reveal relative overflow-hidden grid grid-cols-1 lg:grid-cols-12 gap-10 items-center">
+                    
+                    <!-- Left: The Receipt -->
+                    <div class="lg:col-span-5 flex flex-col items-center">
+                        <div class="text-xs font-bold text-gray-500 mb-6 uppercase tracking-wider flex items-center justify-center gap-2">
+                            <i data-lucide="image" class="w-4 h-4"></i> Raw Receipt Upload
                         </div>
-                        <div class="text-lg md:text-3xl font-body text-charcoal bg-gray-50 p-4 md:p-6 rounded-xl border border-gray-100 inline-block shadow-sm">
-                            "Paid <span id="dec-amount" class="transition-colors duration-300 rounded-lg px-1 md:px-2 py-0.5 md:py-1">£45</span> at 
-                            <span id="dec-vendor" class="transition-colors duration-300 rounded-lg px-1 md:px-2 py-0.5 md:py-1">Costa Coffee</span> for a 
-                            <span id="dec-context" class="transition-colors duration-300 rounded-lg px-1 md:px-2 py-0.5 md:py-1">client meeting</span>."
-                        </div>
-                    </div>
 
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-3 md:gap-6 mb-6 md:mb-12 relative z-10">
-                        <div id="card-amount" class="opacity-0 transform translate-y-8 transition-all duration-500 bg-white p-3 md:p-5 rounded-xl border-t-4 border-blue-500 shadow-[0_4px_20px_rgba(0,0,0,0.05)] relative">
-                            <div class="conn-line hidden md:block"></div>
-                            <div class="text-[10px] md:text-xs text-slate font-bold uppercase mb-1 md:mb-2">Extracted Amount</div>
-                            <div class="text-xl md:text-3xl font-mono font-bold text-blue-600">£45.00</div>
-                        </div>
-                        
-                        <div id="card-vendor" class="opacity-0 transform translate-y-8 transition-all duration-500 bg-white p-3 md:p-5 rounded-xl border-t-4 border-purple-500 shadow-[0_4px_20px_rgba(0,0,0,0.05)] relative">
-                            <div class="conn-line hidden md:block"></div>
-                            <div class="text-[10px] md:text-xs text-slate font-bold uppercase mb-1 md:mb-2">Identified Vendor</div>
-                            <div class="text-lg md:text-2xl font-bold text-purple-700">Costa Coffee</div>
-                        </div>
-                        
-                        <div id="card-context" class="opacity-0 transform translate-y-8 transition-all duration-500 bg-white p-3 md:p-5 rounded-xl border-t-4 border-orange-500 shadow-[0_4px_20px_rgba(0,0,0,0.05)] relative">
-                            <div class="conn-line hidden md:block"></div>
-                            <div class="text-[10px] md:text-xs text-slate font-bold uppercase mb-1 md:mb-2">HMRC Mapped Category</div>
-                            <div class="text-base md:text-xl font-bold text-charcoal">Business Ent.</div>
-                            <div class="text-[10px] md:text-xs bg-orange-100 text-orange-700 px-2 py-1 rounded mt-1 md:mt-2 inline-block font-medium">Non-allowable deduction</div>
-                        </div>
-                    </div>
-
-                    <div id="card-vault" class="opacity-0 transform translate-y-8 transition-all duration-500 relative z-10 flex flex-col md:flex-row items-center justify-between bg-charcoal text-white p-4 md:p-6 rounded-xl shadow-float gap-4 md:gap-0">
-                        <div class="flex items-center gap-4 mb-4 md:mb-0">
-                            <div class="w-12 h-12 bg-[#25D366]/20 rounded-full flex items-center justify-center">
-                                <i data-lucide="shield-check" class="w-6 h-6 text-wapp"></i>
-                            </div>
-                            <div>
-                                <div class="font-bold text-lg text-white">Digital Link Secured</div>
-                                <div class="text-gray-400 text-sm">Expense irreversibly logged to your HMRC ledger</div>
-                            </div>
-                        </div>
-                        
-                        <div class="flex items-center gap-3 bg-white/5 border border-white/10 p-3 rounded-lg w-full md:w-auto">
-                            <div class="w-8 h-8 rounded-full bg-blue-500/20 flex items-center justify-center shadow-inner">
-                                <i data-lucide="lock" class="w-4 h-4 text-blue-400"></i>
-                            </div>
-                            <div>
-                                <div class="text-[10px] text-gray-400 uppercase tracking-wider font-bold mb-0.5">256-bit Encrypted</div>
-                                <div class="flex items-center gap-2">
-                                    <div class="w-2 h-2 rounded-full bg-wapp animate-pulse"></div>
-                                    <span class="text-sm font-medium text-white">HMRC Sync Active</span>
+                        <div class="w-full max-w-sm relative z-10">
+                            <div class="receipt-paper mx-auto p-6 my-2 relative">
+                                <!-- Glowing Scanner Bar -->
+                                <div id="scanner-bar" class="absolute left-0 right-0 h-[2px] bg-hmrcblue shadow-[0_0_15px_4px_rgba(29,112,184,0.6)] z-20 transition-all duration-75" style="top: -10%;"></div>
+                                
+                                <div class="text-center border-b border-gray-300 pb-4 mb-4 mt-2">
+                                    <h4 id="receipt-vendor" class="font-bold text-2xl text-deepslate tracking-widest uppercase transition-colors duration-300">COSTA COFFEE</h4>
+                                    <p class="text-xs text-gray-500 mt-1 uppercase">123 High Street, London</p>
+                                    <p class="text-xs text-gray-500 mt-1 uppercase">Date: 12 Nov 2026 09:14</p>
+                                </div>
+                                
+                                <div class="space-y-3 mb-6 text-sm text-gray-700 font-medium px-2">
+                                    <div class="flex justify-between">
+                                        <span>Client Pastries</span>
+                                        <span>£15.50</span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span>Flat White x 2</span>
+                                        <span>£7.60</span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span>Meeting Room Hire</span>
+                                        <span>£21.90</span>
+                                    </div>
+                                </div>
+                                
+                                <div class="border-t-2 border-gray-400 pt-4 pb-2 px-2 flex justify-between font-bold text-xl text-deepslate mb-2">
+                                    <span>TOTAL</span>
+                                    <span id="receipt-total" class="transition-colors duration-300">£45.00</span>
+                                </div>
+                                
+                                <div class="text-center text-[10px] text-gray-400 mt-6 tracking-widest">
+                                    THANK YOU FOR YOUR CUSTOM
                                 </div>
                             </div>
                         </div>
+                    </div>
+
+                    <!-- Right: The Cards -->
+                    <div class="lg:col-span-7 flex flex-col gap-4 md:gap-6 relative z-10 w-full max-w-lg mx-auto">
+                        
+                        <!-- Vendor Card -->
+                        <div id="card-vendor" class="opacity-0 transform translate-x-8 transition-all duration-700 bg-white p-5 md:p-6 rounded-2xl border-l-[6px] border-hmrcblue shadow-soft flex items-center justify-between">
+                            <div>
+                                <div class="text-xs text-gray-500 font-semibold uppercase mb-1">Vendor Identified</div>
+                                <div class="text-xl md:text-2xl font-bold text-deepslate">Costa Coffee</div>
+                            </div>
+                            <i data-lucide="check-circle-2" class="w-8 h-8 text-hmrcblue/20"></i>
+                        </div>
+                        
+                        <!-- Tax Category Card -->
+                        <div id="card-context" class="opacity-0 transform translate-x-8 transition-all duration-700 bg-white p-5 md:p-6 rounded-2xl border-l-[6px] border-warmcaution shadow-soft flex items-center justify-between">
+                            <div>
+                                <div class="text-xs text-gray-500 font-semibold uppercase mb-1">Tax Category</div>
+                                <div class="text-lg md:text-xl font-bold text-deepslate">Business Ent.</div>
+                            </div>
+                            <div class="text-xs bg-orange-50 text-warmcaution px-2.5 py-1.5 rounded-md font-medium">Non-allowable</div>
+                        </div>
+
+                        <!-- Amount Card -->
+                        <div id="card-amount" class="opacity-0 transform translate-x-8 transition-all duration-700 bg-white p-5 md:p-6 rounded-2xl border-l-[6px] border-sagesuccess shadow-soft flex items-center justify-between">
+                            <div>
+                                <div class="text-xs text-gray-500 font-semibold uppercase mb-1">Total Amount</div>
+                                <div class="text-2xl md:text-3xl font-heading font-bold text-sagesuccess">£45.00</div>
+                            </div>
+                            <div class="text-xs bg-green-50 text-sagesuccess px-2.5 py-1.5 rounded-md font-medium">Ready for Ledger</div>
+                        </div>
+                        
                     </div>
                 </div>
             </div>
@@ -408,27 +442,27 @@
             
             <div class="grid grid-cols-1 md:grid-cols-3 gap-10">
                 <div class="bg-cardbg p-8 rounded-2xl shadow-sm border border-emerald-50">
-                    <div class="w-14 h-14 bg-ukblue/10 rounded-xl flex items-center justify-center text-ukblue mb-6">
-                        <i data-lucide="book-open-check" class="w-7 h-7"></i>
-                    </div>
-                    <h3 class="font-heading font-bold text-xl text-charcoal mb-3">We handle the HMRC rules</h3>
-                    <p class="text-slate font-body leading-relaxed">Emma checks every expense against strict tax rules. If a purchase is a "dual-use" item, she handles the complex paperwork automatically.</p>
-                </div>
-                
-                <div class="bg-cardbg p-8 rounded-2xl shadow-sm border border-emerald-50">
                     <div class="w-14 h-14 bg-wapp/10 rounded-xl flex items-center justify-center text-emerald-600 mb-6">
-                        <i data-lucide="smartphone" class="w-7 h-7"></i>
+                        <i data-lucide="camera" class="w-7 h-7"></i>
                     </div>
-                    <h3 class="font-heading font-bold text-xl text-charcoal mb-3">No manual data entry</h3>
-                    <p class="text-slate font-body leading-relaxed">MTD laws mandate zero manual data entry. Going from your WhatsApp directly into the HMRC portal keeps the digital link unbroken.</p>
+                    <h3 class="font-heading font-bold text-xl text-charcoal mb-3">Just snap a photo</h3>
+                    <p class="text-slate font-body leading-relaxed">MTD laws accept digital photos of receipts. Just snap a photo in WhatsApp and our Multimodal AI instantly extracts the vendor and amount for your ledger.</p>
                 </div>
                 
                 <div class="bg-cardbg p-8 rounded-2xl shadow-sm border border-emerald-50">
                     <div class="w-14 h-14 bg-purple-100 rounded-xl flex items-center justify-center text-purple-600 mb-6">
-                        <i data-lucide="lock" class="w-7 h-7"></i>
+                        <i data-lucide="mail" class="w-7 h-7"></i>
                     </div>
-                    <h3 class="font-heading font-bold text-xl text-charcoal mb-3">Bank-level security vault</h3>
-                    <p class="text-slate font-body leading-relaxed">Your financial data isn't just floating in a chat. It's instantly transferred to an isolated, encrypted vault that only you and HMRC can access.</p>
+                    <h3 class="font-heading font-bold text-xl text-charcoal mb-3">Forward email receipts</h3>
+                    <p class="text-slate font-body leading-relaxed">Got an Uber receipt via email? Just forward the PDF or email directly to your Invisible Accountant. Our engine parses it and securely links it to your MTD ledger.</p>
+                </div>
+                
+                <div class="bg-cardbg p-8 rounded-2xl shadow-sm border border-emerald-50">
+                    <div class="w-14 h-14 bg-ukblue/10 rounded-xl flex items-center justify-center text-ukblue mb-6">
+                        <i data-lucide="landmark" class="w-7 h-7"></i>
+                    </div>
+                    <h3 class="font-heading font-bold text-xl text-charcoal mb-3">Auto-Reconciliation</h3>
+                    <p class="text-slate font-body leading-relaxed">Coming soon: We are partnering with Tier-1 Open Banking providers to match your WhatsApp receipts with live bank feeds, creating an enterprise-grade ledger.</p>
                 </div>
             </div>
         </div>
@@ -459,14 +493,14 @@
                 <a href="/terms" class="text-sm font-body text-slate hover:text-ukblue transition-colors">Terms & Conditions</a>
                 <a href="/privacy" class="text-sm font-body text-slate hover:text-ukblue transition-colors">Privacy Policy</a>
                 <a href="/accessibility" class="text-sm font-body text-slate hover:text-ukblue transition-colors">Accessibility</a>
-                <a href="mailto:security@invisibleaccountant.co.uk" class="text-sm font-body text-slate hover:text-ukblue transition-colors">Report Security Issue</a>
+                <a href="/cdn-cgi/l/email-protection#8ffceaecfafde6fbf6cfe6e1f9e6fce6ede3eaeeecece0fae1fbeee1fba1ece0a1fae4" class="text-sm font-body text-slate hover:text-ukblue transition-colors">Report Security Issue</a>
             </div>
             <p class="text-sm font-body text-slate">&copy; 2026 Invisible Accountant Ltd. Registered in England & Wales.</p>
-            <p class="text-xs font-body text-gray-400 mt-2 max-w-2xl mx-auto">Our software submits data to HMRC via their official APIs. We adhere strictly to HMRC Developer Hub guidelines. Use of our software does not constitute formal endorsement or "HMRC approval" of your tax affairs.</p>
+            <p class="text-xs font-body text-gray-400 mt-2 max-w-2xl mx-auto">Our software submits data to HMRC via their official APIs. We adhere strictly to HMRC Developer Hub guidelines. Use of our software does not constitute formal endorsement or "HMRC approval" of your tax affairs. The taxpayer remains legally responsible for the accuracy of their tax submissions, regardless of AI categorization.</p>
         </div>
     </footer>
 
-    <script>
+    <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
         lucide.createIcons();
 
 
@@ -535,9 +569,26 @@
         updateLiveTime(); // Call immediately on load
         
         // Quiz Logic
+        let userRevenue = '';
+        function setRevenue(val) {
+            userRevenue = val;
+        }
+        
         function nextQuizStep(step) {
             document.querySelectorAll('.quiz-step').forEach(el => el.classList.add('hidden'));
             document.getElementById('quiz-step-' + step).classList.remove('hidden');
+            
+            if (step === 3) {
+                const title = document.getElementById('quiz-result-title');
+                const desc = document.getElementById('quiz-result-desc');
+                if (userRevenue === 'under50') {
+                    title.innerText = "You have more time, but start preparing.";
+                    desc.innerText = "Based on your profile, your MTD compliance deadline is April 2027 (or you may be exempt if under £30k). Get ahead of the curve and secure your beta spot now.";
+                } else {
+                    title.innerText = "You are required to comply with MTD.";
+                    desc.innerText = "Based on your profile, you will face quarterly mandatory updates by April 2026. Secure your spot in the Invisible Accountant Beta vault now.";
+                }
+            }
         }
 
         // Phone Fullscreen Logic
@@ -569,7 +620,7 @@
             }
         });
 
-        // Scroll-driven Inference Engine Logic
+        // Soft Scroll-driven Receipt Scanner Logic
         window.addEventListener('scroll', () => {
             const wrapper = document.getElementById('inference-wrapper');
             if(!wrapper) return;
@@ -579,46 +630,49 @@
             const currentScroll = window.scrollY - scrollStart;
             
             let progress = 0;
-            if (currentScroll > 0) {
-                progress = Math.min(currentScroll / scrollDistance, 1);
+            if (currentScroll > 0) progress = Math.min(currentScroll / scrollDistance, 1);
+
+            // Scanner Bar Animation (-10% to 110% of receipt height)
+            const scanner = document.getElementById('scanner-bar');
+            if (scanner) {
+                scanner.style.top = `${-10 + (progress * 120)}%`;
             }
 
-            if(progress > 0.15) {
-                document.getElementById('dec-amount').classList.add('bg-blue-100', 'text-blue-800');
-                document.getElementById('card-amount').classList.replace('opacity-0', 'opacity-100');
-                document.getElementById('card-amount').classList.replace('translate-y-8', 'translate-y-0');
-            } else {
-                document.getElementById('dec-amount').classList.remove('bg-blue-100', 'text-blue-800');
-                document.getElementById('card-amount').classList.replace('opacity-100', 'opacity-0');
-                document.getElementById('card-amount').classList.replace('translate-y-0', 'translate-y-8');
-            }
-
-            if(progress > 0.35) {
-                document.getElementById('dec-vendor').classList.add('bg-purple-100', 'text-purple-800');
+            // Vendor (Passes around 20-30%)
+            if(progress > 0.25) {
+                document.getElementById('receipt-vendor').classList.add('text-hmrcblue');
                 document.getElementById('card-vendor').classList.replace('opacity-0', 'opacity-100');
-                document.getElementById('card-vendor').classList.replace('translate-y-8', 'translate-y-0');
+                document.getElementById('card-vendor').classList.replace('translate-y-4', 'translate-y-0');
             } else {
-                document.getElementById('dec-vendor').classList.remove('bg-purple-100', 'text-purple-800');
+                document.getElementById('receipt-vendor').classList.remove('text-hmrcblue');
                 document.getElementById('card-vendor').classList.replace('opacity-100', 'opacity-0');
-                document.getElementById('card-vendor').classList.replace('translate-y-0', 'translate-y-8');
+                document.getElementById('card-vendor').classList.replace('translate-y-0', 'translate-y-4');
             }
 
-            if(progress > 0.55) {
-                document.getElementById('dec-context').classList.add('bg-orange-100', 'text-orange-800');
+            // Amount (Passes around 65%)
+            if(progress > 0.65) {
+                document.getElementById('receipt-total').classList.add('text-hmrcblue');
+                document.getElementById('card-amount').classList.replace('opacity-0', 'opacity-100');
+                document.getElementById('card-amount').classList.replace('translate-y-4', 'translate-y-0');
+            } else {
+                document.getElementById('receipt-total').classList.remove('text-hmrcblue');
+                document.getElementById('card-amount').classList.replace('opacity-100', 'opacity-0');
+                document.getElementById('card-amount').classList.replace('translate-y-0', 'translate-y-4');
+            }
+
+            // Context & Vault (Passes end, around 85%)
+            if(progress > 0.85) {
                 document.getElementById('card-context').classList.replace('opacity-0', 'opacity-100');
-                document.getElementById('card-context').classList.replace('translate-y-8', 'translate-y-0');
-            } else {
-                document.getElementById('dec-context').classList.remove('bg-orange-100', 'text-orange-800');
-                document.getElementById('card-context').classList.replace('opacity-100', 'opacity-0');
-                document.getElementById('card-context').classList.replace('translate-y-0', 'translate-y-8');
-            }
-
-            if(progress > 0.75) {
+                document.getElementById('card-context').classList.replace('translate-y-4', 'translate-y-0');
+                
                 document.getElementById('card-vault').classList.replace('opacity-0', 'opacity-100');
-                document.getElementById('card-vault').classList.replace('translate-y-8', 'translate-y-0');
+                document.getElementById('card-vault').classList.replace('translate-y-4', 'translate-y-0');
             } else {
+                document.getElementById('card-context').classList.replace('opacity-100', 'opacity-0');
+                document.getElementById('card-context').classList.replace('translate-y-0', 'translate-y-4');
+                
                 document.getElementById('card-vault').classList.replace('opacity-100', 'opacity-0');
-                document.getElementById('card-vault').classList.replace('translate-y-0', 'translate-y-8');
+                document.getElementById('card-vault').classList.replace('translate-y-0', 'translate-y-4');
             }
         });
 
@@ -657,7 +711,7 @@
                     if (res.status === 'CONFIRMED') {
                         html = `<div class="msg-ai px-3 py-2 text-[15px] shadow-sm max-w-[85%] mb-2">
                             <div class="font-medium text-emerald-700 mb-1 flex items-center gap-1"><i data-lucide="lock" class="w-4 h-4"></i> Locked & Sent</div>
-                            All set! I've officially locked this into your tax ledger and it's queued for HMRC.
+                            All set! I've officially locked this into your tax ledger and it's queued in your digital ledger.
                         </div>`;
                     } else if (res.is_ambiguous) {
                         html = `<div class="msg-ai px-3 py-2 text-[15px] shadow-sm max-w-[85%] mb-2">${res.auditor_question || "Could you clarify that?"}</div>`;
@@ -672,53 +726,6 @@
                     
                     chat.innerHTML += html;
                     lucide.createIcons();
-
-
-        // Initialize High-End Smooth Scrolling (Lenis)
-        const lenis = new Lenis({
-            duration: 1.2,
-            easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)), 
-            direction: 'vertical', 
-            gestureDirection: 'vertical', 
-            smooth: true,
-            mouseMultiplier: 1,
-            smoothTouch: false,
-            touchMultiplier: 2,
-            infinite: false,
-        });
-
-        function raf(time) {
-            lenis.raf(time);
-            requestAnimationFrame(raf);
-        }
-        requestAnimationFrame(raf);
-
-        // High-end Intersection Observer for Fade-Ins
-        document.addEventListener("DOMContentLoaded", () => {
-            const reveals = document.querySelectorAll(".reveal");
-            const revealObserver = new IntersectionObserver((entries, observer) => {
-                entries.forEach(entry => {
-                    if (entry.isIntersecting) {
-                        entry.target.classList.add("active");
-                        observer.unobserve(entry.target);
-                    }
-                });
-            }, {
-                root: null,
-                threshold: 0.1,
-                rootMargin: "0px 0px -50px 0px"
-            });
-            
-            reveals.forEach(reveal => {
-                revealObserver.observe(reveal);
-            });
-            
-            // Immediately activate the first section so it doesn't wait for scroll
-            setTimeout(() => {
-                if(reveals[0]) reveals[0].classList.add("active");
-            }, 100);
-        });
-
 
                     chat.scrollTop = chat.scrollHeight;
                     inp.disabled = false; inp.focus();
@@ -772,5 +779,8 @@
         }
 
     </script>
-</body>
+<script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v31edd6df95cf4e85bb4c19e7a9bdbcba1788362987495" integrity="sha512-iIg7k2xntmwu6/uSb5tpc/hySgZc4eoL31yB29W6tJFo2akwjPWcEqnCEdJvGexCL0KEQwVYv5BlowfhVz26hg==" data-cf-beacon='{"version":"2024.11.0","token":"06fef88b5b0a48fabefd855e477873a7","r":1,"spa":2}' crossorigin="anonymous"></script>
+<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a37827cdaba6138c',t:'MTc4ODgwOTcxNA=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
+
+

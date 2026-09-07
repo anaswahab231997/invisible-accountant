@@ -20,7 +20,8 @@ def anyio_backend():
 def mock_db_init():
     with patch("main.init_db", new_callable=AsyncMock) as mock_init, \
          patch("db.init_pool", new_callable=AsyncMock), \
-         patch("db.close_pool", new_callable=AsyncMock):
+         patch("db.close_pool", new_callable=AsyncMock), \
+         patch("db.sweep_orphaned_processing", new_callable=AsyncMock):
         yield mock_init
 
 @pytest.fixture

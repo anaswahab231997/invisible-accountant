@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 160" width="100%" height="100%" fill="none">
+  <!-- Precision Institutional Bounding Plaque -->
+  <rect width="160" height="160" fill="#0B0F19"/>
+  <rect x="10" y="10" width="140" height="140" stroke="#1E293B" stroke-width="1"/>
+  <rect x="14" y="14" width="132" height="132" stroke="#C5A880" stroke-width="0.5" stroke-opacity="0.3"/>
+
+  <!-- Left Stately Column: The 'I' of Invisible -->
+  <g stroke="#FFFFFF" stroke-width="3.5" stroke-linecap="square" stroke-linejoin="miter">
+    <!-- Vertical Pillar -->
+    <line x1="46" y1="36" x2="46" y2="124"/>
+    <!-- Architectural Plinths (Serifs) -->
+    <line x1="36" y1="36" x2="56" y2="36"/>
+    <line x1="36" y1="124" x2="56" y2="124"/>
+
+    <!-- The 'A' Apex & Columns -->
+    <!-- Apex at (98, 36) -->
+    <!-- Left diagonal descends to (70, 124) -->
+    <!-- Right leg descends to (118, 124) -->
+    <line x1="98" y1="36" x2="70" y2="124"/>
+    <line x1="98" y1="36" x2="118" y2="124"/>
+    <!-- Plinths on 'A' -->
+    <line x1="62" y1="124" x2="78" y2="124"/>
+    <line x1="110" y1="124" x2="126" y2="124"/>
+    <line x1="90" y1="36" x2="106" y2="36"/>
+  </g>
+
+  <!-- Golden Ratio Ledger Balance Beam (y = 80) in Hallmarked Antique Gilt -->
+  <!-- Spanning from inner face of 'I' (46) across both legs of 'A' (83 to 109) -->
+  <line x1="46" y1="80" x2="114" y2="80" stroke="#C5A880" stroke-width="2.5" stroke-linecap="square"/>
+  
+  <!-- Subtle Admiralty Blue Balance Point -->
+  <rect x="78" y="78.5" width="3" height="3" fill="#1D4ED8"/>
+</svg>

@@ -16,10 +16,11 @@ def test_webhook_whatsapp_unauthorized(test_client):
 
 @pytest.mark.integration
 @patch("main.create_chat_session", new_callable=AsyncMock)
+@patch("db.push_intake_queue", new_callable=AsyncMock)
 @patch("main.get_recent_intakes_by_sender", new_callable=AsyncMock)
 @patch("main.process_expense_message", new_callable=AsyncMock)
 @patch("main.verify_expense_hallucination", new_callable=AsyncMock)
-def test_webhook_whatsapp_authorized(mock_verify, mock_process, mock_get_recent, mock_create_chat, test_client):
+def test_webhook_whatsapp_authorized(mock_verify, mock_process, mock_get_recent, mock_push_intake, mock_create_chat, test_client):
     mock_create_chat.return_value = 1
     mock_process.return_value = {"vendor": "Train", "amount": 40.0, "category": "Travel", "is_ambiguous": False}
     mock_verify.return_value = {"is_hallucinated": False}

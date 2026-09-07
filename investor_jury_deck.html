@@ -1,0 +1,1943 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Invisible Accountant: Investor Jury</title>
+    <link href="https://api.fontshare.com/v2/css?f[]=cabinet-grotesk@800,500,700,400&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        /* Geist alternative since it requires custom loading, using system-ui for highly legible UI */
+        @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600&display=swap');
+        
+        :root {
+            --oxford-blue: #0F172A;
+            --deep-slate: #1E293B;
+            --heritage-blue: #1D4ED8;
+            --crisp-white: #FFFFFF;
+            --off-white: #F9FAFB;
+            --subtle-silver: #E2E8F0;
+            --muted-slate: #64748B;
+        }
+
+        body, html {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            overflow: hidden;
+            background-color: var(--off-white);
+            color: var(--oxford-blue);
+        }
+
+        h1, h2, h3, h4, h5, h6 {
+            font-family: 'Cabinet Grotesk', sans-serif;
+            margin-top: 0;
+            color: var(--oxford-blue);
+        }
+
+        h1 {
+            font-size: 3rem;
+            letter-spacing: -0.02em;
+            font-weight: 500;
+            margin-bottom: 24px;
+        }
+
+        h2 {
+            font-size: 2.25rem;
+            letter-spacing: -0.01em;
+            font-weight: 500;
+            margin-bottom: 24px;
+        }
+
+        p {
+            font-size: 1rem;
+            line-height: 1.6;
+            margin-bottom: 24px;
+            color: var(--deep-slate);
+        }
+
+        .caption {
+            font-size: 0.875rem;
+            color: var(--muted-slate);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        /* Iframe Background */
+        #bg-iframe {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            border: none;
+            z-index: -2;
+        }
+
+        #bg-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background-color: rgba(15, 23, 42, 0.12); /* Oxford Blue 0.12 opacity */
+            z-index: -1;
+            backdrop-filter: blur(2px);
+        }
+
+        /* Presentation Container */
+        #deck {
+            position: relative;
+            width: 100vw;
+            max-width: 1560px;
+            height: 100vh;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: clamp(16px, 2.5vw, 44px) clamp(16px, 3vw, 56px) 76px clamp(16px, 3vw, 56px);
+            box-sizing: border-box;
+        }
+
+        .slide {
+            position: absolute;
+            width: calc(100% - clamp(32px, 6vw, 112px));
+            height: calc(100% - 84px);
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.4s cubic-bezier(0.2, 0.8, 0.2, 1), transform 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
+            transform: translateY(12px);
+            display: grid;
+            grid-template-columns: repeat(12, 1fr);
+            gap: clamp(16px, 2vw, 32px);
+            align-items: stretch;
+            box-sizing: border-box;
+        }
+
+        .slide.active {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+
+        .card {
+            background-color: rgba(255, 255, 255, 0.96);
+            border: 1px solid var(--subtle-silver);
+            padding: clamp(24px, 3vw, 44px);
+            box-shadow: 0 4px 24px rgba(15, 23, 42, 0.04);
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+            box-sizing: border-box;
+            overflow-y: auto;
+            scrollbar-width: thin;
+            scrollbar-color: rgba(148, 163, 184, 0.35) transparent;
+        }
+
+        
+        .visual-box.card-dark {
+            background-color: var(--oxford-blue) !important;
+        }
+        .card-dark {
+            background-color: var(--oxford-blue);
+            color: var(--crisp-white);
+            border: none;
+            box-sizing: border-box;
+        }
+
+        .card-dark h1, .card-dark h2, .card-dark p {
+            color: var(--crisp-white);
+        }
+
+        .card-dark .caption {
+            color: var(--subtle-silver);
+        }
+
+        .col-left-4 { grid-column: span 4; }
+        .col-left-5 { grid-column: span 5; }
+        .col-left-6 { grid-column: span 6; }
+        .col-left-7 { grid-column: span 7; }
+        
+        .col-right-8 { grid-column: 5 / 13; }
+        .col-right-7 { grid-column: 6 / 13; }
+        .col-right-6 { grid-column: 7 / 13; }
+        .col-right-5 { grid-column: 8 / 13; }
+
+        .visual-box {
+            background-color: var(--off-white);
+            border: 1px solid var(--subtle-silver);
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: clamp(20px, 2.5vw, 44px);
+            text-align: center;
+            box-sizing: border-box;
+            overflow: hidden;
+        }
+
+        .moat-highlight {
+            border-left: 4px solid var(--heritage-blue);
+            padding-left: 20px;
+            margin: 20px 0;
+            background-color: rgba(29, 78, 216, 0.03);
+            padding: 18px 20px;
+        }
+
+        ul {
+            padding-left: 20px;
+            margin-bottom: 20px;
+        }
+
+        li {
+            font-size: clamp(0.88rem, 1vw, 1rem);
+            line-height: 1.55;
+            margin-bottom: 12px;
+            color: var(--deep-slate);
+        }
+
+        .card-dark li {
+            color: var(--crisp-white);
+        }
+
+        /* Floating Elevated Navigation Controls */
+        .controls {
+            position: fixed;
+            bottom: 18px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            z-index: 100;
+            background: rgba(15, 23, 42, 0.92);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.16);
+            border-radius: 9999px;
+            padding: 6px 14px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.32);
+        }
+
+        .slide-counter {
+            font-family: 'Geist Mono', monospace;
+            font-size: 0.78rem;
+            color: #94A3B8;
+            padding: 0 8px;
+            user-select: none;
+            white-space: nowrap;
+            letter-spacing: 0.08em;
+        }
+
+        button {
+            background-color: transparent;
+            color: #FFFFFF;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            padding: 7px 18px;
+            font-family: inherit;
+            font-size: 0.82rem;
+            font-weight: 500;
+            cursor: pointer;
+            border-radius: 9999px;
+            transition: all 0.25s cubic-bezier(0.2, 0.8, 0.2, 1);
+            white-space: nowrap;
+        }
+
+        button:hover:not(:disabled) {
+            background-color: rgba(255, 255, 255, 0.12);
+            border-color: rgba(255, 255, 255, 0.4);
+        }
+
+        button:disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+        }
+
+        .btn-primary {
+            background-color: var(--heritage-blue);
+            color: var(--crisp-white);
+            border-color: var(--heritage-blue);
+        }
+
+        .btn-primary:hover:not(:disabled) {
+            background-color: #2563eb;
+            border-color: #2563eb;
+        }
+
+        .script-notes {
+            margin-top: 20px;
+            padding-top: 16px;
+            border-top: 1px solid var(--subtle-silver);
+            font-size: 0.84rem;
+            color: var(--muted-slate);
+            font-style: italic;
+        }
+
+        .card-dark .script-notes {
+            border-top-color: rgba(255,255,255,0.2);
+            color: rgba(255,255,255,0.7);
+        }
+
+        /* Specific visual elements */
+        .big-number {
+            font-family: 'Cabinet Grotesk', sans-serif;
+            font-size: 5rem;
+            font-weight: 700;
+            color: var(--heritage-blue);
+            line-height: 1;
+            margin-bottom: 16px;
+        }
+
+        .comparison {
+            display: flex;
+            width: 100%;
+            gap: 24px;
+        }
+
+        .comp-item {
+            flex: 1;
+            padding: 24px;
+            border: 1px solid var(--subtle-silver);
+            background: #fff;
+        }
+
+        .comp-header {
+            font-family: 'Cabinet Grotesk', sans-serif;
+            font-weight: 500;
+            margin-bottom: 16px;
+            border-bottom: 1px solid var(--subtle-silver);
+            padding-bottom: 8px;
+        }
+
+        /* -------------------------------------------------------------
+           SLIDE 1: SINGLE-PLANE EXPANSIVE EDITORIAL MEMORANDUM
+           British Institutional Elegance (Coutts / Rothschild / Savile Row)
+           Zero AI Slop: No neon gradients, no glow filters, no drop shadows
+        ------------------------------------------------------------- */
+        #slide-1.slide,
+        #slide-9.slide {
+            display: flex;
+            padding: 0;
+            align-items: stretch;
+            justify-content: stretch;
+        }
+
+        .editorial-memorandum {
+            width: 100%;
+            height: 100%;
+            background: #0B0F19;
+            border: 1px solid #1E293B;
+            position: relative;
+            padding: clamp(36px, 4.5vw, 64px);
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            overflow: hidden;
+            box-sizing: border-box;
+        }
+
+        .editorial-memorandum::before {
+            content: "";
+            position: absolute;
+            top: 12px; left: 12px; right: 12px; bottom: 12px;
+            border: 1px solid rgba(197, 168, 128, 0.2);
+            pointer-events: none;
+        }
+
+        .memorandum-eyebrow {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-bottom: 20px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+            z-index: 2;
+            gap: 16px;
+        }
+
+        .eyebrow-text {
+            font-family: 'Geist Mono', monospace;
+            font-size: clamp(0.68rem, 0.88vw, 0.75rem);
+            font-weight: 600;
+            letter-spacing: clamp(0.12em, 0.2vw, 0.22em);
+            text-transform: uppercase;
+            color: #C5A880;
+            line-height: 1.4;
+        }
+
+        .eyebrow-id {
+            font-family: 'Geist Mono', monospace;
+            font-size: 0.72rem;
+            font-weight: 400;
+            letter-spacing: 0.15em;
+            color: #64748B;
+            text-transform: uppercase;
+            white-space: nowrap;
+        }
+
+        @media (max-width: 1080px) {
+            .eyebrow-id {
+                display: none;
+            }
+            .hero-right {
+                padding-left: 24px;
+            }
+        }
+
+        .memorandum-hero {
+            display: grid;
+            grid-template-columns: 7fr 5fr;
+            gap: clamp(36px, 4.5vw, 64px);
+            align-items: center;
+            flex: 1;
+            padding: clamp(20px, 2.8vw, 40px) 0;
+            z-index: 2;
+        }
+
+        .hero-left {
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+        }
+
+        .hero-title {
+            font-family: 'Cabinet Grotesk', sans-serif;
+            font-size: clamp(2.8rem, 4.8vw, 4.2rem);
+            font-weight: 700;
+            letter-spacing: -0.035em;
+            line-height: 1.05;
+            color: #FFFFFF;
+            margin-bottom: 20px;
+        }
+
+        .hero-proposition {
+            font-size: clamp(1.25rem, 1.7vw, 1.5rem);
+            font-weight: 300;
+            line-height: 1.5;
+            color: #94A3B8;
+            margin-bottom: 16px;
+            max-width: 580px;
+        }
+
+        .hero-detail {
+            font-size: clamp(0.92rem, 1.05vw, 1.02rem);
+            font-weight: 400;
+            line-height: 1.6;
+            color: #64748B;
+            max-width: 540px;
+        }
+
+        .hero-right {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            border-left: 1px solid rgba(255, 255, 255, 0.08);
+            padding-left: clamp(28px, 3.5vw, 56px);
+            height: 100%;
+        }
+
+        .emblem-wrapper {
+            width: clamp(170px, 18vw, 220px);
+            height: clamp(170px, 18vw, 220px);
+            position: relative;
+        }
+
+        .emblem-inscription {
+            margin-top: 18px;
+            text-align: center;
+        }
+
+        .emblem-title {
+            font-family: 'Cabinet Grotesk', sans-serif;
+            font-size: 0.95rem;
+            font-weight: 700;
+            letter-spacing: 0.18em;
+            color: #FFFFFF;
+            text-transform: uppercase;
+        }
+
+        .emblem-sub {
+            font-family: 'Geist Mono', monospace;
+            font-size: 0.7rem;
+            font-weight: 500;
+            letter-spacing: 0.2em;
+            color: #64748B;
+            margin-top: 6px;
+            text-transform: uppercase;
+        }
+
+        .memorandum-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            padding-top: 16px;
+            border-top: 1px solid rgba(255, 255, 255, 0.08);
+            z-index: 2;
+            gap: 20px;
+            padding-bottom: 4px;
+        }
+
+        .thesis-block {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .thesis-label {
+            font-family: 'Geist Mono', monospace;
+            font-size: 0.7rem;
+            font-weight: 600;
+            letter-spacing: 0.2em;
+            color: #C5A880;
+            text-transform: uppercase;
+        }
+
+        .thesis-text {
+            font-size: clamp(0.85rem, 0.98vw, 0.95rem);
+            font-weight: 400;
+            color: #E2E8F0;
+            letter-spacing: -0.01em;
+        }
+
+        .status-block {
+            text-align: right;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            gap: 6px;
+            flex-shrink: 0;
+        }
+
+        .status-badge {
+            font-family: 'Geist Mono', monospace;
+            font-size: 0.72rem;
+            font-weight: 600;
+            letter-spacing: 0.14em;
+            color: #C5A880;
+            border: 1px solid rgba(197, 168, 128, 0.35);
+            padding: 5px 12px;
+            text-transform: uppercase;
+            white-space: nowrap;
+        }
+
+        .status-note {
+            font-family: 'Geist Mono', monospace;
+            font-size: 0.68rem;
+            letter-spacing: 0.12em;
+            color: #64748B;
+            text-transform: uppercase;
+            white-space: nowrap;
+        }
+
+        /* -------------------------------------------------------------
+           RESPONSIVE BREAKPOINTS: Tablet, Mobile, and Low-Height Laptops
+        ------------------------------------------------------------- */
+        @media (max-width: 1080px) {
+            .eyebrow-id { display: none; }
+            .hero-right { padding-left: 20px; }
+            .col-left-4, .col-left-5, .col-left-6 { grid-column: span 5; }
+            .col-right-8, .col-right-7, .col-right-6 { grid-column: 6 / 13; }
+            .comparison { gap: 14px; }
+            .comp-item { padding: 16px; }
+        }
+
+        @media (max-width: 860px) {
+            body, html {
+                overflow-y: auto !important;
+                height: auto !important;
+                min-height: 100% !important;
+            }
+
+            #deck {
+                height: auto !important;
+                min-height: 100vh;
+                overflow-y: visible !important;
+                padding: 16px 16px 88px 16px !important;
+                display: block !important;
+            }
+
+            .slide {
+                position: relative !important;
+                width: 100% !important;
+                height: auto !important;
+                min-height: calc(100vh - 104px) !important;
+                display: none !important;
+                flex-direction: column !important;
+                gap: 16px !important;
+                transform: none !important;
+            }
+
+            .slide.active {
+                display: flex !important;
+                opacity: 1 !important;
+                transform: none !important;
+            }
+
+            .col-left-4, .col-left-5, .col-left-6, .col-left-7,
+            .col-right-8,
+            .col-right-5, .col-right-6, .col-right-7 {
+                width: 100% !important;
+                grid-column: auto !important;
+                height: auto !important;
+            }
+
+            .card {
+                height: auto !important;
+                min-height: auto !important;
+                padding: 24px 18px !important;
+            }
+
+            .editorial-memorandum {
+                padding: 24px 18px !important;
+                min-height: calc(100vh - 120px) !important;
+            }
+
+            .memorandum-hero {
+                display: flex !important;
+                flex-direction: column-reverse !important;
+                gap: 20px !important;
+                padding: 12px 0 !important;
+            }
+
+            .hero-right {
+                border-left: none !important;
+                border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
+                padding: 0 0 20px 0 !important;
+                width: 100% !important;
+            }
+
+            .hero-title {
+                font-size: clamp(2.2rem, 7vw, 3rem) !important;
+                margin-bottom: 12px !important;
+            }
+
+            .hero-proposition {
+                font-size: 1.15rem !important;
+                margin-bottom: 12px !important;
+            }
+
+            .hero-detail {
+                font-size: 0.9rem !important;
+            }
+
+            .memorandum-footer {
+                flex-direction: column !important;
+                align-items: flex-start !important;
+                gap: 12px !important;
+            }
+
+            .status-block {
+                text-align: left !important;
+                align-items: flex-start !important;
+            }
+
+            .comparison {
+                flex-direction: column !important;
+                height: auto !important;
+                gap: 16px !important;
+            }
+
+            .comp-item {
+                height: auto !important;
+                min-height: 340px !important;
+            }
+        }
+
+        @media (max-height: 820px) and (min-width: 861px) {
+            .card { padding: clamp(16px, 2vw, 24px) 28px !important; }
+            .moat-highlight { margin: 10px 0 !important; padding: 10px 14px !important; }
+            h1 { font-size: 2.2rem !important; margin-bottom: 10px !important; }
+            h2 { font-size: 1.65rem !important; margin-bottom: 10px !important; }
+            p { margin-bottom: 10px !important; font-size: 0.92rem !important; line-height: 1.45 !important; }
+            li { margin-bottom: 6px !important; font-size: 0.88rem !important; }
+            .script-notes { margin-top: 12px !important; padding-top: 10px !important; font-size: 0.8rem !important; }
+            .big-number { font-size: 3.5rem !important; margin-bottom: 8px !important; }
+        }
+    
+        /* -------------------------------------------------------------
+           SLIDE 3: NATIVE SIMULATED UI PANELS
+           Airtight HMRC Statutory Logic, Arithmetic, and Timeline
+        ------------------------------------------------------------- */
+        .legacy-portal {
+            background: #FFFFFF;
+            border: 1px solid #CBD5E1;
+            border-radius: 8px;
+            box-shadow: 0 4px 16px rgba(15, 23, 42, 0.06);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            height: 100%;
+            min-height: 480px;
+            font-size: 0.72rem;
+            color: #1E293B;
+            box-sizing: border-box;
+        }
+
+        .portal-window-bar {
+            background: #F1F5F9;
+            border-bottom: 1px solid #E2E8F0;
+            padding: 6px 10px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-shrink: 0;
+        }
+
+        .window-dots {
+            display: flex;
+            gap: 5px;
+            align-items: center;
+        }
+
+        .window-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+        }
+
+        .portal-url-bar {
+            flex: 1;
+            background: #FFFFFF;
+            border: 1px solid #CBD5E1;
+            border-radius: 4px;
+            padding: 2px 8px;
+            font-family: 'Geist Mono', monospace;
+            font-size: 0.62rem;
+            color: #475569;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .portal-org-bar {
+            background: #0F172A;
+            color: #FFFFFF;
+            padding: 8px 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.68rem;
+            flex-shrink: 0;
+        }
+
+        .portal-alert-bar {
+            background: #FEF2F2;
+            border-bottom: 1px solid #FECACA;
+            color: #991B1B;
+            padding: 6px 10px;
+            font-size: 0.65rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            flex-shrink: 0;
+        }
+
+        .portal-feed-container {
+            flex: 1;
+            overflow-y: auto;
+            padding: 8px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            background: #F8FAFC;
+        }
+
+        .reconcile-card-active {
+            background: #FFFFFF;
+            border: 1.5px solid #2563EB;
+            border-radius: 6px;
+            padding: 8px 10px;
+            box-shadow: 0 2px 8px rgba(37, 99, 235, 0.1);
+        }
+
+        .reconcile-header-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            border-bottom: 1px solid #F1F5F9;
+            padding-bottom: 6px;
+            margin-bottom: 6px;
+        }
+
+        .reconcile-form-group {
+            margin-bottom: 6px;
+        }
+
+        .reconcile-label {
+            font-size: 0.6rem;
+            color: #64748B;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            margin-bottom: 3px;
+            display: block;
+            font-weight: 600;
+        }
+
+        .reconcile-select-box {
+            width: 100%;
+            background: #F8FAFC;
+            border: 1px solid #94A3B8;
+            border-radius: 4px;
+            padding: 4px 6px;
+            font-size: 0.66rem;
+            font-weight: 600;
+            color: #0F172A;
+            box-sizing: border-box;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .reconcile-dropdown-peek {
+            margin-top: 4px;
+            background: #FFFFFF;
+            border: 1px solid #CBD5E1;
+            border-radius: 4px;
+            padding: 4px 6px;
+            font-size: 0.61rem;
+            line-height: 1.35;
+            color: #475569;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+        }
+
+        .reconcile-warning {
+            background: #FFFBEB;
+            border: 1px solid #FDE68A;
+            color: #92400E;
+            border-radius: 4px;
+            padding: 4px 6px;
+            font-size: 0.59rem;
+            line-height: 1.3;
+            margin-top: 6px;
+        }
+
+        .reconcile-actions {
+            display: flex;
+            gap: 6px;
+            margin-top: 8px;
+        }
+
+        .portal-pending-row {
+            background: #FFFFFF;
+            border: 1px solid #E2E8F0;
+            border-radius: 4px;
+            padding: 6px 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.63rem;
+            color: #64748B;
+        }
+
+        /* WhatsApp Phone Screen Mockup */
+        .whatsapp-phone {
+            background: #0B0F19;
+            border-radius: 26px;
+            border: 3px solid #1E293B;
+            box-shadow: 0 12px 32px rgba(15, 23, 42, 0.22);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            height: 100%;
+            min-height: 480px;
+            position: relative;
+            box-sizing: border-box;
+        }
+
+        .dynamic-island {
+            width: 72px;
+            height: 16px;
+            background: #000000;
+            border-radius: 10px;
+            margin: 4px auto 2px auto;
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            padding-right: 6px;
+            z-index: 10;
+            flex-shrink: 0;
+        }
+
+        .dynamic-camera {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: #111827;
+            border: 1px solid #1F2937;
+        }
+
+        .ios-status-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 2px 14px 4px 14px;
+            color: #FFFFFF;
+            font-size: 0.65rem;
+            font-weight: 600;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            flex-shrink: 0;
+        }
+
+        .whatsapp-header {
+            background: #008069;
+            color: #FFFFFF;
+            padding: 6px 10px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
+            z-index: 5;
+            flex-shrink: 0;
+        }
+
+        .whatsapp-avatar {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            background: #0B0F19;
+            border: 1.5px solid #C5A880;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #C5A880;
+            font-family: 'Cabinet Grotesk', sans-serif;
+            font-weight: 800;
+            font-size: 0.72rem;
+            flex-shrink: 0;
+        }
+
+        .whatsapp-chat-body {
+            flex: 1;
+            background: #ECE5DD;
+            background-image: radial-gradient(#D5CEBE 1.2px, transparent 1.2px);
+            background-size: 14px 14px;
+            padding: 8px 10px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        }
+
+        .chat-date-pill {
+            align-self: center;
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 6px;
+            padding: 2px 10px;
+            font-size: 0.58rem;
+            font-weight: 600;
+            color: #54656F;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            margin-bottom: 2px;
+        }
+
+        .chat-bubble-out {
+            align-self: flex-end;
+            max-width: 90%;
+            background: #D9FDD3;
+            border-radius: 8px 0 8px 8px;
+            padding: 5px;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+            position: relative;
+        }
+
+        .thermal-receipt {
+            background: #FFFFFF;
+            border-radius: 3px;
+            padding: 6px 8px;
+            font-family: 'Geist Mono', monospace;
+            font-size: 0.60rem;
+            line-height: 1.35;
+            color: #0F172A;
+            border: 1px dashed #CBD5E1;
+            box-shadow: 0 1px 4px rgba(0, 0, 0, 0.05);
+        }
+
+        .receipt-divider {
+            border-top: 1px dashed #94A3B8;
+            margin: 4px 0;
+        }
+
+        .chat-bubble-in {
+            align-self: flex-start;
+            max-width: 92%;
+            background: #FFFFFF;
+            border-radius: 0 8px 8px 8px;
+            padding: 8px 10px;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+            font-size: 0.66rem;
+            line-height: 1.4;
+            color: #111827;
+            position: relative;
+        }
+
+        .tax-badge-callout {
+            background: #ECFDF5;
+            border: 1px solid #A7F3D0;
+            border-radius: 4px;
+            padding: 4px 6px;
+            margin: 4px 0;
+            font-size: 0.64rem;
+            color: #065F46;
+        }
+
+        .chat-time {
+            font-size: 0.55rem;
+            color: #667781;
+            float: right;
+            margin-left: 6px;
+            margin-top: 2px;
+        }
+
+        .chat-ticks {
+            color: #53BDEB;
+            font-weight: bold;
+            margin-left: 2px;
+        }
+
+        .chat-action-btn {
+            background: #FFFFFF;
+            border: 1px solid #10B981;
+            color: #065F46;
+            border-radius: 6px;
+            padding: 4px 8px;
+            font-size: 0.60rem;
+            font-weight: 600;
+            text-align: center;
+            display: flex;
+            align-items: center;
+            justify-content: flex-start;
+            gap: 4px;
+            cursor: default;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+        }
+
+    
+        @media (max-height: 820px) and (min-width: 861px) {
+            .legacy-portal, .whatsapp-phone { min-height: 380px !important; }
+            .portal-window-bar { padding: 4px 8px !important; }
+            .portal-org-bar { padding: 5px 8px !important; }
+            .portal-alert-bar { padding: 4px 8px !important; }
+            .reconcile-card-active { padding: 6px 8px !important; }
+            .whatsapp-header { padding: 4px 8px !important; }
+            .whatsapp-chat-body { padding: 6px 8px !important; gap: 6px !important; }
+            .thermal-receipt { padding: 4px 6px !important; }
+            .chat-bubble-in { padding: 6px 8px !important; }
+        }
+
+    </style>
+</head>
+<body>
+
+    <!-- Background Iframe & Overlay -->
+    <iframe id="bg-iframe" src="http://127.0.0.1:58596" title="Mindwalk 3D Codebase"></iframe>
+    <div id="bg-overlay"></div>
+
+    <!-- Presentation Deck -->
+    <div id="deck">
+
+                <!-- Slide 1: British Institutional Masterpiece -->
+        <div class="slide active" id="slide-1">
+            <div class="editorial-memorandum">
+                <!-- Top Regulatory Inscription -->
+                <div class="memorandum-eyebrow">
+                    <div class="eyebrow-text">HMRC Making Tax Digital 2026 · Statutory Compliance Infrastructure</div>
+                    <div class="eyebrow-id">Document Ref: IA-MTD-2026-PRESEED</div>
+                </div>
+
+                <!-- Main Hero: 7:5 Architectural Ratio -->
+                <div class="memorandum-hero">
+                    <div class="hero-left">
+                        <h1 class="hero-title">Invisible Accountant</h1>
+                        <p class="hero-proposition">The end of tax anxiety. Just send a text.</p>
+                        <p class="hero-detail">Autonomous fiscal compliance for 3.2 million UK sole traders delivered natively via WhatsApp. Zero applications to download. Zero chart-of-accounts training. Full statutory HMRC filing.</p>
+                    </div>
+
+                    <div class="hero-right">
+                        <div class="emblem-wrapper">
+                            <!-- Inlined Master SVG Crest: The Sovereign Monoline Ledger -->
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 160" width="100%" height="100%" fill="none">
+                              <!-- Obsidian Slate Ground -->
+                              <rect width="160" height="160" fill="#0B0F19"/>
+                              <rect x="8" y="8" width="144" height="144" stroke="#1E293B" stroke-width="1"/>
+                              <rect x="12" y="12" width="136" height="136" stroke="#C5A880" stroke-width="0.5" stroke-opacity="0.35"/>
+
+                              <!-- The Sovereign Monoline Ledger (Interlocking IA Monogram) -->
+                              <g stroke="#FFFFFF" stroke-width="3.5" stroke-linecap="square" stroke-linejoin="miter">
+                                <!-- Pillar I (Invisible / Institutional Integrity) -->
+                                <line x1="46" y1="38" x2="46" y2="122"/>
+                                <line x1="36" y1="38" x2="56" y2="38"/>
+                                <line x1="36" y1="122" x2="56" y2="122"/>
+
+                                <!-- Chevron Apex & Pillars (Accountant / Asset) -->
+                                <line x1="96" y1="38" x2="68" y2="122"/>
+                                <line x1="96" y1="38" x2="114" y2="122"/>
+                                
+                                <line x1="60" y1="122" x2="76" y2="122"/>
+                                <line x1="106" y1="122" x2="122" y2="122"/>
+                                <line x1="88" y1="38" x2="104" y2="38"/>
+                              </g>
+
+                              <!-- Golden Section Ledger Beam: Hallmarked Antique Gilt -->
+                              <line x1="46" y1="80" x2="114" y2="80" stroke="#C5A880" stroke-width="2.5" stroke-linecap="square"/>
+
+                              <!-- Central Trust Anchor: Admiralty Blue -->
+                              <rect x="74" y="78.5" width="3" height="3" fill="#1D4ED8"/>
+                            </svg>
+                        </div>
+                        <div class="emblem-inscription">
+                            <div class="emblem-title">The Sovereign Ledger</div>
+                            <div class="emblem-sub">Monoline Monogram · φ = 1.618</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Bottom Institutional Footer -->
+                <div class="memorandum-footer">
+                    <div class="thesis-block">
+                        <span class="thesis-label">Investment Thesis</span>
+                        <span class="thesis-text">The B2C illusion masking a B2B2C enterprise powerhouse.</span>
+                    </div>
+                    <div class="status-block">
+                        <span class="status-badge">SEIS / EIS Advance Assurance</span>
+                        <span class="status-note">Pre-Seed Syndicate · £350,000 Allocation</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 2 -->
+        <div class="slide">
+            <div class="card col-left-5">
+                <div class="caption">Slide 2: The Hook</div>
+                <h2>The MTD 2026 Mandate</h2>
+                <p>In April 2026, HMRC’s Making Tax Digital (MTD) mandate comes into full force.</p>
+                <p>This legislation effectively outlaws 'shoebox accounting'. It enforces mandatory digital record-keeping and strict quarterly updates.</p>
+                <div class="script-notes">
+                    "The urgency of our proposition is driven by a massive, unavoidable government mandate. In April 2026, HMRC’s Making Tax Digital (MTD) mandate comes into full force for 3.2 million UK sole traders. This is not a gradual market shift; it is a forced-adoption event of unprecedented scale..."
+                </div>
+            </div>
+            <div class="card col-right-7">
+                <div class="visual-box" style="flex-direction: column; border: none; background: transparent; padding:0;">
+                    <div class="big-number">April 2026</div>
+                    <h2 style="margin-top: 24px;">3.2 Million UK Sole Traders</h2>
+                    <p style="color: var(--muted-slate); font-size: 1.25rem;">A forced-adoption event of unprecedented scale.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 3 -->
+        <div class="slide">
+            <div class="card col-left-4">
+                <div class="caption">Slide 3: Behavioral Architecture</div>
+                <h2>Meet 'Emma': Behavioral UX</h2>
+                <p>Traditional accounting software imposes corporate double-entry bookkeeping on sole traders, triggering the <strong>'Shoebox Avoidance Loop'</strong>—administrative dread that leads to missed deductions and HMRC penalties.</p>
+                <p>Emma lives entirely inside <strong>WhatsApp</strong>. By attaching receipt capture to an existing physical micro-habit at the trade counter, we achieve zero switching friction.</p>
+                <div class="moat-highlight" style="margin: 16px 0; padding: 14px 18px; border-left-color: #10B981; background: rgba(16, 185, 129, 0.04);">
+                    <div style="font-family: 'Geist Mono', monospace; font-size: 0.75rem; color: #10B981; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 4px;">Loss Aversion (Kahneman & Tversky)</div>
+                    <div style="font-size: 0.95rem; color: var(--deep-slate); font-weight: 500;">
+                        Logging £48.50 at Screwfix preserves <strong style="color: #10B981;">£12.61 in cash tax relief</strong> (20% Income Tax + 6% Class 4 NIC). Emma turns a boring chore into an active wealth defense tool.
+                    </div>
+                </div>
+                <div class="script-notes">
+                    "Traditional solutions force 3.2 million tradespeople and freelancers to become corporate bookkeepers. Navigating 50-item Chart of Accounts dropdowns induces administrative dread. Emma eliminates the interface entirely..."
+                </div>
+            </div>
+                        <div class="col-right-8" style="height: 100%; min-width: 0;">
+                <div class="comparison" style="height: 100%; min-width: 0;">
+                    <!-- Traditional Desktop View (Problem: High Cognitive Load & Disconnected) -->
+                    <div class="comp-item" style="background-color: var(--off-white); display: flex; flex-direction: column; flex: 1; min-width: 0; border-radius: 8px; padding: 14px;">
+                        <div class="comp-header" style="color: var(--muted-slate); font-weight: 600; display: flex; flex-direction: column; gap: 4px; margin-bottom: 10px; padding-bottom: 6px;">
+                            <div style="display: flex; justify-content: space-between; align-items: center;">
+                                <span style="font-size: 0.95rem; color: var(--oxford-blue); font-weight: 700;">Legacy Desktop Software</span>
+                                <span style="color: #EF4444; font-size: 0.68rem; font-family: 'Geist Mono', monospace; background: rgba(239, 68, 68, 0.1); padding: 2px 8px; border-radius: 4px; border: 1px solid rgba(239, 68, 68, 0.25); font-weight: 600;">47 Unreconciled Items</span>
+                            </div>
+                            <span style="font-size: 0.72rem; color: var(--muted-slate); font-weight: 400;">Manual Web Portal · 50+ Chart-of-Account Dropdowns</span>
+                        </div>
+
+                        <!-- Simulated Native Browser Window: CloudLedger Pro -->
+                        <div class="legacy-portal">
+                            <!-- Browser Chrome -->
+                            <div class="portal-window-bar">
+                                <div class="window-dots">
+                                    <div class="window-dot" style="background: #EF4444;"></div>
+                                    <div class="window-dot" style="background: #F59E0B;"></div>
+                                    <div class="window-dot" style="background: #10B981;"></div>
+                                </div>
+                                <div class="portal-url-bar">
+                                    <span style="color: #10B981;">🔒</span> app.cloudledger.co.uk/sole-trader/bank/reconcile?acct=4821
+                                </div>
+                            </div>
+
+                            <!-- Org & Tax Year Header -->
+                            <div class="portal-org-bar">
+                                <div>
+                                    <strong style="color: #F8FAFC;">Dave Jenkins Plumbing</strong>
+                                    <span style="color: #94A3B8; margin-left: 6px; font-size: 0.62rem;">(Sole Trader · UTR: 84920 11928)</span>
+                                </div>
+                                <div style="font-family: 'Geist Mono', monospace; font-size: 0.62rem; color: #38BDF8;">
+                                    HMRC ITSA 2026/27
+                                </div>
+                            </div>
+
+                            <!-- Statutory Penalty Risk Warning -->
+                            <div class="portal-alert-bar">
+                                <span>⚠️</span>
+                                <div>
+                                    <strong>47 Unreconciled Items</strong> · Q1 Period Closing in 12 Days
+                                    <span style="font-weight: 400; opacity: 0.9; display: block; font-size: 0.58rem;">Late quarterly filing risks statutory penalties under FA 2021 Sch 24.</span>
+                                </div>
+                            </div>
+
+                            <!-- Bank Reconciliation Feed -->
+                            <div class="portal-feed-container">
+                                <!-- Active Transaction: Screwfix £48.50 -->
+                                <div class="reconcile-card-active">
+                                    <div class="reconcile-header-row">
+                                        <div>
+                                            <span style="font-family: 'Geist Mono', monospace; font-size: 0.64rem; color: #64748B;">14 MAY 2026</span>
+                                            <div style="font-weight: 700; color: #0F172A; font-size: 0.72rem;">POS 4821 SCREWFIX BISHOPSGATE</div>
+                                            <span style="font-size: 0.60rem; color: #64748B;">Card Payment · Till 02</span>
+                                        </div>
+                                        <div style="text-align: right;">
+                                            <div style="font-family: 'Cabinet Grotesk', sans-serif; font-size: 0.92rem; font-weight: 700; color: #DC2626;">-£48.50</div>
+                                            <span style="font-size: 0.58rem; color: #DC2626; background: #FEE2E2; padding: 1px 4px; border-radius: 2px;">Unmatched</span>
+                                        </div>
+                                    </div>
+
+                                    <!-- Chart of Accounts Dropdown Nightmare -->
+                                    <div class="reconcile-form-group">
+                                        <label class="reconcile-label">Chart of Accounts Category (50+ Choices) *</label>
+                                        <div class="reconcile-select-box">
+                                            <span>310 - Small Tools & Equipment (BIM37000)</span>
+                                            <span style="color: #64748B; font-size: 0.6rem;">▼</span>
+                                        </div>
+                                        <!-- Open Dropdown Peek showing cognitive load -->
+                                        <div class="reconcile-dropdown-peek">
+                                            <div style="color: #94A3B8;">• 300 - Purchases for Resale (Materials)</div>
+                                            <div style="color: #1D4ED8; font-weight: 700; background: #EFF6FF; padding: 1px 3px; border-radius: 2px;">✓ 310 - Small Tools & Equipment (BIM37000)</div>
+                                            <div style="color: #DC2626;">⚠️ 420 - Subsistence / Client Lunch [DISALLOWED BIM45000]</div>
+                                            <div style="color: #94A3B8;">• 450 - Motor & Travel Expenses (BIM47700)</div>
+                                            <div style="color: #94A3B8;">• 710 - Sundry Office Administration</div>
+                                        </div>
+                                    </div>
+
+                                    <!-- VAT Treatment -->
+                                    <div style="display: flex; justify-content: space-between; font-size: 0.62rem; color: #475569; margin-top: 4px;">
+                                        <span>VAT Treatment: <strong>20% Standard Input (£8.08)</strong></span>
+                                        <span>Net: <strong>£40.42</strong></span>
+                                    </div>
+
+                                    <!-- Digital Link Failure Callout -->
+                                    <div class="reconcile-warning">
+                                        <strong>⚠️ Digital Link Breach:</strong> No receipt attached. Manual entry without source document breaks digital link under <em>Regulation 4, SI 2021/1076</em>.
+                                    </div>
+
+                                    <div class="reconcile-actions">
+                                        <button style="background: #2563EB; color: #FFF; border: none; border-radius: 4px; padding: 3px 10px; font-size: 0.62rem; font-weight: 600;">Reconcile Item</button>
+                                        <button style="background: #F1F5F9; color: #475569; border: 1px solid #CBD5E1; border-radius: 4px; padding: 3px 8px; font-size: 0.62rem;">Find Match</button>
+                                    </div>
+                                </div>
+
+                                <!-- Pending Backlog Row 1 -->
+                                <div class="portal-pending-row">
+                                    <div>
+                                        <div style="font-weight: 600; color: #1E293B;">13 May · TRAVIS PERKINS EC2</div>
+                                        <div style="font-size: 0.58rem; color: #64748B;">Direct Debit · Materials</div>
+                                    </div>
+                                    <div style="text-align: right;">
+                                        <div style="font-weight: 700; color: #1E293B;">-£142.20</div>
+                                        <span style="font-size: 0.55rem; color: #EF4444;">● Unreconciled</span>
+                                    </div>
+                                </div>
+
+                                <!-- Pending Backlog Row 2 -->
+                                <div class="portal-pending-row">
+                                    <div>
+                                        <div style="font-weight: 600; color: #1E293B;">12 May · SHELL PETROL STATIONS UK</div>
+                                        <div style="font-size: 0.58rem; color: #64748B;">Contactless · Fuel</div>
+                                    </div>
+                                    <div style="text-align: right;">
+                                        <div style="font-weight: 700; color: #1E293B;">-£65.00</div>
+                                        <span style="font-size: 0.55rem; color: #EF4444;">● Unreconciled</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div style="font-size: 0.72rem; color: #64748B; margin-top: 8px; line-height: 1.35;">
+                            <em>The Shoebox Dread: 47 items waiting after 10 hours on site. 50+ dropdowns, manual BIM rules, and broken digital links.</em>
+                        </div>
+                    </div>
+
+                    <!-- Emma on WhatsApp (Hero - User's Point of View) -->
+                    <div class="comp-item" style="border: 2px solid var(--heritage-blue); box-shadow: 0 8px 24px rgba(29, 78, 216, 0.12); display: flex; flex-direction: column; flex: 1.08; min-width: 0; background: #FFFFFF; border-radius: 8px; padding: 14px;">
+                        <div class="comp-header" style="color: var(--heritage-blue); font-weight: 700; display: flex; flex-direction: column; gap: 4px; border-bottom-color: rgba(29, 78, 216, 0.2); margin-bottom: 10px; padding-bottom: 6px;">
+                            <div style="display: flex; justify-content: space-between; align-items: center;">
+                                <span style="font-size: 1rem; color: var(--oxford-blue); font-weight: 700;">User Point of View: Emma</span>
+                                <span style="color: #10B981; font-size: 0.68rem; font-family: 'Geist Mono', monospace; background: rgba(16, 185, 129, 0.1); padding: 2px 8px; border-radius: 4px; border: 1px solid rgba(16, 185, 129, 0.3); font-weight: 600;">● Native WhatsApp</span>
+                            </div>
+                            <span style="font-size: 0.72rem; color: #10B981; font-weight: 600;">Point-of-Sale Snap · Instant £12.61 Tax Relief Preserved</span>
+                        </div>
+
+                        <!-- Simulated Native iPhone 15 Pro on WhatsApp -->
+                        <div class="whatsapp-phone">
+                            <!-- Dynamic Island -->
+                            <div class="dynamic-island">
+                                <div class="dynamic-camera"></div>
+                            </div>
+
+                            <!-- iOS Status Bar (Synchronized to 10:45 AM) -->
+                            <div class="ios-status-bar">
+                                <span>10:45</span>
+                                <div style="display: flex; align-items: center; gap: 4px;">
+                                    <span>5G</span>
+                                    <svg viewBox="0 0 24 24" width="12" height="12" fill="currentColor"><path d="M12 3c-4.97 0-9 4.03-9 9 0 2.12.74 4.07 1.97 5.61L12 22l7.03-4.39C20.26 16.07 21 14.12 21 12c0-4.97-4.03-9-9-9z"/></svg>
+                                    <span style="font-size: 0.6rem; border: 1px solid #FFF; padding: 0 2px; border-radius: 2px;">98%</span>
+                                </div>
+                            </div>
+
+                            <!-- WhatsApp Contact Header -->
+                            <div class="whatsapp-header">
+                                <span style="font-size: 0.9rem; color: #FFF; margin-right: 2px; font-weight: 600;">‹</span>
+                                <div class="whatsapp-avatar">
+                                    <span>IA</span>
+                                </div>
+                                <div style="flex: 1; min-width: 0;">
+                                    <div style="display: flex; align-items: center; gap: 4px;">
+                                        <span style="font-weight: 700; font-size: 0.78rem; color: #FFFFFF;">Emma</span>
+                                        <!-- Verified Green Badge -->
+                                        <svg viewBox="0 0 24 24" width="13" height="13" fill="#10B981"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>
+                                    </div>
+                                    <div style="font-size: 0.58rem; color: #E2E8F0; opacity: 0.9; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                                        Invisible Accountant · HMRC MTD Compatible
+                                    </div>
+                                </div>
+                                <div style="display: flex; gap: 8px; color: #FFFFFF; font-size: 0.75rem; opacity: 0.9;">
+                                    <span>📹</span>
+                                    <span>📞</span>
+                                </div>
+                            </div>
+
+                            <!-- WhatsApp Chat Body -->
+                            <div class="whatsapp-chat-body">
+                                <div class="chat-date-pill">TODAY · 14 MAY 2026</div>
+
+                                <!-- User Outgoing Message: Dave snaps photo at 10:42 AM -->
+                                <div class="chat-bubble-out">
+                                    <!-- High-Fidelity Thermal Receipt -->
+                                    <div class="thermal-receipt">
+                                        <div style="text-align: center; font-weight: 700; font-size: 0.68rem; letter-spacing: 0.04em;">SCREWFIX DIRECT LTD</div>
+                                        <div style="text-align: center; font-size: 0.54rem; color: #64748B;">STORE 412 · LONDON BISHOPSGATE EC2M</div>
+                                        <div style="text-align: center; font-size: 0.54rem; color: #64748B; margin-bottom: 3px;">14/05/2026 10:38 · TILL 02 · TRANS 88412</div>
+                                        <div class="receipt-divider"></div>
+                                        <div style="display: flex; justify-content: space-between;">
+                                            <span>1x STANLEY FATMAX KNIFE</span>
+                                            <span>£16.50</span>
+                                        </div>
+                                        <div style="display: flex; justify-content: space-between;">
+                                            <span>1x RAWLPLUG 300PK FIXINGS</span>
+                                            <span>£18.00</span>
+                                        </div>
+                                        <div style="display: flex; justify-content: space-between;">
+                                            <span>1x DRAPER 5M HEAVY TAPE</span>
+                                            <span>£14.00</span>
+                                        </div>
+                                        <div class="receipt-divider"></div>
+                                        <div style="display: flex; justify-content: space-between; font-size: 0.54rem; color: #64748B;">
+                                            <span>SUBTOTAL (NET):</span>
+                                            <span>£40.42</span>
+                                        </div>
+                                        <div style="display: flex; justify-content: space-between; font-size: 0.54rem; color: #64748B;">
+                                            <span>VAT @ 20.0%:</span>
+                                            <span>£8.08</span>
+                                        </div>
+                                        <div style="display: flex; justify-content: space-between; font-weight: 700; font-size: 0.66rem; color: #0F172A; margin-top: 2px;">
+                                            <span>TOTAL PAID (GBP):</span>
+                                            <span>£48.50</span>
+                                        </div>
+                                        <div class="receipt-divider"></div>
+                                        <div style="font-size: 0.52rem; color: #64748B; text-align: center;">
+                                            VISA CONTACTLESS · CARD *4821 · AUTH 049281
+                                        </div>
+                                    </div>
+                                    <div style="text-align: right; padding: 2px 4px 0 0;">
+                                        <span class="chat-time">10:42 AM</span>
+                                        <span class="chat-ticks">✓✓</span>
+                                    </div>
+                                </div>
+
+                                <!-- Emma Autonomous Response: 10:43 AM (3 seconds later) -->
+                                <div class="chat-bubble-in">
+                                    <div style="font-weight: 700; color: #065F46; font-size: 0.70rem; margin-bottom: 4px; display: flex; align-items: center; gap: 4px;">
+                                        <span>⚡</span> Logged in 3.1s · Screwfix Bishopsgate
+                                    </div>
+                                    <div style="font-size: 0.64rem; line-height: 1.4; color: #334155;">
+                                        <div>• <strong>Allowable Expense:</strong> £48.50 (Trade Consumables)</div>
+                                        <div>• <strong>HMRC Category:</strong> <span style="font-family: 'Geist Mono', monospace; font-weight: 600; color: #1D4ED8;">BIM37000</span> (Tools & Materials)</div>
+                                    </div>
+
+                                    <!-- Tax Preserved Callout -->
+                                    <div class="tax-badge-callout">
+                                        <div style="font-weight: 700; font-size: 0.72rem; color: #065F46;">
+                                            💰 £12.61 Cash Tax Relief Preserved
+                                        </div>
+                                        <div style="font-size: 0.56rem; color: #047857;">
+                                            20% Basic Income Tax (£9.70) + 6% Class 4 NIC (£2.91)
+                                        </div>
+                                    </div>
+
+                                    <div style="font-size: 0.62rem; line-height: 1.35; color: #475569;">
+                                        <div>🔒 <strong>Digital Link:</strong> SHA-256 sealed under <em>SI 2021/1076</em></div>
+                                        <div>📊 <strong>Q1 ITSA Reserve:</strong> £1,420 / £3,200 estimated</div>
+                                    </div>
+
+                                    <div style="margin-top: 6px; font-weight: 600; color: #0F172A; font-size: 0.66rem;">
+                                        “All sorted for HMRC Dave. Back to work! 🔧”
+                                    </div>
+
+                                    <div style="margin-top: 6px;">
+                                        <div class="chat-action-btn">
+                                            <span>📄</span> View Cryptographic Audit Link (SHA-256)
+                                        </div>
+                                    </div>
+
+                                    <span class="chat-time">10:43 AM</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div style="font-size: 0.72rem; color: var(--oxford-blue); margin-top: 8px; line-height: 1.35; font-weight: 500;">
+                            <strong>3-Second Trade Counter Habit:</strong> Photo snapped at the till. Zero app switching, 100% BIM37000 compliant, and unbroken digital link.
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 4 -->
+        <div class="slide">
+            <div class="card col-left-6">
+                <div class="caption">Slide 4: Statutory Defensibility</div>
+                <h2>The Statutory Tax Engine</h2>
+                <p>Generic LLMs hallucinate and fail UK tax tribunals. Our inference engine is custom fine-tuned on HMRC's <strong>Business Income Manual (BIM)</strong>.</p>
+                <ul style="margin: 12px 0 14px 0; padding-left: 20px;">
+                    <li style="margin-bottom: 6px;"><strong>Allowable Deductions:</strong> Automatically approves trade purchases under <em>BIM37000</em> (e.g. Screwfix tools/materials).</li>
+                    <li style="margin-bottom: 6px;"><strong>Statutory Disallowances:</strong> Strictly disallows client hospitality under <em>BIM45000</em> & <em>s.45 ITTOIA 2005</em>, protecting users from Schedule 24 FA 2007 careless error penalties.</li>
+                    <li style="margin-bottom: 6px;"><strong>Unbroken Digital Link:</strong> Programmatically seals transaction hashes under <em>SI 2021/1076</em> for direct quarterly MTD ITSA staging.</li>
+                    <li style="margin-bottom: 6px;"><strong>In-Year True-Up Engine:</strong> Automated reconciliation of provisional quarterly reserves against capital allowances (CAA 2001) prior to final HMRC declaration.</li>
+                </ul>
+                <div class="moat-highlight" style="margin-top: 10px; margin-bottom: 12px; padding: 10px 14px; border-left-color: #0284C7; background: rgba(2, 132, 199, 0.05);">
+                    <div style="font-family: 'Geist Mono', monospace; font-size: 0.70rem; color: #0284C7; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 2px; font-weight: 600;">Autonomous In-Year True-Up</div>
+                    <div style="font-size: 0.82rem; color: var(--deep-slate); line-height: 1.4;">
+                        Provisional quarterly reserves are trued up dynamically before submission—reconciling dual-purpose expenses and capital allowances to prevent year-end penalty surprises.
+                    </div>
+                </div>
+                <div class="script-notes">
+                    "Investors ask: 'Is this just a wrapper?' The answer is categorically no. A generic LLM cannot navigate UK tax law. Emma enforces statutory rules under BIM37000, blocks penalties under BIM45000 and Schedule 24 FA 2007, and automatically trues-up provisional reserves before final quarterly submission..."
+                </div>
+            </div>
+            <div class="card col-right-6 card-dark" style="padding: 28px; display: flex; flex-direction: column;">
+                <div class="caption" style="color: var(--subtle-silver); margin-bottom: 14px;">Live Telemetry: HMRC Rules Engine</div>
+                
+                <div style="display: flex; gap: 20px; height: 100%;">
+                    <!-- Receipt visual -->
+                    <div style="flex: 1; position: relative; background: #fff; border-radius: 4px; overflow: hidden;">
+                        <div style="padding: 14px; color: #000; font-family: monospace; font-size: 0.72rem; border-bottom: 1px dashed #ccc;">
+                            <div style="text-align: center; font-weight: bold; font-size: 0.90rem;">SCREWFIX DIRECT</div>
+                            <div style="text-align: center; color: #666; font-size: 0.62rem;">London Bishopsgate • EC2M</div>
+                            <br>
+                            <div>1x Stanley Knife ..... £16.50</div>
+                            <div>1x Masonry Fixings ... £18.00</div>
+                            <div>1x 5m Tape Measure ... £14.00</div>
+                            <br>
+                            <div style="font-weight: bold; font-size: 0.88rem; border-top: 1px solid #000; padding-top: 5px;">TOTAL: £48.50 GBP</div>
+                            <div style="font-size: 0.62rem; color: #10b981; margin-top: 4px;">Verified Paper POS Receipt</div>
+                        </div>
+                        <!-- Scanner Line -->
+                        <div id="scanner-line" style="position: absolute; top: 0; left: 0; width: 100%; height: 2px; background: #00f0ff; box-shadow: 0 0 10px #00f0ff; animation: scan 3s infinite linear;"></div>
+                    </div>
+                    
+                    <!-- JSON Output -->
+                    <div style="flex: 1.25; background: #0F172A; border: 1px solid rgba(255,255,255,0.2); border-radius: 4px; padding: 12px; font-family: monospace; color: #00f0ff; font-size: 0.72rem; position: relative; overflow: hidden;">
+                        <pre id="json-output" style="margin: 0; white-space: pre-wrap; line-height: 1.35;"></pre>
+                    </div>
+                </div>
+                
+                <style>
+                    @keyframes scan {
+                        0% { top: 0; opacity: 1; }
+                        90% { top: 100%; opacity: 1; }
+                        100% { top: 100%; opacity: 0; }
+                    }
+                    .typing-cursor::after {
+                        content: '|';
+                        animation: blink 1s step-start infinite;
+                    }
+                    @keyframes blink { 50% { opacity: 0; } }
+                </style>
+                <script>
+                    const payload = '{\n  "vendor": "Screwfix Direct",\n  "amount": 48.50,\n  "currency": "GBP",\n  "hmrc_manual": "BIM37000",\n  "status": "100% Allowable",\n  "tax_saved": 12.61,\n  "digital_link": "SI-2021-1076",\n  "true_up_reconciliation": "Auto-Reconciled"\n}';
+                    let i = 0;
+                    const el = document.getElementById('json-output');
+                    function typeWriter() {
+                        if (i < payload.length) {
+                            el.innerHTML = payload.substring(0, i+1) + '<span class="typing-cursor"></span>';
+                            i++;
+                            setTimeout(typeWriter, 35);
+                        } else {
+                            setTimeout(() => { i = 0; el.innerHTML = ''; typeWriter(); }, 2500);
+                        }
+                    }
+                    setTimeout(typeWriter, 500);
+                </script>
+            </div>
+        </div>
+
+        <!-- Slide 5 -->
+        <div class="slide">
+            <div class="card col-left-5">
+                <div class="caption">Slide 5: Go-To-Market</div>
+                <h2>The B2B2C Trojan Horse</h2>
+                <p>Pure B2C financial apps burn millions on CAC. We bypass this entirely with a <strong>B2B2C Enterprise White-labeling</strong> strategy.</p>
+                <p>By selling an enterprise licence to one accountancy practice, we deploy 'Emma' across 1,000 to 5,000 sole traders overnight.</p>
+                
+                <div class="moat-highlight" style="margin: 12px 0; padding: 12px 14px; border-left-color: #1D4ED8; background: rgba(29, 78, 216, 0.04);">
+                    <div style="font-family: 'Geist Mono', monospace; font-size: 0.70rem; color: #1D4ED8; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 3px; font-weight: 600;">Zero Practice Disruption</div>
+                    <div style="font-size: 0.84rem; color: var(--deep-slate); line-height: 1.45;">
+                        Emma does <strong>not</strong> replace Xero, Iris, or Sage. Emma acts as the autonomous frontline ingestion conduit, converting messy WhatsApp receipts into pre-reconciled, digitally linked journals piped straight into the accountant's current software.
+                    </div>
+                </div>
+
+                <div class="script-notes">
+                    "Accountants don't need to change their existing software. Emma doesn't replace Xero, Iris, or Sage; she eliminates the 8 hours a week spent chasing shoe-boxes of receipts and pipes reconciled journals directly into their current platform..."
+                </div>
+            </div>
+            <div class="col-right-7 card card-dark" style="flex-direction: column; position: relative; overflow: hidden; padding: 0;">
+                    <div class="visual-box card-dark" style="flex-direction: column; position: relative; overflow: hidden; padding: 0; width: 100%; height: 100%; border: none;">
+                    <div style="position: absolute; top: 24px; left: 24px; font-family: monospace; font-size: 1.2rem; color: #10b981;">
+                        CAC: £<span id="cac-counter">150.00</span>
+                    </div>
+                    
+                    <div style="position: relative; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center;">
+                        <!-- Central B2B Node -->
+                        <div style="position: absolute; width: 64px; height: 64px; background: var(--heritage-blue); border-radius: 50%; z-index: 2; box-shadow: 0 0 24px var(--heritage-blue); display: flex; align-items: center; justify-content: center; font-size: 0.7rem; font-weight: bold; color: white;">B2B</div>
+                        
+                        <!-- Animated Pulse -->
+                        <div class="pulse-ring" style="position: absolute; width: 64px; height: 64px; border: 2px solid var(--heritage-blue); border-radius: 50%; z-index: 1;"></div>
+                        
+                        <!-- Spawning B2C Nodes -->
+                        <div class="b2c-nodes" style="position: absolute; width: 100%; height: 100%;">
+                            <!-- Nodes created via JS for radial pattern -->
+                        </div>
+                    </div>
+                    
+                    <style>
+                        .pulse-ring {
+                            animation: pulse 3s infinite cubic-bezier(0.2, 0.8, 0.2, 1);
+                        }
+                        @keyframes pulse {
+                            0% { transform: scale(1); opacity: 1; }
+                            100% { transform: scale(6); opacity: 0; }
+                        }
+                        .b2c-node {
+                            position: absolute;
+                            width: 8px;
+                            height: 8px;
+                            background: white;
+                            border-radius: 50%;
+                            box-shadow: 0 0 8px white;
+                            opacity: 0;
+                            transition: opacity 0.5s ease-out;
+                        }
+                
+        </style>
+                    <script>
+                        const container = document.querySelector('.b2c-nodes');
+                        const cacCounter = document.getElementById('cac-counter');
+                        
+                        // Generate radial nodes
+                        for(let i=0; i<40; i++) {
+                            const node = document.createElement('div');
+                            node.className = 'b2c-node';
+                            const angle = Math.random() * Math.PI * 2;
+                            const distance = 80 + Math.random() * 120;
+                            node.style.left = `calc(50% + ${Math.cos(angle) * distance}px)`;
+                            node.style.top = `calc(50% + ${Math.sin(angle) * distance}px)`;
+                            container.appendChild(node);
+                        }
+                        
+                        // Animation loop
+                        setInterval(() => {
+                            const nodes = document.querySelectorAll('.b2c-node');
+                            // Reset
+                            nodes.forEach(n => n.style.opacity = '0');
+                            cacCounter.innerText = '150.00';
+                            
+                            // Pulse
+                            setTimeout(() => {
+                                nodes.forEach(n => n.style.opacity = Math.random() * 0.5 + 0.3);
+                                // Animate CAC drop
+                                let currentCac = 150.00;
+                                const dropInterval = setInterval(() => {
+                                    currentCac -= 15;
+                                    if(currentCac <= 0.30) {
+                                        currentCac = 0.30;
+                                        clearInterval(dropInterval);
+                                    }
+                                    cacCounter.innerText = currentCac.toFixed(2);
+                                }, 30);
+                            }, 500);
+                        }, 3000);
+                    </script>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 6 -->
+        <div class="slide">
+            <div class="card col-left-7">
+                <div class="caption">Slide 6: Defensibility</div>
+                <h2>The Technical Moat: Enterprise Rigour</h2>
+                <p>This is not a ChatGPT wrapper. Our moat is built on deep HMRC integration and banking-grade security architecture.</p>
+                <ul style="margin: 12px 0 14px 0; padding-left: 20px;">
+                    <li style="margin-bottom: 7px;"><strong>HMRC Production Gate:</strong> Formally submitted for Production API Credentials (Ticket 2026-OUP153) with schema-validated JSON payloads and automated digital linking under <em>SI 2021/1076</em>.</li>
+                    <li style="margin-bottom: 7px;"><strong>FIPS 140-3 CloudHSM Vault:</strong> Envelope encryption with automated 90-day AES-256-GCM master key rotation, SHA-256 salted PII hashing, and tamper-evident AEAD authentication tags.</li>
+                    <li style="margin-bottom: 7px;"><strong>HMRC Anti-Fraud Telemetry:</strong> Mandated fraud prevention headers (<code>Gov-Client-Connection-Method: OTHER_VIA_SERVER</code>), static egress IP whitelisting, and OAuth 2.0 PKCE with automated circuit breakers.</li>
+                    <li style="margin-bottom: 7px;"><strong>Independent Security Audit:</strong> Passed comprehensive CREST-accredited penetration test (Intruder.io) with zero critical or high vulnerabilities.</li>
+                </ul>
+                <div class="script-notes">
+                    "Our technical moat is built on enterprise-grade rigour. Our master vault leverages FIPS 140-3 CloudHSM with automated 90-day AES-256-GCM key rotation, eliminating single points of failure. Every transaction is sealed with SHA-256 digital links and authenticated AEAD tags before touching HMRC infrastructure..."
+                </div>
+            </div>
+            <div class="card card-dark col-right-5" style="position: relative; overflow: hidden; padding: 28px; display: flex; flex-direction: column; justify-content: center; height: 100%; border-radius: 4px;">
+                <div class="caption" style="color: var(--subtle-silver); margin-bottom: 20px;">Telemetry: Security Pipeline</div>
+                
+                <div style="flex: 1; position: relative; display: flex; align-items: center; justify-content: space-between;">
+                    <!-- Unstructured Input -->
+                    <div style="flex: 1; text-align: left; font-family: monospace; font-size: 0.7rem; color: var(--muted-slate);">
+                        <div class="chaos-text" style="animation: float 2s infinite;">{raw_msg_xyz}</div>
+                        <div class="chaos-text" style="animation: float 2.5s infinite reverse;">[receipt_img_bin]</div>
+                        <div class="chaos-text" style="animation: float 1.8s infinite;">"screwfix 48.50"</div>
+                    </div>
+                    
+                    <!-- The Vault -->
+                    <div style="width: 108px; height: 108px; border: 2px dashed #10b981; border-radius: 8px; display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative; z-index: 10; background: var(--oxford-blue); padding: 4px;">
+                        <div style="font-size: 0.64rem; color: #10b981; font-weight: bold; text-align: center; line-height: 1.25;">FIPS 140-3<br>CloudHSM<br>AES-256-GCM</div>
+                        <div style="font-size: 0.52rem; color: #38BDF8; margin-top: 3px; font-family: monospace;">90d Rotation</div>
+                        <div style="position: absolute; top: 110%; font-size: 0.58rem; color: var(--subtle-silver); width: 160px; text-align: center;">OAuth 2.0 PKCE · AEAD</div>
+                    </div>
+                    
+                    <!-- Structured Output Packets -->
+                    <div style="flex: 1; position: relative; height: 100%;">
+                        <div class="packet" style="position: absolute; top: 25%; font-size: 0.58rem; background: var(--heritage-blue); color: white; padding: 3px 6px; border-radius: 3px;">Gov-Client-Headers</div>
+                        <div class="packet packet-delay" style="position: absolute; top: 55%; font-size: 0.58rem; background: #10b981; color: white; padding: 3px 6px; border-radius: 3px;">SI-2021-1076 JSON</div>
+                        <div class="packet" style="position: absolute; top: 80%; font-size: 0.58rem; background: #0284C7; color: white; padding: 3px 6px; border-radius: 3px; animation-delay: 1.5s;">SHA-256 Sealed</div>
+                    </div>
+                </div>
+                
+                <style>
+                    @keyframes float { 0% { transform: translateY(0); opacity: 0; } 50% { opacity: 1; } 100% { transform: translateY(20px) translateX(20px); opacity: 0; } }
+                    .packet { animation: shoot 2s infinite cubic-bezier(0.4, 0, 0.2, 1); opacity: 0; left: 0; }
+                    .packet-delay { animation-delay: 1s; }
+                    @keyframes shoot { 0% { left: -20px; opacity: 0; } 20% { opacity: 1; } 80% { opacity: 1; } 100% { left: 100%; opacity: 0; } }
+            
+        </style>
+            </div>
+        </div>
+
+        <!-- Slide 7 -->
+        <div class="slide">
+            <div class="card col-left-7">
+                <div class="caption">Slide 7: Roadmap & Defensibility</div>
+                <h2>The "Zero-Friction" Compliance Roadmap</h2>
+                <div style="display: flex; flex-direction: column; gap: 16px;">
+                    <div style="border-left: 4px solid var(--heritage-blue); padding: 16px 18px; background-color: rgba(29, 78, 216, 0.03); border-radius: 0 4px 4px 0;">
+                        <h3 style="margin-top: 0; margin-bottom: 6px; color: var(--heritage-blue); font-size: 1.12rem;">Phase 1: Zero-Friction Launch & Multi-Rail Insulation</h3>
+                        <p style="margin-bottom: 6px; font-size: 0.86rem; line-height: 1.42;">Bypass the 12-month FCA authorization bottleneck. HMRC rules confirm a photo of a trade receipt satisfies the statutory digital link under <em>SI 2021/1076</em>. <strong>£0 regulatory licensing, immediate market capture.</strong></p>
+                        <div style="font-size: 0.78rem; color: #0284C7; font-weight: 600; line-height: 1.35;">
+                            🛡️ <strong>Platform Risk Insulation:</strong> Meta Cloud API (99.9% SLA) fortified by automated failover to Twilio Enterprise SMS and offline Web PWA—guaranteeing zero single-vendor lock-in.
+                        </div>
+                    </div>
+                    <div style="border-left: 4px solid var(--oxford-blue); padding: 16px 18px; background-color: rgba(15, 23, 42, 0.03); border-radius: 0 4px 4px 0;">
+                        <h3 style="margin-top: 0; margin-bottom: 6px; font-size: 1.12rem;">Phase 2: Premium Banking-as-a-Service Auto-Reconciliation</h3>
+                        <p style="margin-bottom: 0; font-size: 0.86rem; line-height: 1.42;">Partner with TrueLayer (BaaS). They absorb the FCA compliance risk; our engine consumes their Open Banking API to automatically match WhatsApp receipts against live bank feeds—delivering institutional-grade auto-reconciliation.</p>
+                    </div>
+                </div>
+                <div class="script-notes">
+                    "We have eliminated both regulatory delay and platform dependency. By leveraging receipt OCR, we achieve full HMRC compliance under SI 2021/1076 with zero FCA licensing delay. Crucially, we insulate against Meta platform risk through automated multi-rail fallback to Twilio SMS and Web PWA..."
+                </div>
+            </div>
+            <div class="card card-dark col-right-5" style="display:flex; flex-direction:column; justify-content:center; align-items:center; text-align:center; position: relative; overflow: hidden; padding: 0;">
+                <div class="caption" style="color: var(--subtle-silver); position: absolute; top: 16px; left: 20px;">Phase 2: Multi-Rail Auto-Reconciliation</div>
+                
+                <div style="position: absolute; top: 38px; left: 20px; font-size: 0.56rem; color: #38BDF8; font-family: monospace;">
+                    Primary: WhatsApp Cloud API · Failover: Twilio SMS / PWA
+                </div>
+
+                <div style="width: 100%; height: 100%; display: flex; align-items: center; justify-content: flex-start; position: relative; margin-top: 16px;">
+                    <!-- Data Streams -->
+                    <div style="position: absolute; width: 100%; height: 100%;">
+                        <svg width="100%" height="100%" viewBox="0 0 400 300" preserveAspectRatio="none">
+                            <path class="stream stream-top" d="M -50 100 C 150 100, 150 150, 200 150" fill="none" stroke="var(--heritage-blue)" stroke-width="4" stroke-dasharray="10 10"/>
+                            <path class="stream stream-bot" d="M -50 200 C 150 200, 150 150, 200 150" fill="none" stroke="#10b981" stroke-width="4" stroke-dasharray="10 10"/>
+                        </svg>
+                        <!-- Stream Labels -->
+                        <div style="position: absolute; top: 25%; left: 8%; font-size: 0.58rem; color: var(--heritage-blue); font-family: monospace;">Multi-Rail OCR</div>
+                        <div style="position: absolute; top: 70%; left: 8%; font-size: 0.58rem; color: #10b981; font-family: monospace;">TrueLayer BaaS</div>
+                    </div>
+                    
+                    <!-- The Merger Node -->
+                    <div class="merge-node" style="position: absolute; left: 50%; width: 40px; height: 40px; background: white; border-radius: 50%; transform: translateX(-50%); box-shadow: 0 0 20px white; z-index: 2;"></div>
+                    
+                    <!-- Reconciled Output -->
+                    <div class="reconciled-box" style="position: absolute; left: 65%; background: rgba(16, 185, 129, 0.1); border: 1px solid #10b981; padding: 12px; border-radius: 4px; text-align: left; opacity: 0;">
+                        <div style="color: #10b981; font-weight: bold; font-size: 0.8rem; margin-bottom: 4px;">✓ RECONCILED</div>
+                        <div id="hash-text" style="font-family: monospace; font-size: 0.6rem; color: var(--subtle-silver);">SHA-256: ...</div>
+                    </div>
+                </div>
+                
+                <style>
+                    .stream { animation: flow 1s linear infinite; }
+                    .stream-top { stroke-dashoffset: 20; }
+                    .stream-bot { stroke-dashoffset: 20; animation-duration: 0.8s; }
+                    @keyframes flow { to { stroke-dashoffset: 0; } }
+                    
+                    .merge-node { animation: pulse-node 2s infinite; }
+                    @keyframes pulse-node { 0%, 100% { transform: translateX(-50%) scale(1); box-shadow: 0 0 10px white; } 50% { transform: translateX(-50%) scale(1.2); box-shadow: 0 0 30px #10b981; } }
+                    
+                    .reconciled-box { animation: appear-hash 2s infinite; }
+                    @keyframes appear-hash { 0%, 40% { opacity: 0; transform: translateX(-10px); } 50%, 90% { opacity: 1; transform: translateX(0); } 100% { opacity: 0; } }
+            
+        </style>
+                <script>
+                    const hashEl = document.getElementById('hash-text');
+                    setInterval(() => {
+                        const hash = Array.from({length: 12}, () => Math.floor(Math.random()*16).toString(16)).join('');
+                        hashEl.innerText = 'SHA-256: ' + hash + '...';
+                    }, 2000);
+                </script>
+            </div>
+        </div>
+
+        <!-- Slide 8 -->
+        <div class="slide">
+            <div class="card col-left-6">
+                <div class="caption">Slide 8: Commercial Term Sheet</div>
+                <h2>Pre-Seed Syndicate & Terms</h2>
+                <div class="big-number" style="font-size: 2.7rem; margin-bottom: 4px;">£350,000</div>
+                <p style="font-size: 1.05rem; font-weight: 600; color: #10B981; margin-top: 0; margin-bottom: 12px;">
+                    Firm Allocation on £3.2M Post-Money Cap · SEIS / EIS Confirmed
+                </p>
+                
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 12px;">
+                    <div style="background: #F8FAFC; border: 1px solid #E2E8F0; padding: 10px 12px; border-radius: 4px;">
+                        <div style="font-size: 0.62rem; color: #64748B; text-transform: uppercase; font-family: 'Geist Mono', monospace;">Runway & Breakeven</div>
+                        <div style="font-size: 0.95rem; font-weight: 700; color: #0F172A; margin-top: 2px;">18 Mo · Mo 14 B/E</div>
+                        <div style="font-size: 0.65rem; color: #64748B;">4,200 active trade seats</div>
+                    </div>
+                    <div style="background: #F8FAFC; border: 1px solid #E2E8F0; padding: 10px 12px; border-radius: 4px;">
+                        <div style="font-size: 0.62rem; color: #64748B; text-transform: uppercase; font-family: 'Geist Mono', monospace;">Statutory Tax Relief</div>
+                        <div style="font-size: 0.95rem; font-weight: 700; color: #10B981; margin-top: 2px;">50% / 30% Relief</div>
+                        <div style="font-size: 0.65rem; color: #64748B;">HMRC Advance Assurance</div>
+                    </div>
+                </div>
+
+                <div class="moat-highlight" style="margin-top: 0; margin-bottom: 12px; padding: 10px 14px; background: rgba(29, 78, 216, 0.04); border-left-color: #1D4ED8;">
+                    <div style="font-family: 'Geist Mono', monospace; font-size: 0.68rem; color: #1D4ED8; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 4px; font-weight: 600;">Use of Proceeds Allocation</div>
+                    <div style="font-size: 0.78rem; color: var(--deep-slate); display: flex; justify-content: space-between;">
+                        <span>• 55% Core HMRC Engineering</span>
+                        <span>• 25% FIPS Security & Audits</span>
+                        <span>• 20% Practice Distribution</span>
+                    </div>
+                </div>
+
+                <div class="script-notes">
+                    "We are closing a £350,000 Pre-Seed syndicate allocation on a £3.2M post-money valuation. HMRC SEIS/EIS Advance Assurance is confirmed, giving investors up to 50% income tax relief. We have 18 months of runway, reaching operational breakeven at month 14 on 4,200 paying seats..."
+                </div>
+            </div>
+            <div class="card col-right-6">
+                <div class="caption">Exit Architecture</div>
+                <h3 style="margin-top: 8px; font-size: 1.5rem;">10x to 20x M&A Return Target</h3>
+                <p style="color: var(--muted-slate); font-size: 0.88rem; margin-bottom: 14px; line-height: 1.45;">Targeting £32M - £64M strategic trade exit as the primary client acquisition engine for the 3.2M UK sole trader market.</p>
+                <div style="display: flex; flex-direction: column; gap: 12px;">
+                    <div style="border: 1px solid var(--subtle-silver); padding: 16px; border-radius: 4px; background: #FFFFFF;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+                            <h4 style="margin: 0; color: var(--oxford-blue); font-size: 0.98rem;">Legacy Cloud Incumbents</h4>
+                            <span style="font-family: 'Geist Mono', monospace; font-size: 0.65rem; color: #2563EB; background: #EFF6FF; padding: 2px 6px; border-radius: 2px;">Strategic Acquisition</span>
+                        </div>
+                        <p style="margin: 0; font-size: 0.82rem; color: var(--muted-slate); line-height: 1.4;"><strong>Xero, Intuit (QuickBooks), Sage, IRIS:</strong> Squeezed by churn among sole traders unable to use desktop portals; acquiring Emma to capture frontline conversational ingestion.</p>
+                    </div>
+                    <div style="border: 1px solid var(--subtle-silver); padding: 16px; border-radius: 4px; background: #FFFFFF;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+                            <h4 style="margin: 0; color: var(--oxford-blue); font-size: 0.98rem;">Challenger Neo-Banks</h4>
+                            <span style="font-family: 'Geist Mono', monospace; font-size: 0.65rem; color: #059669; background: #ECFDF5; padding: 2px 6px; border-radius: 2px;">Ecosystem Moat</span>
+                        </div>
+                        <p style="margin: 0; font-size: 0.82rem; color: var(--muted-slate); line-height: 1.4;"><strong>Monzo, Revolut, Starling, Tide:</strong> Aggressively packaging business accounts with automated HMRC MTD compliance to achieve primary operating account lock-in.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 9: Conclusion & Inquiries -->
+        <div class="slide" id="slide-9">
+            <div class="editorial-memorandum">
+                <!-- Top Regulatory Inscription -->
+                <div class="memorandum-eyebrow">
+                    <div class="eyebrow-text">HMRC Making Tax Digital 2026 · Pre-Seed Syndicate Close</div>
+                    <div class="eyebrow-id">Document Ref: IA-MTD-2026-SYNDICATE</div>
+                </div>
+
+                <!-- Main Hero: 7:5 Architectural Ratio -->
+                <div class="memorandum-hero">
+                    <div class="hero-left">
+                        <div class="caption" style="color: #C5A880; margin-bottom: 8px; font-weight: 600; letter-spacing: 0.15em;">CONCLUDING REMARKS & Q&A</div>
+                        <h1 class="hero-title" style="margin-bottom: 16px;">Thank You.</h1>
+                        <p class="hero-proposition" style="color: #F8FAFC; font-size: clamp(1.3rem, 1.8vw, 1.65rem); font-weight: 400; margin-bottom: 20px;">
+                            Presented by <span style="color: #FFFFFF; font-weight: 700; border-bottom: 2px solid #C5A880; padding-bottom: 2px;">Anas Wahab</span>
+                        </p>
+                        <p class="hero-detail" style="color: #94A3B8; margin-bottom: 20px;">
+                            Founder & Systems Architect · Invisible Accountant<br>
+                            Autonomous Fiscal Compliance Infrastructure for UK Micro-Enterprise
+                        </p>
+
+                        <!-- Contact & Diligence Box -->
+                        <div style="display: flex; gap: 20px; margin-top: 10px; padding: 16px 20px; background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 4px; max-width: 580px;">
+                            <div style="flex: 1;">
+                                <div style="font-family: 'Geist Mono', monospace; font-size: 0.65rem; color: #C5A880; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 4px;">Direct Founder Contact</div>
+                                <div style="font-size: 0.90rem; color: #FFFFFF; font-weight: 600; margin-bottom: 2px;">anas@invisibleaccountant.co.uk</div>
+                                <div style="font-size: 0.75rem; color: #64748B;">London, United Kingdom · Available for Diligence</div>
+                            </div>
+                            <div style="border-left: 1px solid rgba(255, 255, 255, 0.1); padding-left: 18px; flex: 1;">
+                                <div style="font-family: 'Geist Mono', monospace; font-size: 0.65rem; color: #10B981; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 4px;">Syndicate Allocation</div>
+                                <div style="font-size: 0.90rem; color: #FFFFFF; font-weight: 600; margin-bottom: 2px;">£350,000 Allocation</div>
+                                <div style="font-size: 0.75rem; color: #10B981;">HMRC SEIS / EIS Confirmed</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="hero-right">
+                        <div class="emblem-wrapper">
+                            <!-- Inlined Master SVG Crest: The Sovereign Monoline Ledger -->
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 160" width="100%" height="100%" fill="none">
+                              <!-- Obsidian Slate Ground -->
+                              <rect width="160" height="160" fill="#0B0F19"/>
+                              <rect x="8" y="8" width="144" height="144" stroke="#1E293B" stroke-width="1"/>
+                              <rect x="12" y="12" width="136" height="136" stroke="#C5A880" stroke-width="0.5" stroke-opacity="0.35"/>
+
+                              <!-- The Sovereign Monoline Ledger (Interlocking IA Monogram) -->
+                              <g stroke="#FFFFFF" stroke-width="3.5" stroke-linecap="square" stroke-linejoin="miter">
+                                <!-- Pillar I (Invisible / Institutional Integrity) -->
+                                <line x1="46" y1="38" x2="46" y2="122"/>
+                                <line x1="36" y1="38" x2="56" y2="38"/>
+                                <line x1="36" y1="122" x2="56" y2="122"/>
+
+                                <!-- Chevron Apex & Pillars (Accountant / Asset) -->
+                                <line x1="96" y1="38" x2="68" y2="122"/>
+                                <line x1="96" y1="38" x2="114" y2="122"/>
+                                
+                                <line x1="60" y1="122" x2="76" y2="122"/>
+                                <line x1="106" y1="122" x2="122" y2="122"/>
+                                <line x1="88" y1="38" x2="104" y2="38"/>
+                              </g>
+
+                              <!-- Golden Section Ledger Beam: Hallmarked Antique Gilt -->
+                              <line x1="46" y1="80" x2="114" y2="80" stroke="#C5A880" stroke-width="2.5" stroke-linecap="square"/>
+
+                              <!-- Central Trust Anchor: Admiralty Blue -->
+                              <rect x="74" y="78.5" width="3" height="3" fill="#1D4ED8"/>
+                            </svg>
+                        </div>
+                        <div class="emblem-inscription">
+                            <div class="emblem-title">Invisible Accountant</div>
+                            <div class="emblem-sub">The End of Tax Anxiety · London EC2</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Bottom Institutional Footer -->
+                <div class="memorandum-footer">
+                    <div class="thesis-block">
+                        <span class="thesis-label">Floor Open</span>
+                        <span class="thesis-text">Questions, Technical Architecture Deep Dive & Due Diligence Discussion.</span>
+                    </div>
+                    <div class="status-block">
+                        <span class="status-badge">Term Sheet Executable</span>
+                        <span class="status-note">Pre-Seed Syndicate · £3.2M Post-Money Cap</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Presentation Controls Dock -->
+    <div class="controls">
+        <button id="prevBtn" title="Previous Slide (Left Arrow)">← Prev</button>
+        <div class="slide-counter" id="slideCounter">1 / 9</div>
+        <button id="nextBtn" class="btn-primary" title="Next Slide (Right Arrow or Space)">Next →</button>
+    </div>
+
+    <script>
+        const slides = document.querySelectorAll('.slide');
+        let currentSlide = 0;
+        const slideCounter = document.getElementById('slideCounter');
+        const prevBtn = document.getElementById('prevBtn');
+        const nextBtn = document.getElementById('nextBtn');
+
+        function showSlide(index) {
+            slides.forEach((slide, i) => {
+                slide.classList.remove('active');
+                if (i === index) {
+                    slide.classList.add('active');
+                }
+            });
+            if (slideCounter) {
+                slideCounter.textContent = `${index + 1} / ${slides.length}`;
+            }
+            if (prevBtn) prevBtn.disabled = (index === 0);
+            if (nextBtn) nextBtn.disabled = (index === slides.length - 1);
+        }
+
+        prevBtn.addEventListener('click', () => {
+            if (currentSlide > 0) {
+                currentSlide--;
+                showSlide(currentSlide);
+            }
+        });
+
+        nextBtn.addEventListener('click', () => {
+            if (currentSlide < slides.length - 1) {
+                currentSlide++;
+                showSlide(currentSlide);
+            }
+        });
+
+        // Keyboard navigation
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowRight' || e.key === ' ') {
+                if (currentSlide < slides.length - 1) {
+                    currentSlide++;
+                    showSlide(currentSlide);
+                }
+            } else if (e.key === 'ArrowLeft') {
+                if (currentSlide > 0) {
+                    currentSlide--;
+                    showSlide(currentSlide);
+                }
+            }
+        });
+
+        // Initialize
+        showSlide(0);
+    </script>
+</body>
+</html>

@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Invisible Accountant - Data Flow</title>
+    <style>
+        body {
+            background-color: #090b0f;
+            color: #c9d1d9;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            height: 100vh;
+            overflow: hidden;
+        }
+        h1 {
+            color: #58a6ff;
+            text-shadow: 0 0 10px rgba(88, 166, 255, 0.5);
+            margin-top: 30px;
+            font-weight: 300;
+            letter-spacing: 2px;
+        }
+        #controls {
+            margin: 20px;
+            z-index: 20;
+        }
+        button {
+            background: rgba(0, 255, 128, 0.1);
+            color: #00ff80;
+            border: 1px solid #00ff80;
+            padding: 12px 24px;
+            font-size: 16px;
+            cursor: pointer;
+            border-radius: 4px;
+            box-shadow: 0 0 15px rgba(0, 255, 128, 0.3);
+            transition: all 0.3s;
+            text-transform: uppercase;
+            font-weight: bold;
+            letter-spacing: 1px;
+        }
+        button:hover {
+            background: rgba(0, 255, 128, 0.3);
+            box-shadow: 0 0 25px rgba(0, 255, 128, 0.6);
+            transform: scale(1.05);
+        }
+        button:disabled {
+            border-color: #333;
+            color: #555;
+            box-shadow: none;
+            background: transparent;
+            cursor: not-allowed;
+            transform: none;
+        }
+        #container {
+            position: relative;
+            width: 1000px;
+            height: 600px;
+            margin-top: 20px;
+        }
+        svg {
+            width: 100%;
+            height: 100%;
+        }
+        .node-rect {
+            fill: #161b22;
+            stroke: #30363d;
+            stroke-width: 2;
+            rx: 8;
+            transition: all 0.4s ease;
+        }
+        .node-text {
+            fill: #e6edf3;
+            font-size: 15px;
+            font-weight: 600;
+            text-anchor: middle;
+            pointer-events: none;
+        }
+        .node-subtext {
+            fill: #8b949e;
+            font-size: 12px;
+            text-anchor: middle;
+            pointer-events: none;
+        }
+        .path-line {
+            fill: none;
+            stroke: #21262d;
+            stroke-width: 3;
+            stroke-dasharray: 6, 6;
+        }
+        .glow-active {
+            stroke: #58a6ff;
+            stroke-width: 3;
+            filter: drop-shadow(0 0 15px rgba(88, 166, 255, 0.8));
+            fill: #0d2a46;
+        }
+        .glow-active-fraud {
+            stroke: #ff7b72;
+            stroke-width: 3;
+            filter: drop-shadow(0 0 15px rgba(255, 123, 114, 0.8));
+            fill: #3b1d1f;
+        }
+        #packet {
+            fill: #00ff80;
+            filter: drop-shadow(0 0 12px #00ff80);
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        .details-panel {
+            position: absolute;
+            background: rgba(13, 17, 23, 0.95);
+            border: 1px solid #30363d;
+            padding: 15px 20px;
+            border-radius: 6px;
+            width: 260px;
+            display: none;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.8);
+            color: #8b949e;
+            font-size: 13px;
+            pointer-events: none;
+            z-index: 10;
+            opacity: 0;
+            transform: translateY(10px);
+            animation: slideUp 0.4s forwards ease-out;
+            backdrop-filter: blur(5px);
+        }
+        @keyframes slideUp {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        .details-panel h3 {
+            margin: 0 0 10px 0;
+            font-size: 15px;
+            color: #58a6ff;
+            border-bottom: 1px solid #21262d;
+            padding-bottom: 6px;
+        }
+        .details-panel ul {
+            margin: 6px 0;
+            padding-left: 20px;
+            line-height: 1.4;
+            color: #c9d1d9;
+        }
+        .details-panel li {
+            margin-bottom: 4px;
+        }
+        .details-panel strong {
+            color: #58a6ff;
+            font-size: 12px;
+            text-transform: uppercase;
+        }
+        
+        /* Specific Detail Panel Placements */
+        #details-1 { top: 220px; left: 20px; }
+        #details-2 { top: 220px; left: 720px; }
+        #details-3 { top: 520px; left: 720px; }
+        #details-4 { top: 520px; left: 20px; }
+        
+        #details-4 h3, #details-4 strong {
+            color: #ff7b72;
+        }
+
+    </style>
+</head>
+<body>
+    <h1>INVISIBLE ACCOUNTANT // DATA FLOW</h1>
+    <div id="controls">
+        <button id="simBtn">Simulate Journey</button>
+    </div>
+    
+    <div id="container">
+        <!-- SVG Canvas -->
+        <svg id="canvas" viewBox="0 0 1000 600">
+            <!-- Defs for filters and markers -->
+            <defs>
+                <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
+                    <feGaussianBlur stdDeviation="5" result="blur" />
+                    <feMerge>
+                        <feMergeNode in="blur" />
+                        <feMergeNode in="SourceGraphic" />
+                    </feMerge>
+                </filter>
+                <marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                    <path d="M 0 2 L 8 5 L 0 8 z" fill="#30363d" />
+                </marker>
+            </defs>
+
+            <!-- Paths connecting nodes -->
+            <path class="path-line" d="M 250 150 L 735 150" marker-end="url(#arrow)" />
+            <path class="path-line" d="M 850 200 L 850 385" marker-end="url(#arrow)" />
+            <path class="path-line" d="M 750 450 L 265 450" marker-end="url(#arrow)" />
+
+            <!-- Node 1 -->
+            <g class="node" id="node1">
+                <rect class="node-rect" x="50" y="100" width="200" height="100" />
+                <text class="node-text" x="150" y="145">WhatsApp Webhook</text>
+                <text class="node-subtext" x="150" y="165">→ PII Masking</text>
+            </g>
+
+            <!-- Node 2 -->
+            <g class="node" id="node2">
+                <rect class="node-rect" x="750" y="100" width="200" height="100" />
+                <text class="node-text" x="850" y="145">Gemini AI Engine</text>
+                <text class="node-subtext" x="850" y="165">Anti-Hallucination Auditor</text>
+            </g>
+
+            <!-- Node 3 -->
+            <g class="node" id="node3">
+                <rect class="node-rect" x="750" y="400" width="200" height="100" />
+                <text class="node-text" x="850" y="445">PostgreSQL Vault</text>
+                <text class="node-subtext" x="850" y="465">AES-GCM Encryption</text>
+            </g>
+
+            <!-- Node 4 -->
+            <g class="node" id="node4">
+                <rect class="node-rect" x="50" y="400" width="200" height="100" />
+                <text class="node-text" x="150" y="445">HMRC API</text>
+                <text class="node-subtext" x="150" y="465">(with Fraud Headers)</text>
+            </g>
+
+            <!-- Glowing Data Packet -->
+            <circle id="packet" r="6" cx="150" cy="150" />
+        </svg>
+
+        <!-- Detail Panels -->
+        <div id="details-1" class="details-panel">
+            <h3>[1] WhatsApp Webhook</h3>
+            <strong>Actions Executing:</strong>
+            <ul>
+                <li>HMAC Signature check</li>
+                <li>mask_pii()</li>
+            </ul>
+        </div>
+        <div id="details-2" class="details-panel">
+            <h3>[2] Gemini AI Engine</h3>
+            <strong>Actions Executing:</strong>
+            <ul>
+                <li>Extract Amount/Vendor</li>
+                <li>verify_expense_hallucination</li>
+            </ul>
+        </div>
+        <div id="details-3" class="details-panel">
+            <h3>[3] PostgreSQL Vault</h3>
+            <strong>Actions Executing:</strong>
+            <ul>
+                <li>AES-GCM encryption for OAuth tokens</li>
+            </ul>
+        </div>
+        <div id="details-4" class="details-panel">
+            <h3>[4] HMRC API</h3>
+            <strong>Actions Executing:</strong>
+            <ul>
+                <li>Token bucket rate limiter</li>
+                <li>OTHER_VIA_SERVER fraud headers</li>
+            </ul>
+        </div>
+    </div>
+
+    <script>
+        const btn = document.getElementById('simBtn');
+        const packet = document.getElementById('packet');
+        const nodes = [
+            document.getElementById('node1').querySelector('.node-rect'),
+            document.getElementById('node2').querySelector('.node-rect'),
+            document.getElementById('node3').querySelector('.node-rect'),
+            document.getElementById('node4').querySelector('.node-rect')
+        ];
+        const panels = [
+            document.getElementById('details-1'),
+            document.getElementById('details-2'),
+            document.getElementById('details-3'),
+            document.getElementById('details-4')
+        ];
+
+        // Coordinate points for the center of each node
+        const journey = [
+            { x: 150, y: 150 }, // Node 1
+            { x: 850, y: 150 }, // Node 2
+            { x: 850, y: 450 }, // Node 3
+            { x: 150, y: 450 }  // Node 4
+        ];
+
+        function resetAll() {
+            nodes.forEach(n => {
+                n.classList.remove('glow-active');
+                n.classList.remove('glow-active-fraud');
+            });
+            panels.forEach(p => p.style.display = 'none');
+            packet.style.opacity = 0;
+            packet.setAttribute('cx', journey[0].x);
+            packet.setAttribute('cy', journey[0].y);
+        }
+
+        // Animate visually moving the packet between coordinates
+        function animatePacket(startX, startY, endX, endY, duration) {
+            return new Promise(resolve => {
+                const startTime = performance.now();
+                packet.style.opacity = 1;
+
+                function step(currentTime) {
+                    const elapsed = currentTime - startTime;
+                    // Ease-in-out calculation for smoother movement
+                    let progress = Math.min(elapsed / duration, 1);
+                    progress = progress < 0.5 ? 2 * progress * progress : -1 + (4 - 2 * progress) * progress;
+                    
+                    const currentX = startX + (endX - startX) * progress;
+                    const currentY = startY + (endY - startY) * progress;
+                    
+                    packet.setAttribute('cx', currentX);
+                    packet.setAttribute('cy', currentY);
+
+                    if (progress < 1) {
+                        requestAnimationFrame(step);
+                    } else {
+                        resolve();
+                    }
+                }
+                requestAnimationFrame(step);
+            });
+        }
+
+        async function highlightNode(index) {
+            // Apply special styling for the HMRC node
+            if (index === 3) {
+                nodes[index].classList.add('glow-active-fraud');
+                packet.style.fill = '#ff7b72';
+                packet.style.filter = 'drop-shadow(0 0 12px #ff7b72)';
+            } else {
+                nodes[index].classList.add('glow-active');
+                packet.style.fill = '#00ff80';
+                packet.style.filter = 'drop-shadow(0 0 12px #00ff80)';
+            }
+            
+            panels[index].style.display = 'block';
+            
+            // Wait for user to read or simulate processing time
+            await new Promise(r => setTimeout(r, 2200));
+            
+            panels[index].style.display = 'none';
+            nodes[index].classList.remove('glow-active');
+            nodes[index].classList.remove('glow-active-fraud');
+        }
+
+        btn.addEventListener('click', async () => {
+            btn.disabled = true;
+            resetAll();
+
+            // Processing Node 1
+            packet.setAttribute('cx', journey[0].x);
+            packet.setAttribute('cy', journey[0].y);
+            packet.style.opacity = 1;
+            await highlightNode(0);
+
+            // Move to Node 2
+            await animatePacket(journey[0].x, journey[0].y, journey[1].x, journey[1].y, 800);
+            await highlightNode(1);
+
+            // Move to Node 3
+            await animatePacket(journey[1].x, journey[1].y, journey[2].x, journey[2].y, 800);
+            await highlightNode(2);
+
+            // Move to Node 4
+            await animatePacket(journey[2].x, journey[2].y, journey[3].x, journey[3].y, 800);
+            await highlightNode(3);
+
+            // End journey
+            packet.style.opacity = 0;
+            btn.disabled = false;
+        });
+    </script>
+</body>
+</html>

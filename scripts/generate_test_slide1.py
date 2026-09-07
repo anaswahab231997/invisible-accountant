@@ -1,0 +1,350 @@
+"""
+Test Slide 1 Replacement Layout
+Testing Single-Plane Expansive Editorial Layout
+"""
+
+html = '''<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Slide 1 - British Institutional Elegance</title>
+    <link href="https://api.fontshare.com/v2/css?f[]=cabinet-grotesk@400,500,700,800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Geist+Mono:wght@400;500;600&family=Geist:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --obsidian: #0B0F19;
+            --oxford-blue: #0F172A;
+            --admiralty-blue: #1D4ED8;
+            --antique-gilt: #C5A880;
+            --archival-chalk: #FFFFFF;
+            --muted-slate: #94A3B8;
+            --portland-slate: #64748B;
+            --hairline-border: #1E293B;
+            --hairline-subtle: rgba(255, 255, 255, 0.08);
+            --ease: cubic-bezier(0.2, 0.8, 0.2, 1);
+        }
+
+        *, *::before, *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body, html {
+            width: 100%;
+            height: 100%;
+            background-color: #07090E;
+            font-family: 'Geist', -apple-system, BlinkMacSystemFont, sans-serif;
+            color: var(--archival-chalk);
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* 16:9 Presentation Stage */
+        #deck {
+            position: relative;
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: clamp(32px, 5vw, 64px);
+        }
+
+        /* Slide Container */
+        .slide {
+            position: relative;
+            width: 100%;
+            max-width: 1440px;
+            height: 100%;
+            max-height: 820px;
+            display: flex;
+            opacity: 1;
+        }
+
+        /* Single-Plane Expansive Editorial Layout (Rothschild / Goldman Memorandum) */
+        .editorial-memorandum {
+            width: 100%;
+            height: 100%;
+            background: var(--obsidian);
+            border: 1px solid var(--hairline-border);
+            position: relative;
+            padding: clamp(48px, 6vw, 84px);
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            overflow: hidden;
+        }
+
+        /* Subtle Archival Corner Plaque Hairlines */
+        .editorial-memorandum::before {
+            content: "";
+            position: absolute;
+            top: 12px; left: 12px; right: 12px; bottom: 12px;
+            border: 1px solid rgba(197, 168, 128, 0.18);
+            pointer-events: none;
+        }
+
+        /* Top Bar / Regulatory Inscription */
+        .memorandum-eyebrow {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-bottom: 24px;
+            border-bottom: 1px solid var(--hairline-subtle);
+            z-index: 2;
+        }
+
+        .eyebrow-text {
+            font-family: 'Geist Mono', monospace;
+            font-size: 0.75rem;
+            font-weight: 500;
+            letter-spacing: 0.25em;
+            text-transform: uppercase;
+            color: var(--antique-gilt);
+        }
+
+        .eyebrow-id {
+            font-family: 'Geist Mono', monospace;
+            font-size: 0.75rem;
+            font-weight: 400;
+            letter-spacing: 0.15em;
+            color: var(--portland-slate);
+            text-transform: uppercase;
+        }
+
+        /* Hero Split: 7:5 Architectural Balance */
+        .memorandum-hero {
+            display: grid;
+            grid-template-columns: 7fr 5fr;
+            gap: clamp(40px, 5vw, 80px);
+            align-items: center;
+            flex: 1;
+            padding: clamp(32px, 4vw, 56px) 0;
+            z-index: 2;
+        }
+
+        .hero-left {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .hero-title {
+            font-family: 'Cabinet Grotesk', sans-serif;
+            font-size: clamp(3rem, 5.2vw, 4.5rem);
+            font-weight: 700;
+            letter-spacing: -0.035em;
+            line-height: 1.05;
+            color: var(--archival-chalk);
+            margin-bottom: 24px;
+        }
+
+        .hero-title span {
+            color: var(--archival-chalk);
+            font-weight: 500;
+        }
+
+        .hero-proposition {
+            font-size: clamp(1.3rem, 1.8vw, 1.55rem);
+            font-weight: 300;
+            line-height: 1.5;
+            color: var(--muted-slate);
+            margin-bottom: 18px;
+            max-width: 560px;
+        }
+
+        .hero-detail {
+            font-size: 1rem;
+            font-weight: 400;
+            line-height: 1.6;
+            color: var(--portland-slate);
+            max-width: 520px;
+        }
+
+        /* Hero Right: Architectural Emblem Sanctuary */
+        .hero-right {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            border-left: 1px solid var(--hairline-subtle);
+            padding-left: clamp(32px, 4vw, 64px);
+            height: 100%;
+        }
+
+        .emblem-wrapper {
+            width: clamp(180px, 20vw, 240px);
+            height: clamp(180px, 20vw, 240px);
+            position: relative;
+        }
+
+        .emblem-inscription {
+            margin-top: 24px;
+            text-align: center;
+        }
+
+        .emblem-title {
+            font-family: 'Cabinet Grotesk', sans-serif;
+            font-size: 0.95rem;
+            font-weight: 700;
+            letter-spacing: 0.18em;
+            color: var(--archival-chalk);
+            text-transform: uppercase;
+        }
+
+        .emblem-sub {
+            font-family: 'Geist Mono', monospace;
+            font-size: 0.7rem;
+            font-weight: 500;
+            letter-spacing: 0.2em;
+            color: var(--portland-slate);
+            margin-top: 6px;
+            text-transform: uppercase;
+        }
+
+        /* Bottom Anchor / Institutional Footnote */
+        .memorandum-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            padding-top: 24px;
+            border-top: 1px solid var(--hairline-subtle);
+            z-index: 2;
+        }
+
+        .thesis-block {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .thesis-label {
+            font-family: 'Geist Mono', monospace;
+            font-size: 0.7rem;
+            font-weight: 600;
+            letter-spacing: 0.2em;
+            color: var(--antique-gilt);
+            text-transform: uppercase;
+        }
+
+        .thesis-text {
+            font-size: 0.95rem;
+            font-weight: 400;
+            color: #E2E8F0;
+            letter-spacing: -0.01em;
+        }
+
+        .status-block {
+            text-align: right;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            gap: 6px;
+        }
+
+        .status-badge {
+            font-family: 'Geist Mono', monospace;
+            font-size: 0.72rem;
+            font-weight: 600;
+            letter-spacing: 0.14em;
+            color: var(--antique-gilt);
+            border: 1px solid rgba(197, 168, 128, 0.35);
+            padding: 5px 12px;
+            text-transform: uppercase;
+        }
+
+        .status-note {
+            font-family: 'Geist Mono', monospace;
+            font-size: 0.68rem;
+            letter-spacing: 0.12em;
+            color: var(--portland-slate);
+            text-transform: uppercase;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="deck">
+        <!-- Slide 1: British Institutional Masterpiece -->
+        <div class="slide active" id="slide-1">
+            <div class="editorial-memorandum">
+                <!-- Top Regulatory Eyebrow -->
+                <div class="memorandum-eyebrow">
+                    <div class="eyebrow-text">HMRC Making Tax Digital 2026 · Statutory Compliance Infrastructure</div>
+                    <div class="eyebrow-id">Document Ref: IA-MTD-2026-PRESEED</div>
+                </div>
+
+                <!-- Main Hero: 7:5 Ratio -->
+                <div class="memorandum-hero">
+                    <div class="hero-left">
+                        <h1 class="hero-title">Invisible Accountant</h1>
+                        <p class="hero-proposition">The end of tax anxiety. Just send a text.</p>
+                        <p class="hero-detail">Autonomous fiscal compliance for 3.2 million UK sole traders delivered natively via WhatsApp. Zero applications to download. Zero chart-of-accounts training. Full statutory HMRC filing.</p>
+                    </div>
+
+                    <div class="hero-right">
+                        <div class="emblem-wrapper">
+                            <!-- Inlined Master SVG Crest -->
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 160" width="100%" height="100%" fill="none">
+                              <!-- Obsidian Slate Ground -->
+                              <rect width="160" height="160" fill="#0B0F19"/>
+                              <rect x="8" y="8" width="144" height="144" stroke="#1E293B" stroke-width="1"/>
+                              <rect x="12" y="12" width="136" height="136" stroke="#C5A880" stroke-width="0.5" stroke-opacity="0.35"/>
+
+                              <!-- The Sovereign Monoline Ledger (Interlocking IA Monogram) -->
+                              <g stroke="#FFFFFF" stroke-width="3.5" stroke-linecap="square" stroke-linejoin="miter">
+                                <!-- Pillar I (Invisible / Institutional Integrity) -->
+                                <line x1="46" y1="38" x2="46" y2="122"/>
+                                <line x1="36" y1="38" x2="56" y2="38"/>
+                                <line x1="36" y1="122" x2="56" y2="122"/>
+
+                                <!-- Chevron Apex & Pillars (Accountant / Asset) -->
+                                <line x1="96" y1="38" x2="68" y2="122"/>
+                                <line x1="96" y1="38" x2="114" y2="122"/>
+                                
+                                <line x1="60" y1="122" x2="76" y2="122"/>
+                                <line x1="106" y1="122" x2="122" y2="122"/>
+                                <line x1="88" y1="38" x2="104" y2="38"/>
+                              </g>
+
+                              <!-- Golden Section Ledger Beam: Hallmarked Antique Gilt -->
+                              <line x1="46" y1="80" x2="114" y2="80" stroke="#C5A880" stroke-width="2.5" stroke-linecap="square"/>
+
+                              <!-- Central Trust Anchor: Admiralty Blue -->
+                              <rect x="74" y="78.5" width="3" height="3" fill="#1D4ED8"/>
+                            </svg>
+                        </div>
+                        <div class="emblem-inscription">
+                            <div class="emblem-title">The Sovereign Ledger</div>
+                            <div class="emblem-sub">Monoline Monogram · φ = 1.618</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Bottom Institutional Footer -->
+                <div class="memorandum-footer">
+                    <div class="thesis-block">
+                        <span class="thesis-label">Investment Thesis</span>
+                        <span class="thesis-text">The B2C illusion masking a B2B2C enterprise powerhouse.</span>
+                    </div>
+                    <div class="status-block">
+                        <span class="status-badge">SEIS / EIS Advance Assurance</span>
+                        <span class="status-note">Pre-Seed Syndicate · £350,000 Allocation</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</body>
+</html>
+'''
+
+with open('C:/Antigravity/UK MTD/invisible-accountant/scripts/test_slide1.html', 'w', encoding='utf-8') as f:
+    f.write(html)
+
+print("Test Slide 1 HTML written successfully.")

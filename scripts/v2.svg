@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 160" width="100%" height="100%" fill="none">
+  <rect width="160" height="160" fill="#0B0F19"/>
+  <rect x="10" y="10" width="140" height="140" stroke="#1E293B" stroke-width="1"/>
+  
+  <!-- The Sovereign IA Ledger Monogram: Pure Monoline (Stroke Width: 3px) -->
+  <g stroke="#FFFFFF" stroke-width="2.5" stroke-linecap="square" stroke-linejoin="miter">
+    <!-- Left Stately Pillar: "I" (x=46) -->
+    <line x1="46" y1="36" x2="46" y2="124"/>
+    <!-- Capital & Plinth on "I" -->
+    <line x1="38" y1="36" x2="54" y2="36"/>
+    <line x1="38" y1="124" x2="54" y2="124"/>
+
+    <!-- Right Stately Pillar: (x=114) -->
+    <line x1="114" y1="36" x2="114" y2="124"/>
+    <line x1="106" y1="124" x2="122" y2="124"/>
+
+    <!-- The Architectural "A" Apex: Centered at (80, 36) -->
+    <!-- Descending diagonally to meet the pillars at the Golden Ratio points -->
+    <polyline points="46,124 80,36 114,124"/>
+  </g>
+
+  <!-- The Sovereign Gold Ledger Beam (Balance Axis at Golden Ratio y = 78) -->
+  <line x1="46" y1="78" x2="114" y2="78" stroke="#C5A880" stroke-width="2" stroke-linecap="square"/>
+  
+  <!-- Sovereign Central Aperture Accent: Hallmarked Gold Pivot -->
+  <rect x="78" y="76" width="4" height="4" fill="#C5A880"/>
+</svg>

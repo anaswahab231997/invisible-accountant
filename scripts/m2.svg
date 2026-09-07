@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 160" width="100%" height="100%" fill="none">
+  <!-- Obsidian Slate Ground -->
+  <rect width="160" height="160" fill="#0B0F19"/>
+  <rect x="8" y="8" width="144" height="144" stroke="#1E293B" stroke-width="1"/>
+  <rect x="12" y="12" width="136" height="136" stroke="#C5A880" stroke-width="0.5" stroke-opacity="0.35"/>
+
+  <!-- Architectural Vector Paths -->
+  <g stroke="#FFFFFF" stroke-width="3" stroke-linecap="square" stroke-linejoin="miter">
+    <!-- Left Stately Pillar: 'I' (Debit Foundation) -->
+    <line x1="46" y1="34" x2="46" y2="126"/>
+    <line x1="36" y1="34" x2="56" y2="34"/>
+    <line x1="36" y1="126" x2="56" y2="126"/>
+
+    <!-- Right Stately Pillar: (Credit Foundation) -->
+    <line x1="114" y1="34" x2="114" y2="126"/>
+    <line x1="104" y1="34" x2="124" y2="34"/>
+    <line x1="104" y1="126" x2="124" y2="126"/>
+
+    <!-- The Architectural Pediment Apex (The 'A') -->
+    <!-- Springs from (46, 78) to Apex (80, 34) and down to (114, 78) -->
+    <polyline points="46,88 80,34 114,88"/>
+  </g>
+
+  <!-- The Golden Section Ledger Beam: Hallmarked Antique Gilt (#C5A880) -->
+  <!-- Span: 46 to 114 at y = 88 -->
+  <line x1="46" y1="88" x2="114" y2="88" stroke="#C5A880" stroke-width="2.5" stroke-linecap="square"/>
+  
+  <!-- Central Sovereign Gold Aperture Keystone -->
+  <polygon points="80,34 76,42 84,42" fill="#C5A880"/>
+  <circle cx="80" cy="88" r="2.5" fill="#1D4ED8"/>
+</svg>

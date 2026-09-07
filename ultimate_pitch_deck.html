@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Invisible Accountant</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap');
+
+        body, html {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: #000;
+            color: #fff;
+        }
+
+        /* 3D Background Iframe */
+        #bg-iframe {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border: none;
+            z-index: 1;
+        }
+
+        /* Overlay to ensure text readability if needed */
+        #overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at center, rgba(0,0,0,0.1) 0%, rgba(0,0,0,0.5) 100%);
+            z-index: 2;
+            pointer-events: none;
+        }
+
+        /* Slide Container */
+        #slider {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 3;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            pointer-events: none; /* Let clicks pass through except for interactive elements */
+        }
+
+        .slide {
+            position: absolute;
+            opacity: 0;
+            transition: opacity 1.5s ease-in-out, transform 1.5s cubic-bezier(0.19, 1, 0.22, 1);
+            transform: translateY(20px) scale(0.98);
+            text-align: center;
+            width: 80%;
+            max-width: 1000px;
+        }
+
+        .slide.active {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+            pointer-events: auto; /* Active slide can receive clicks */
+        }
+
+        h1 {
+            font-size: 5rem;
+            font-weight: 300;
+            letter-spacing: -0.03em;
+            line-height: 1.1;
+            margin-bottom: 20px;
+            text-shadow: 0 4px 20px rgba(0,0,0,0.8);
+        }
+
+        /* Interactive SVG Pipeline */
+        #pipeline-container {
+            margin-top: 50px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        svg {
+            width: 800px;
+            height: 200px;
+            overflow: visible;
+        }
+
+        .node {
+            fill: rgba(255, 255, 255, 0.1);
+            stroke: rgba(255, 255, 255, 0.5);
+            stroke-width: 2;
+            transition: all 0.3s ease;
+        }
+
+        .node.active {
+            fill: rgba(255, 255, 255, 0.9);
+            stroke: #fff;
+            box-shadow: 0 0 20px rgba(255,255,255,0.5);
+        }
+
+        .node-text {
+            fill: #fff;
+            font-family: 'Inter', sans-serif;
+            font-size: 14px;
+            font-weight: 400;
+            text-anchor: middle;
+            alignment-baseline: middle;
+            opacity: 0.6;
+            transition: all 0.3s ease;
+        }
+        
+        .node-text.active {
+            fill: #000;
+            opacity: 1;
+            font-weight: 600;
+        }
+
+        .link {
+            fill: none;
+            stroke: rgba(255, 255, 255, 0.2);
+            stroke-width: 3;
+        }
+
+        .packet {
+            fill: #4ade80;
+            filter: drop-shadow(0 0 8px #4ade80);
+            opacity: 0;
+        }
+
+        .btn {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            color: #fff;
+            padding: 16px 32px;
+            font-size: 1.2rem;
+            font-family: 'Inter', sans-serif;
+            border-radius: 30px;
+            cursor: pointer;
+            backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
+            margin-bottom: 40px;
+        }
+
+        .btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+            border-color: #fff;
+            box-shadow: 0 0 20px rgba(255,255,255,0.2);
+        }
+
+        /* Navigation hints */
+        .nav-hint {
+            position: absolute;
+            bottom: 40px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 0.9rem;
+            opacity: 0.5;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            z-index: 4;
+            pointer-events: none;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 0.3; }
+            50% { opacity: 0.8; }
+        }
+
+    </style>
+</head>
+<body>
+
+    <!-- 3D Background -->
+    <iframe id="bg-iframe" src="http://127.0.0.1:58596"></iframe>
+    <div id="overlay"></div>
+
+    <!-- Slides -->
+    <div id="slider">
+        <div class="slide active" id="slide-1">
+            <h1>Taxes, reduced to a single click.<br>This is the future.</h1>
+        </div>
+
+        <div class="slide" id="slide-2">
+            <h1>Snap a photo on WhatsApp.<br>Our AI auditor handles the rest instantly.</h1>
+        </div>
+
+        <div class="slide" id="slide-3">
+            <h1>Military-grade encryption.<br>Your data flows directly and securely to HMRC.</h1>
+        </div>
+
+        <div class="slide" id="slide-4">
+            <button class="btn" id="simulate-btn" onclick="runSimulation()">Simulate Data Flow</button>
+            <div id="pipeline-container">
+                <svg viewBox="0 0 800 200">
+                    <!-- Links -->
+                    <path class="link" d="M 150 100 L 400 100" />
+                    <path class="link" d="M 400 100 L 650 100" />
+                    
+                    <!-- Nodes -->
+                    <g transform="translate(150, 100)">
+                        <circle class="node" id="node-1" r="45" />
+                        <text class="node-text" id="text-1" y="5">WhatsApp</text>
+                    </g>
+                    
+                    <g transform="translate(400, 100)">
+                        <circle class="node" id="node-2" r="55" />
+                        <text class="node-text" id="text-2" y="5">AI Auditor</text>
+                    </g>
+
+                    <g transform="translate(650, 100)">
+                        <circle class="node" id="node-3" r="45" />
+                        <text class="node-text" id="text-3" y="5">HMRC</text>
+                    </g>
+
+                    <!-- Data Packets -->
+                    <circle class="packet" id="packet-1" r="6" cx="150" cy="100" />
+                    <circle class="packet" id="packet-2" r="6" cx="400" cy="100" />
+                </svg>
+            </div>
+        </div>
+    </div>
+
+    <div class="nav-hint" id="nav-hint">Press Space or Click to Advance</div>
+
+    <script>
+        let currentSlide = 0;
+        const slides = document.querySelectorAll('.slide');
+        let isSimulating = false;
+
+        function showSlide(index) {
+            slides.forEach((slide, i) => {
+                if (i === index) {
+                    slide.classList.add('active');
+                } else {
+                    slide.classList.remove('active');
+                }
+            });
+            
+            const navHint = document.getElementById('nav-hint');
+            if (index === slides.length - 1) {
+                navHint.style.display = 'none';
+            } else {
+                navHint.style.display = 'block';
+            }
+        }
+
+        function nextSlide() {
+            if (currentSlide < slides.length - 1) {
+                currentSlide++;
+                showSlide(currentSlide);
+            }
+        }
+
+        window.addEventListener('keydown', (e) => {
+            if (e.code === 'Space' || e.code === 'ArrowRight' || e.code === 'ArrowDown') {
+                nextSlide();
+            }
+        });
+
+        window.addEventListener('click', (e) => {
+            if (e.target.tagName !== 'BUTTON' && !isSimulating) {
+                nextSlide();
+            }
+        });
+
+        function runSimulation() {
+            if (isSimulating) return;
+            isSimulating = true;
+            
+            const btn = document.getElementById('simulate-btn');
+            btn.style.opacity = '0.5';
+            btn.innerText = 'Processing...';
+
+            const n1 = document.getElementById('node-1');
+            const t1 = document.getElementById('text-1');
+            const n2 = document.getElementById('node-2');
+            const t2 = document.getElementById('text-2');
+            const n3 = document.getElementById('node-3');
+            const t3 = document.getElementById('text-3');
+            
+            const p1 = document.getElementById('packet-1');
+            const p2 = document.getElementById('packet-2');
+
+            // Reset
+            [n1, n2, n3].forEach(n => n.classList.remove('active'));
+            [t1, t2, t3].forEach(t => t.classList.remove('active'));
+            p1.style.opacity = '0';
+            p1.style.transform = 'translateX(0)';
+            p2.style.opacity = '0';
+            p2.style.transform = 'translateX(0)';
+            
+            // Force reflow
+            void p1.offsetWidth;
+            void p2.offsetWidth;
+            
+            p1.style.transition = 'none';
+            p2.style.transition = 'none';
+
+            setTimeout(() => {
+                // Step 1: WhatsApp Activation
+                n1.classList.add('active');
+                t1.classList.add('active');
+                
+                setTimeout(() => {
+                    // Step 2: Packet moves to AI
+                    n1.classList.remove('active');
+                    t1.classList.remove('active');
+                    
+                    p1.style.opacity = '1';
+                    p1.style.transition = 'transform 1s cubic-bezier(0.4, 0, 0.2, 1)';
+                    p1.style.transform = 'translateX(250px)'; // 400 - 150 = 250
+
+                    setTimeout(() => {
+                        p1.style.opacity = '0';
+                        n2.classList.add('active');
+                        t2.classList.add('active');
+
+                        setTimeout(() => {
+                            // Step 3: Packet moves to HMRC
+                            n2.classList.remove('active');
+                            t2.classList.remove('active');
+                            
+                            p2.style.opacity = '1';
+                            p2.style.transition = 'transform 1s cubic-bezier(0.4, 0, 0.2, 1)';
+                            p2.style.transform = 'translateX(250px)'; // 650 - 400 = 250
+
+                            setTimeout(() => {
+                                p2.style.opacity = '0';
+                                n3.classList.add('active');
+                                t3.classList.add('active');
+
+                                setTimeout(() => {
+                                    n3.classList.remove('active');
+                                    t3.classList.remove('active');
+                                    btn.style.opacity = '1';
+                                    btn.innerText = 'Simulate Data Flow';
+                                    isSimulating = false;
+                                }, 1000);
+
+                            }, 1000);
+                        }, 1200);
+                    }, 1000);
+                }, 500);
+            }, 100);
+        }
+    </script>
+</body>
+</html>

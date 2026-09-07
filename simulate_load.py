@@ -12,7 +12,7 @@ async def simulate_traffic(num_requests=50):
     # 1. Create chat sessions (simulating the fast webhook part)
     chat_ids = []
     for i in range(num_requests):
-        chat_id = await create_chat_session(sender_id=f"user_{i}", raw_message=f"lunch {i} amount 10", media_urls=[], turn_count=1)
+        chat_id = await create_chat_session(sender_id=f"user_{i}", message=f"lunch {i} amount 10", media_urls=[], turn_count=1)
         chat_ids.append(chat_id)
         
     print(f"Created {num_requests} DB chat sessions in {time.time() - start_time:.2f} seconds.")

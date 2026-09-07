@@ -156,7 +156,8 @@ async def process_intake_task(
                 auth_token = os.environ.get('TWILIO_AUTH_TOKEN')
                 if account_sid and auth_token:
                     client = Client(account_sid, auth_token)
-                    client.messages.create(
+                    await asyncio.to_thread(
+                        client.messages.create,
                         body="I'm sorry, my systems are currently experiencing an internal error. Please try again later.",
                         from_='whatsapp:+14155238886', # Typical Twilio sandbox number; update in prod
                         to=f"whatsapp:{sender_id}" if not sender_id.startswith("whatsapp:") else sender_id

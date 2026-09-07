@@ -1,0 +1,730 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Invisible Accountant | Stress-Free UK Taxes</title>
+    <link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://unpkg.com/@studio-freight/lenis@1.0.39/dist/lenis.min.js"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        heading: ['"DM Sans"', 'sans-serif'],
+                        body: ['Inter', 'sans-serif'],
+                    },
+                    colors: {
+                        ukblue: '#1A56DB',      
+                        wapp: '#25D366',        
+                        mint: '#ECFDF5',        
+                        charcoal: '#1F2937',    
+                        slate: '#4B5563',       
+                        offwhite: '#F9FAFB',    
+                        cardbg: '#FFFFFF'
+                    },
+                    boxShadow: {
+                        'soft': '0 10px 40px -10px rgba(0,0,0,0.08)',
+                        'float': '0 20px 60px -15px rgba(26, 86, 219, 0.15)'
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+
+        /* Lenis Smooth Scroll Recommended CSS */
+        html.lenis, html.lenis body {
+            height: auto;
+        }
+        .lenis.lenis-smooth {
+            scroll-behavior: auto !important;
+        }
+        .lenis.lenis-smooth [data-lenis-prevent] {
+            overscroll-behavior: contain;
+        }
+        .lenis.lenis-stopped {
+            overflow: hidden;
+        }
+        .lenis.lenis-scrolling iframe {
+            pointer-events: none;
+        }
+        
+        /* High-end reveal animations */
+        .reveal {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: all 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .reveal.active {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        body { background-color: #F9FAFB; color: #1F2937; -webkit-font-smoothing: antialiased; }
+        
+        /* Premium iPhone 15 Pro Mockup */
+        .phone-wrapper {
+            position: relative;
+            padding: 14px;
+            background: linear-gradient(145deg, #444, #111);
+            border-radius: 60px;
+            box-shadow: 
+                0 30px 60px -12px rgba(26, 86, 219, 0.3),
+                inset 0 0 0 2px #666,
+                inset 0 4px 10px rgba(255,255,255,0.4);
+        }
+        
+        .phone-hardware-buttons::before {
+            content: ''; position: absolute; left: -4px; top: 130px;
+            width: 4px; height: 30px; background: #333; border-radius: 4px 0 0 4px; /* Mute */
+            box-shadow: 0 50px 0 0 #333, 0 110px 0 0 #333; /* Vol Up, Vol Down */
+        }
+        .phone-hardware-buttons::after {
+            content: ''; position: absolute; right: -4px; top: 160px;
+            width: 4px; height: 80px; background: #333; border-radius: 0 4px 4px 0; /* Power */
+        }
+
+        /* Phone Screen - Flexbox for perfect matching layout */
+        .phone {
+            border: 6px solid #000000; 
+            border-radius: 48px;
+            background: #FFFFFF; 
+            width: 320px; 
+            height: 660px; 
+            position: relative;
+            overflow: hidden;
+            box-shadow: inset 0 0 0 2px #111;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Dynamic Island */
+        .dynamic-island {
+            position: absolute; top: 10px; left: 50%; transform: translateX(-50%);
+            width: 100px; height: 28px; background: #000000;
+            border-radius: 20px; z-index: 50;
+            display: flex; align-items: center; justify-content: flex-end; padding: 0 10px;
+            box-shadow: inset 0 -1px 3px rgba(255,255,255,0.2);
+        }
+        .camera-lens {
+            width: 10px; height: 10px; background: #111; border-radius: 50%;
+            box-shadow: inset 0 0 4px #0a1128, 0 0 1px rgba(255,255,255,0.2);
+            position: relative; overflow: hidden;
+        }
+        .camera-lens::after {
+            content: ''; position: absolute; top: 2px; left: 2px;
+            width: 4px; height: 4px; background: rgba(255,255,255,0.4); border-radius: 50%;
+        }
+
+        /* Glass Glare */
+        .glass-glare {
+            position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+            background: linear-gradient(135deg, rgba(255,255,255,0.15) 0%, rgba(255,255,255,0) 40%);
+            pointer-events: none; z-index: 60;
+        }
+        
+        /* Modern iOS WhatsApp styling */
+        .chat-bg { background-color: #EFEAE2; background-image: url('https://w0.peakpx.com/wallpaper/818/148/HD-wallpaper-whatsapp-background-cool-dark-green-light-pattern-patterns-texture-textures.jpg'); background-size: cover; background-blend-mode: screen; }
+        .msg-ai { background: #FFFFFF; color: #1F2937; border-radius: 18px; border-bottom-left-radius: 4px; box-shadow: 0 1px 2px rgba(0,0,0,0.05); }
+        .msg-user { background: #D9FDD3; color: #1F2937; border-radius: 18px; border-bottom-right-radius: 4px; box-shadow: 0 1px 2px rgba(0,0,0,0.05); }
+        
+        .btn-massive { transition: transform 0.15s ease, box-shadow 0.15s ease; cursor: pointer; }
+        .btn-massive:active { transform: scale(0.98); box-shadow: none; }
+        .quiz-btn {
+            display: flex; align-items: center; justify-content: space-between;
+            width: 100%; padding: 1rem; margin-bottom: 0.5rem;
+            border: 1px solid #E5E7EB; border-radius: 0.75rem;
+            background: #FFFFFF; font-family: 'Inter', sans-serif;
+            font-weight: 500; color: #1F2937; transition: all 0.2s;
+        }
+        .quiz-btn:hover { border-color: #1A56DB; background: #F3F6FD; }
+        
+        .conn-line {
+            position: absolute; top: -20px; left: 50%; width: 2px; height: 20px;
+            background: #E5E7EB; transform: translateX(-50%);
+        }
+        
+        /* Fullscreen Mobile Transitions */
+        .phone-wrapper {
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .phone {
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        @media (max-width: 767px) {
+            .phone-wrapper:not(.is-fullscreen) {
+                cursor: pointer;
+            }
+        }
+        .phone-wrapper.is-fullscreen {
+            position: fixed;
+            inset: 0;
+            width: 100%;
+            height: 100dvh;
+            z-index: 50;
+            margin: 0;
+            padding: 0;
+            border-radius: 0;
+            transform: none !important;
+            background: transparent;
+            box-shadow: none;
+        }
+        .phone-wrapper.is-fullscreen .phone {
+            width: 100%;
+            height: 100dvh;
+            border-width: 0;
+            border-radius: 0;
+        }
+        .phone-wrapper.is-fullscreen::before,
+        .phone-wrapper.is-fullscreen::after,
+        .phone-wrapper.is-fullscreen .dynamic-island,
+        .phone-wrapper.is-fullscreen .glass-glare {
+            display: none !important;
+        }
+        @media (max-width: 767px) {
+            .phone-wrapper.is-fullscreen .top-bar-container {
+                padding-top: env(safe-area-inset-top, 20px) !important;
+            }
+            .phone-wrapper.is-fullscreen .footer-container {
+                padding-bottom: env(safe-area-inset-bottom, 20px) !important;
+            }
+        }
+    </style>
+</head>
+<body class="font-body min-h-screen selection:bg-ukblue selection:text-white">
+
+    <div class="bg-ukblue text-white text-sm font-medium py-3 text-center px-4 font-heading tracking-wide">
+        Making Tax Digital (MTD) becomes mandatory for UK Sole Traders in April 2026. <a href="#waitlist" class="underline hover:text-blue-200">Assess your readiness.</a>
+    </div>
+
+    <nav class="max-w-7xl mx-auto px-6 md:px-12 py-6 flex justify-between items-center">
+        <a href="/" class="block">
+            <img src="assets/invisible_accountant_logo.svg" alt="Invisible Accountant" class="h-16 sm:h-20 md:h-24 lg:h-28 w-auto max-w-full">
+        </a>
+    </nav>
+
+    <main class="max-w-7xl mx-auto px-6 md:px-12 pt-8 md:pt-16 pb-16 md:pb-24 grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-16 items-center">
+        <div class="lg:col-span-7">
+            <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-mint text-emerald-800 font-medium text-sm mb-6 border border-emerald-200 shadow-sm">
+                <i data-lucide="check-circle" class="w-4 h-4"></i> Built for HMRC Making Tax Digital
+            </div>
+            
+            <h1 class="font-heading font-bold text-5xl md:text-6xl text-charcoal leading-[1.1] mb-6 tracking-tight">
+                The end of tax anxiety. <br>
+                <span class="text-ukblue">Just send a text.</span>
+            </h1>
+            
+            <p class="text-xl text-slate font-body mb-10 leading-relaxed max-w-2xl">
+                Stop stressing over spreadsheets and shoeboxes of receipts. Snap a photo, send it to Emma on WhatsApp, and our AI securely categorises and vaults it directly to HMRC for you.
+            </p>
+
+            <div id="waitlist" class="bg-cardbg p-8 rounded-2xl shadow-soft border border-gray-100 max-w-xl min-h-[300px]">
+                <div id="quiz-step-1" class="quiz-step">
+                    <h3 class="font-heading font-bold text-xl mb-2 text-charcoal">MTD Readiness Assessment</h3>
+                    <p class="text-slate mb-6 text-sm">To qualify for the beta vault, please confirm your estimated annual revenue.</p>
+                    <button class="quiz-btn" onclick="nextQuizStep(2)">Under £50,000 <i data-lucide="chevron-right" class="w-4 h-4 text-gray-400"></i></button>
+                    <button class="quiz-btn" onclick="nextQuizStep(2)">£50,000 - £85,000 <i data-lucide="chevron-right" class="w-4 h-4 text-gray-400"></i></button>
+                    <button class="quiz-btn" onclick="nextQuizStep(2)">Over £85,000 <i data-lucide="chevron-right" class="w-4 h-4 text-gray-400"></i></button>
+                </div>
+                <div id="quiz-step-2" class="quiz-step hidden">
+                    <h3 class="font-heading font-bold text-xl mb-2 text-charcoal">Current Workflow</h3>
+                    <p class="text-slate mb-6 text-sm">How do you currently track your business expenses?</p>
+                    <button class="quiz-btn" onclick="nextQuizStep(3)">Paper & Shoeboxes <i data-lucide="chevron-right" class="w-4 h-4 text-gray-400"></i></button>
+                    <button class="quiz-btn" onclick="nextQuizStep(3)">Excel Spreadsheets <i data-lucide="chevron-right" class="w-4 h-4 text-gray-400"></i></button>
+                    <button class="quiz-btn" onclick="nextQuizStep(3)">Traditional Accounting Software <i data-lucide="chevron-right" class="w-4 h-4 text-gray-400"></i></button>
+                </div>
+                <div id="quiz-step-3" class="quiz-step hidden">
+                    <div class="flex items-center gap-2 text-emerald-700 bg-mint px-3 py-1 rounded-full text-sm font-bold w-max mb-4">
+                        <i data-lucide="check-circle-2" class="w-4 h-4"></i> Qualified for Beta
+                    </div>
+                    <h3 class="font-heading font-bold text-xl mb-2 text-charcoal">You are required to comply with MTD.</h3>
+                    <p class="text-slate mb-6 text-sm leading-relaxed">Based on your profile, you will face quarterly mandatory updates by April 2026. Secure your spot in the Invisible Accountant Beta vault now.</p>
+                    <div class="flex items-center justify-between mb-4 bg-gray-50 rounded-lg p-3 border border-gray-200">
+                        <span class="text-slate font-medium text-sm">Queue Position</span>
+                        <span class="font-mono font-bold text-ukblue text-lg">#143 / 250</span>
+                    </div>
+                    <a href="https://wa.me/447000000000?text=Add%20me%20to%20the%20UK%20Beta" class="btn-massive w-full py-4 bg-wapp hover:bg-[#20bd5a] text-white rounded-xl flex items-center justify-center gap-3 font-heading font-bold text-lg shadow-[0_4px_14px_0_rgba(37,211,102,0.39)]">
+                        <i data-lucide="message-circle" class="w-6 h-6"></i>
+                        Join Waitlist via WhatsApp
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="lg:col-span-5 flex justify-center relative">
+            <div class="absolute inset-0 bg-gradient-to-tr from-ukblue/5 to-wapp/10 rounded-full blur-3xl -z-10 transform scale-110"></div>
+            
+            <!-- Premium iPhone 15 Frame -->
+            <div class="phone-wrapper phone-hardware-buttons transform scale-[0.85] sm:scale-100 origin-top mb-[-10%] sm:mb-0" onclick="expandPhone(event)">
+                <div class="phone">
+                    <div class="glass-glare"></div>
+                    
+                    <!-- Combined Top Bar (Status + WhatsApp Header) ensuring structural integrity -->
+                    <div class="bg-[#F6F6F6]/95 backdrop-blur-xl z-20 flex-shrink-0 border-b border-gray-200 shadow-sm relative pt-3 top-bar-container transition-all">
+                        
+                        <!-- iOS Status Bar -->
+                        <div class="px-6 flex justify-between items-center text-charcoal mb-3">
+                            <!-- Live UK Time injected here -->
+                            <span id="live-time" class="font-semibold text-[13px] tracking-tight"></span>
+                            
+                            <!-- Dynamic Island absolute inside the top bar -->
+                            <div class="dynamic-island">
+                                <div class="camera-lens"></div>
+                            </div>
+
+                            <div class="flex items-center gap-1.5">
+                                <i data-lucide="signal" class="w-3.5 h-3.5"></i>
+                                <i data-lucide="wifi" class="w-3.5 h-3.5"></i>
+                                <i data-lucide="battery-full" class="w-4 h-4"></i>
+                            </div>
+                        </div>
+
+                        <!-- Modern iOS WhatsApp Header -->
+                        <div class="pb-2 px-4 flex items-center justify-between">
+                            <div class="flex items-center gap-2">
+                                <i data-lucide="chevron-left" class="w-7 h-7 text-[#007AFF] -ml-1 cursor-pointer" onclick="dismissPhone(event)"></i>
+                                <div class="relative">
+                                    <div class="w-9 h-9 rounded-full bg-ukblue flex items-center justify-center text-white font-heading font-bold text-[15px] shadow-inner">E</div>
+                                    <div class="absolute bottom-0 right-0 w-2.5 h-2.5 bg-[#25D366] border-2 border-[#F6F6F6] rounded-full"></div>
+                                </div>
+                                <div class="ml-1">
+                                    <div class="font-heading font-bold text-charcoal text-[15px] leading-tight">Emma</div>
+                                    <div class="text-[11px] text-slate font-medium">Business Accountant</div>
+                                </div>
+                            </div>
+                            <div class="flex gap-4 text-[#007AFF]">
+                                <i data-lucide="video" class="w-[22px] h-[22px]"></i>
+                                <i data-lucide="phone" class="w-5 h-5"></i>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Chat Body (flex-1 forces it to perfectly fill the exact remaining space) -->
+                    <div id="chatBody" class="chat-bg flex-1 p-4 flex flex-col gap-3 overflow-y-auto z-10 relative">
+                        <div class="text-center text-[11px] text-slate bg-[#E1F3FB] px-3 py-1 rounded-lg w-max mx-auto shadow-sm mb-2 mt-2">
+                            Messages and calls are end-to-end encrypted.
+                        </div>
+                        <div class="msg-ai px-3 py-2 text-[15px] shadow-sm max-w-[85%] leading-snug">
+                            Hello! Snap a photo of a receipt, forward an invoice PDF, or just type a business expense. I'll categorise it for HMRC. 👇
+                        </div>
+                    </div>
+
+                    <!-- Modern iOS WhatsApp Footer (flex-shrink-0 keeps it firmly at the bottom) -->
+                    <div class="bg-[#F6F6F6] px-3 py-2 flex gap-2 items-center z-20 flex-shrink-0 border-t border-gray-200 footer-container transition-all">
+                        <button class="text-[#007AFF] p-1"><i data-lucide="plus" class="w-6 h-6"></i></button>
+                        <input type="text" id="demoInput" placeholder="Message" class="flex-1 bg-white text-charcoal rounded-full px-4 py-[6px] border border-gray-300 text-base outline-none shadow-sm focus:border-gray-400 transition-all" onkeypress="if(event.key==='Enter') submitDemo()">
+                        <button onclick="submitDemo()" class="text-[#007AFF] p-1"><i data-lucide="mic" class="w-6 h-6"></i></button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- LIVE INFERENCE DECRYPTOR SECTION (SCROLL-DRIVEN) -->
+    <section id="inference-wrapper" class="bg-white border-y border-gray-100 h-[250vh] relative">
+        <div class="sticky top-0 h-screen flex flex-col justify-center overflow-hidden py-4 md:py-12">
+            <div class="max-w-7xl mx-auto px-4 md:px-12 w-full">
+                
+                <div class="text-center mb-6 md:mb-16">
+                    <h2 class="font-heading font-bold text-2xl md:text-4xl text-charcoal mb-2 md:mb-4">The Live Inference Engine</h2>
+                    <p class="text-sm md:text-lg text-slate font-body max-w-2xl mx-auto hidden sm:block">Scroll down to watch our Multimodal AI dynamically deconstruct an uploaded receipt into a pristine, HMRC-compliant payload.</p>
+                </div>
+                
+                <div class="bg-cardbg rounded-2xl p-4 md:p-8 border border-gray-200 shadow-soft max-w-4xl mx-auto reveal relative overflow-hidden">
+                    <div class="mb-6 md:mb-12 relative z-10 text-center">
+                        <div class="text-[10px] md:text-xs font-bold text-slate mb-2 md:mb-3 uppercase tracking-wider flex items-center justify-center gap-2">
+                            <i data-lucide="message-square" class="w-3 h-3 md:w-4 md:h-4"></i> Raw WhatsApp Input
+                        </div>
+                        <div class="text-lg md:text-3xl font-body text-charcoal bg-gray-50 p-4 md:p-6 rounded-xl border border-gray-100 inline-block shadow-sm">
+                            "Paid <span id="dec-amount" class="transition-colors duration-300 rounded-lg px-1 md:px-2 py-0.5 md:py-1">£45</span> at 
+                            <span id="dec-vendor" class="transition-colors duration-300 rounded-lg px-1 md:px-2 py-0.5 md:py-1">Costa Coffee</span> for a 
+                            <span id="dec-context" class="transition-colors duration-300 rounded-lg px-1 md:px-2 py-0.5 md:py-1">client meeting</span>."
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-3 md:gap-6 mb-6 md:mb-12 relative z-10">
+                        <div id="card-amount" class="opacity-0 transform translate-y-8 transition-all duration-500 bg-white p-3 md:p-5 rounded-xl border-t-4 border-blue-500 shadow-[0_4px_20px_rgba(0,0,0,0.05)] relative">
+                            <div class="conn-line hidden md:block"></div>
+                            <div class="text-[10px] md:text-xs text-slate font-bold uppercase mb-1 md:mb-2">Extracted Amount</div>
+                            <div class="text-xl md:text-3xl font-mono font-bold text-blue-600">£45.00</div>
+                        </div>
+                        
+                        <div id="card-vendor" class="opacity-0 transform translate-y-8 transition-all duration-500 bg-white p-3 md:p-5 rounded-xl border-t-4 border-purple-500 shadow-[0_4px_20px_rgba(0,0,0,0.05)] relative">
+                            <div class="conn-line hidden md:block"></div>
+                            <div class="text-[10px] md:text-xs text-slate font-bold uppercase mb-1 md:mb-2">Identified Vendor</div>
+                            <div class="text-lg md:text-2xl font-bold text-purple-700">Costa Coffee</div>
+                        </div>
+                        
+                        <div id="card-context" class="opacity-0 transform translate-y-8 transition-all duration-500 bg-white p-3 md:p-5 rounded-xl border-t-4 border-orange-500 shadow-[0_4px_20px_rgba(0,0,0,0.05)] relative">
+                            <div class="conn-line hidden md:block"></div>
+                            <div class="text-[10px] md:text-xs text-slate font-bold uppercase mb-1 md:mb-2">HMRC Mapped Category</div>
+                            <div class="text-base md:text-xl font-bold text-charcoal">Business Ent.</div>
+                            <div class="text-[10px] md:text-xs bg-orange-100 text-orange-700 px-2 py-1 rounded mt-1 md:mt-2 inline-block font-medium">Non-allowable deduction</div>
+                        </div>
+                    </div>
+
+                    <div id="card-vault" class="opacity-0 transform translate-y-8 transition-all duration-500 relative z-10 flex flex-col md:flex-row items-center justify-between bg-charcoal text-white p-4 md:p-6 rounded-xl shadow-float gap-4 md:gap-0">
+                        <div class="flex items-center gap-4 mb-4 md:mb-0">
+                            <div class="w-12 h-12 bg-[#25D366]/20 rounded-full flex items-center justify-center">
+                                <i data-lucide="shield-check" class="w-6 h-6 text-wapp"></i>
+                            </div>
+                            <div>
+                                <div class="font-bold text-lg text-white">Digital Link Secured</div>
+                                <div class="text-gray-400 text-sm">Expense irreversibly logged to your HMRC ledger</div>
+                            </div>
+                        </div>
+                        
+                        <div class="flex items-center gap-3 bg-white/5 border border-white/10 p-3 rounded-lg w-full md:w-auto">
+                            <div class="w-8 h-8 rounded-full bg-blue-500/20 flex items-center justify-center shadow-inner">
+                                <i data-lucide="lock" class="w-4 h-4 text-blue-400"></i>
+                            </div>
+                            <div>
+                                <div class="text-[10px] text-gray-400 uppercase tracking-wider font-bold mb-0.5">256-bit Encrypted</div>
+                                <div class="flex items-center gap-2">
+                                    <div class="w-2 h-2 rounded-full bg-wapp animate-pulse"></div>
+                                    <span class="text-sm font-medium text-white">HMRC Sync Active</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Plain English Features Section -->
+    <section class="bg-mint py-24 border-b border-emerald-100">
+        <div class="max-w-7xl mx-auto px-6 md:px-12">
+            <div class="text-center mb-16">
+                <h2 class="font-heading font-bold text-3xl md:text-4xl text-charcoal mb-4">How we reduce your tax anxiety</h2>
+                <p class="text-lg text-slate font-body max-w-2xl mx-auto">We do the heavy lifting in the background, so you only have to do the easy part.</p>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-10">
+                <div class="bg-cardbg p-8 rounded-2xl shadow-sm border border-emerald-50">
+                    <div class="w-14 h-14 bg-wapp/10 rounded-xl flex items-center justify-center text-emerald-600 mb-6">
+                        <i data-lucide="camera" class="w-7 h-7"></i>
+                    </div>
+                    <h3 class="font-heading font-bold text-xl text-charcoal mb-3">Just snap a photo</h3>
+                    <p class="text-slate font-body leading-relaxed">MTD laws accept digital photos of receipts. Just snap a photo in WhatsApp and our Multimodal AI instantly extracts the vendor and amount for your ledger.</p>
+                </div>
+                
+                <div class="bg-cardbg p-8 rounded-2xl shadow-sm border border-emerald-50">
+                    <div class="w-14 h-14 bg-purple-100 rounded-xl flex items-center justify-center text-purple-600 mb-6">
+                        <i data-lucide="mail" class="w-7 h-7"></i>
+                    </div>
+                    <h3 class="font-heading font-bold text-xl text-charcoal mb-3">Forward email receipts</h3>
+                    <p class="text-slate font-body leading-relaxed">Got an Uber receipt via email? Just forward the PDF or email directly to your Invisible Accountant. Our engine parses it and securely links it to your HMRC return.</p>
+                </div>
+                
+                <div class="bg-cardbg p-8 rounded-2xl shadow-sm border border-emerald-50">
+                    <div class="w-14 h-14 bg-ukblue/10 rounded-xl flex items-center justify-center text-ukblue mb-6">
+                        <i data-lucide="landmark" class="w-7 h-7"></i>
+                    </div>
+                    <h3 class="font-heading font-bold text-xl text-charcoal mb-3">Auto-Reconciliation</h3>
+                    <p class="text-slate font-body leading-relaxed">Coming soon: We are partnering with Tier-1 Open Banking providers to match your WhatsApp receipts with live bank feeds, creating an enterprise-grade ledger.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- B2B2C / Accountants Section (Visa Viability Strategy) -->
+    <section class="py-16 md:py-24 bg-charcoal text-white text-center px-6">
+        <div class="max-w-4xl mx-auto">
+            <h2 class="font-heading font-bold text-3xl md:text-4xl mb-6">Are you an Accountancy Firm?</h2>
+            <p class="text-lg text-gray-300 font-body mb-8">
+                Stop chasing clients for receipts. White-label our Live Inference Engine and offer your entire client base a frictionless, MTD-compliant WhatsApp assistant.
+            </p>
+            <div class="inline-flex gap-4 flex-col sm:flex-row">
+                <button class="bg-white text-charcoal px-8 py-3 rounded-full font-bold shadow-float hover:scale-105 transition-transform">
+                    View Enterprise Pricing
+                </button>
+                <button class="bg-transparent border border-gray-500 text-white px-8 py-3 rounded-full font-bold hover:bg-white/10 transition-colors">
+                    Book a Technical Demo
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-white py-12 text-center border-t border-gray-100">
+        <div class="max-w-7xl mx-auto px-4">
+            <div class="flex flex-col md:flex-row justify-center items-center gap-4 md:gap-8 mb-6">
+                <a href="/terms" class="text-sm font-body text-slate hover:text-ukblue transition-colors">Terms & Conditions</a>
+                <a href="/privacy" class="text-sm font-body text-slate hover:text-ukblue transition-colors">Privacy Policy</a>
+                <a href="/accessibility" class="text-sm font-body text-slate hover:text-ukblue transition-colors">Accessibility</a>
+                <a href="/cdn-cgi/l/email-protection#8ffceaecfafde6fbf6cfe6e1f9e6fce6ede3eaeeecece0fae1fbeee1fba1ece0a1fae4" class="text-sm font-body text-slate hover:text-ukblue transition-colors">Report Security Issue</a>
+            </div>
+            <p class="text-sm font-body text-slate">&copy; 2026 Invisible Accountant Ltd. Registered in England & Wales.</p>
+            <p class="text-xs font-body text-gray-400 mt-2 max-w-2xl mx-auto">Our software submits data to HMRC via their official APIs. We adhere strictly to HMRC Developer Hub guidelines. Use of our software does not constitute formal endorsement or "HMRC approval" of your tax affairs.</p>
+        </div>
+    </footer>
+
+    <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
+        lucide.createIcons();
+
+
+        // Initialize High-End Smooth Scrolling (Lenis)
+        const lenis = new Lenis({
+            duration: 1.2,
+            easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)), 
+            direction: 'vertical', 
+            gestureDirection: 'vertical', 
+            smooth: true,
+            mouseMultiplier: 1,
+            smoothTouch: false,
+            touchMultiplier: 2,
+            infinite: false,
+        });
+
+        function raf(time) {
+            lenis.raf(time);
+            requestAnimationFrame(raf);
+        }
+        requestAnimationFrame(raf);
+
+        // High-end Intersection Observer for Fade-Ins
+        document.addEventListener("DOMContentLoaded", () => {
+            const reveals = document.querySelectorAll(".reveal");
+            const revealObserver = new IntersectionObserver((entries, observer) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add("active");
+                        observer.unobserve(entry.target);
+                    }
+                });
+            }, {
+                root: null,
+                threshold: 0.1,
+                rootMargin: "0px 0px -50px 0px"
+            });
+            
+            reveals.forEach(reveal => {
+                revealObserver.observe(reveal);
+            });
+            
+            // Immediately activate the first section so it doesn't wait for scroll
+            setTimeout(() => {
+                if(reveals[0]) reveals[0].classList.add("active");
+            }, 100);
+        });
+
+
+        
+        // Live UK Time Updater
+        function updateLiveTime() {
+            const timeEl = document.getElementById('live-time');
+            if (timeEl) {
+                const now = new Date();
+                const ukTime = new Intl.DateTimeFormat('en-GB', {
+                    timeZone: 'Europe/London',
+                    hour: '2-digit',
+                    minute: '2-digit',
+                    hour12: false
+                }).format(now);
+                timeEl.textContent = ukTime;
+            }
+        }
+        setInterval(updateLiveTime, 1000);
+        updateLiveTime(); // Call immediately on load
+        
+        // Quiz Logic
+        function nextQuizStep(step) {
+            document.querySelectorAll('.quiz-step').forEach(el => el.classList.add('hidden'));
+            document.getElementById('quiz-step-' + step).classList.remove('hidden');
+        }
+
+        // Phone Fullscreen Logic
+        function expandPhone(e) {
+            if (window.innerWidth >= 768) return; // Only on mobile
+            const wrapper = document.querySelector('.phone-wrapper');
+            if (wrapper.classList.contains('is-fullscreen')) return;
+            
+            if (navigator.vibrate) navigator.vibrate([5]);
+            wrapper.classList.add('is-fullscreen');
+            history.pushState({ phoneExpanded: true }, '');
+        }
+
+        function dismissPhone(e) {
+            e.stopPropagation();
+            const wrapper = document.querySelector('.phone-wrapper');
+            if (wrapper && wrapper.classList.contains('is-fullscreen')) {
+                if (navigator.vibrate) navigator.vibrate([5]);
+                wrapper.classList.remove('is-fullscreen');
+                history.back();
+            }
+        }
+
+        window.addEventListener('popstate', (e) => {
+            const wrapper = document.querySelector('.phone-wrapper');
+            if (wrapper && wrapper.classList.contains('is-fullscreen')) {
+                wrapper.classList.remove('is-fullscreen');
+                if (navigator.vibrate) navigator.vibrate([5]);
+            }
+        });
+
+        // Scroll-driven Inference Engine Logic
+        window.addEventListener('scroll', () => {
+            const wrapper = document.getElementById('inference-wrapper');
+            if(!wrapper) return;
+            
+            const scrollStart = wrapper.offsetTop;
+            const scrollDistance = wrapper.offsetHeight - window.innerHeight; 
+            const currentScroll = window.scrollY - scrollStart;
+            
+            let progress = 0;
+            if (currentScroll > 0) {
+                progress = Math.min(currentScroll / scrollDistance, 1);
+            }
+
+            if(progress > 0.15) {
+                document.getElementById('dec-amount').classList.add('bg-blue-100', 'text-blue-800');
+                document.getElementById('card-amount').classList.replace('opacity-0', 'opacity-100');
+                document.getElementById('card-amount').classList.replace('translate-y-8', 'translate-y-0');
+            } else {
+                document.getElementById('dec-amount').classList.remove('bg-blue-100', 'text-blue-800');
+                document.getElementById('card-amount').classList.replace('opacity-100', 'opacity-0');
+                document.getElementById('card-amount').classList.replace('translate-y-0', 'translate-y-8');
+            }
+
+            if(progress > 0.35) {
+                document.getElementById('dec-vendor').classList.add('bg-purple-100', 'text-purple-800');
+                document.getElementById('card-vendor').classList.replace('opacity-0', 'opacity-100');
+                document.getElementById('card-vendor').classList.replace('translate-y-8', 'translate-y-0');
+            } else {
+                document.getElementById('dec-vendor').classList.remove('bg-purple-100', 'text-purple-800');
+                document.getElementById('card-vendor').classList.replace('opacity-100', 'opacity-0');
+                document.getElementById('card-vendor').classList.replace('translate-y-0', 'translate-y-8');
+            }
+
+            if(progress > 0.55) {
+                document.getElementById('dec-context').classList.add('bg-orange-100', 'text-orange-800');
+                document.getElementById('card-context').classList.replace('opacity-0', 'opacity-100');
+                document.getElementById('card-context').classList.replace('translate-y-8', 'translate-y-0');
+            } else {
+                document.getElementById('dec-context').classList.remove('bg-orange-100', 'text-orange-800');
+                document.getElementById('card-context').classList.replace('opacity-100', 'opacity-0');
+                document.getElementById('card-context').classList.replace('translate-y-0', 'translate-y-8');
+            }
+
+            if(progress > 0.75) {
+                document.getElementById('card-vault').classList.replace('opacity-0', 'opacity-100');
+                document.getElementById('card-vault').classList.replace('translate-y-8', 'translate-y-0');
+            } else {
+                document.getElementById('card-vault').classList.replace('opacity-100', 'opacity-0');
+                document.getElementById('card-vault').classList.replace('translate-y-0', 'translate-y-8');
+            }
+        });
+
+        
+        // Real-Time Inference WebSockets & API
+        const session_id = "demo_web_" + Math.random().toString(36).substring(7);
+        const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+        let ws;
+        
+        function connectWebSocket() {
+            ws = new WebSocket(`${protocol}//${window.location.host}/ws/${session_id}`);
+            
+            ws.onmessage = function(event) {
+                const data = JSON.parse(event.data);
+                if (data.type === 'GRACEFUL_WARNING') {
+                    const typingIndicator = document.getElementById('typing-indicator');
+                    if (typingIndicator) {
+                        const warningDiv = document.createElement('div');
+                        warningDiv.className = 'text-xs text-slate mt-1 italic animate-pulse';
+                        warningDiv.innerText = data.message;
+                        typingIndicator.appendChild(warningDiv);
+                        document.getElementById('chatBody').scrollTop = document.getElementById('chatBody').scrollHeight;
+                    }
+                }
+                if (data.type === 'INTAKE_UPDATE') {
+                    if (navigator.vibrate) navigator.vibrate([5]);
+                    
+                    const typingIndicator = document.getElementById('typing-indicator');
+                    if (typingIndicator) typingIndicator.remove();
+                    
+                    const chat = document.getElementById('chatBody');
+                    const inp = document.getElementById('demoInput');
+                    const res = data.result;
+                    
+                    let html = '';
+                    if (res.status === 'CONFIRMED') {
+                        html = `<div class="msg-ai px-3 py-2 text-[15px] shadow-sm max-w-[85%] mb-2">
+                            <div class="font-medium text-emerald-700 mb-1 flex items-center gap-1"><i data-lucide="lock" class="w-4 h-4"></i> Locked & Sent</div>
+                            All set! I've officially locked this into your tax ledger and it's queued for HMRC.
+                        </div>`;
+                    } else if (res.is_ambiguous) {
+                        html = `<div class="msg-ai px-3 py-2 text-[15px] shadow-sm max-w-[85%] mb-2">${res.auditor_question || "Could you clarify that?"}</div>`;
+                    } else if (res.amount) {
+                        html = `<div class="msg-ai px-3 py-2 text-[15px] shadow-sm max-w-[85%] mb-2">
+                            <div class="font-medium text-emerald-700 mb-1 flex items-center gap-1"><i data-lucide="check-circle-2" class="w-4 h-4"></i> Vaulted & Categorised</div>
+                            I've logged £${res.amount.toFixed(2)} at ${res.vendor || "the vendor"} under <strong>${res.category || "General"}</strong>. Reply 'proceed' to lock it.
+                        </div>`;
+                    } else {
+                        html = `<div class="msg-ai px-3 py-2 text-[15px] shadow-sm max-w-[85%] mb-2">I couldn't process that. Try sending an expense like '£5 for coffee'.</div>`;
+                    }
+                    
+                    chat.innerHTML += html;
+                    lucide.createIcons();
+
+                    chat.scrollTop = chat.scrollHeight;
+                    inp.disabled = false; inp.focus();
+                }
+            };
+            
+            ws.onclose = function(e) {
+                setTimeout(connectWebSocket, 1000);
+            };
+        }
+        
+        connectWebSocket();
+
+        async function submitDemo() {
+            const inp = document.getElementById('demoInput');
+            const val = inp.value.trim();
+            if(!val) return;
+            
+            if (navigator.vibrate) navigator.vibrate([5]);
+            
+            inp.value = ''; inp.disabled = true;
+            
+            const chat = document.getElementById('chatBody');
+            chat.innerHTML += `<div class="msg-user px-3 py-2 text-[15px] self-end max-w-[85%] mb-2">${val}</div>`;
+            chat.scrollTop = chat.scrollHeight;
+
+            chat.innerHTML += `<div id="typing-indicator" class="msg-ai px-4 py-2 self-start text-slate flex gap-1 items-center max-w-[85%] mb-2">
+                <span class="w-1.5 h-1.5 bg-slate rounded-full animate-bounce"></span>
+                <span class="w-1.5 h-1.5 bg-slate rounded-full animate-bounce" style="animation-delay: 0.1s"></span>
+                <span class="w-1.5 h-1.5 bg-slate rounded-full animate-bounce" style="animation-delay: 0.2s"></span>
+            </div>`;
+            chat.scrollTop = chat.scrollHeight;
+
+            // Send actual request to the backend AI
+            try {
+                await fetch('/api/simulate_whatsapp', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        sender_id: session_id,
+                        message: val,
+                        turn_count: 1
+                    })
+                });
+            } catch (err) {
+                console.error(err);
+                document.getElementById('typing-indicator').remove();
+                chat.innerHTML += `<div class="msg-ai px-3 py-2 text-[15px] shadow-sm max-w-[85%] mb-2 text-red-600">Connection error. Please try again.</div>`;
+                inp.disabled = false;
+            }
+        }
+
+    </script>
+<script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v31edd6df95cf4e85bb4c19e7a9bdbcba1788362987495" integrity="sha512-iIg7k2xntmwu6/uSb5tpc/hySgZc4eoL31yB29W6tJFo2akwjPWcEqnCEdJvGexCL0KEQwVYv5BlowfhVz26hg==" data-cf-beacon='{"version":"2024.11.0","token":"06fef88b5b0a48fabefd855e477873a7","r":1,"spa":2}' crossorigin="anonymous"></script>
+<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a37827cdaba6138c',t:'MTc4ODgwOTcxNA=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>
+
+

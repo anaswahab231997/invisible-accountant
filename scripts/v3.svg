@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 160" width="100%" height="100%" fill="none">
+  <rect width="160" height="160" fill="#0B0F19"/>
+  <rect x="8" y="8" width="144" height="144" stroke="#1E293B" stroke-width="1"/>
+  
+  <!-- Outer Double-Line Hairline Rim -->
+  <rect x="12" y="12" width="136" height="136" stroke="#C5A880" stroke-width="0.75" stroke-opacity="0.3"/>
+
+  <!-- Left Stately Column ("I"): Full Monumental Height -->
+  <!-- Clean geometric solid column with precision Golden Ratio width -->
+  <path d="M 44 36 L 54 36 L 54 124 L 44 124 Z" fill="#FFFFFF"/>
+  <!-- Sovereign Crown Capital on I in Hallmarked Gilt -->
+  <line x1="38" y1="36" x2="60" y2="36" stroke="#C5A880" stroke-width="1.5"/>
+  <line x1="38" y1="124" x2="60" y2="124" stroke="#FFFFFF" stroke-width="1.5"/>
+
+  <!-- Right Structure: Stately Column & Apex of "A" -->
+  <!-- Apex at x=100, y=36. Right vertical leg at x=112..122. Diagonal leg down to x=72. -->
+  <path d="M 96 36 L 106 36 L 122 124 L 112 124 L 101 64 L 78 124 L 68 124 Z" fill="#FFFFFF"/>
+
+  <!-- Plinth on right foot -->
+  <line x1="106" y1="124" x2="128" y2="124" stroke="#FFFFFF" stroke-width="1.5"/>
+
+  <!-- Golden Ratio Ledger Lintel: Bridging the "I" and the "A" Aperture -->
+  <!-- Exactly at Golden Ratio height: y = 78 (88 * 0.382 + 36 = 69.6 ~ 70 or 78) -->
+  <line x1="54" y1="78" x2="108" y2="78" stroke="#C5A880" stroke-width="2"/>
+  
+  <!-- Subtle Admiralty Blue Seal Accent -->
+  <rect x="79" y="77" width="2" height="2" fill="#1D4ED8"/>
+</svg>

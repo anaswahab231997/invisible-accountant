@@ -1,4 +1,4 @@
-﻿import asyncio
+import asyncio
 import os
 import httpx
 import sys
@@ -9,6 +9,9 @@ from hmrc_api import HMRCClient, generate_whatsapp_fraud_headers
 
 load_dotenv()
 
+import pytest
+
+@pytest.mark.asyncio
 async def test_hmrc_live():
     print("[DEV] Starting Live HMRC Sandbox Test...")
     

@@ -1,3 +1,4 @@
+ï»¿# -*- coding: utf-8 -*-
 import os
 import json
 from dotenv import load_dotenv
@@ -58,11 +59,11 @@ def evaluate_receipt(receipt_text: str):
     if result['emma_user_prompt']:
         print(f"[Emma's WhatsApp Reply]: {result['emma_user_prompt']}")
     else:
-        print(f"[Emma's WhatsApp Reply]: All looks perfect! I've logged £{result['amount']} as {result['sa103_category']}.")
+        print(f"[Emma's WhatsApp Reply]: All looks perfect! I've logged Â£{result['amount']} as {result['sa103_category']}.")
     print("-" * 60)
 
 # 3. Simulate tricky real-world scenarios
 if __name__ == "__main__":
-    evaluate_receipt("Just spent £100 on Amazon")
-    evaluate_receipt("Paid my O2 mobile phone bill, £60.")
-    evaluate_receipt("Took a prospective client out for dinner at Nando's to discuss a contract. Cost £45.")
+    evaluate_receipt("Just spent Â£100 on Amazon")
+    evaluate_receipt("Paid my O2 mobile phone bill, Â£60.")
+    evaluate_receipt("Took a prospective client out for dinner at Nando's to discuss a contract. Cost Â£45.")

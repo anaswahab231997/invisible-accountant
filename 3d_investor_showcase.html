@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Invisible Accountant - Investor Showcase</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap');
+
+        body, html {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            font-family: 'Inter', sans-serif;
+            background-color: #050505;
+            color: #ffffff;
+            overflow: hidden;
+        }
+
+        #mindwalk-iframe {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100vh;
+            border: none;
+            z-index: 1;
+        }
+
+        /* Glassmorphism overlay container */
+        .ui-layer {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 10;
+            pointer-events: none; /* Let clicks pass through to the iframe */
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            padding: 2rem;
+            box-sizing: border-box;
+        }
+
+        .glass-panel {
+            background: rgba(20, 20, 20, 0.5);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+            padding: 1.5rem 2rem;
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.5);
+            pointer-events: auto; /* Enable clicks on panels */
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+        }
+
+        .branding h1 {
+            margin: 0;
+            font-size: 1.5rem;
+            font-weight: 700;
+            background: linear-gradient(90deg, #ffffff, #a1a1aa);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            letter-spacing: -0.5px;
+        }
+
+        .branding p {
+            margin: 0.5rem 0 0 0;
+            font-size: 0.9rem;
+            color: #a1a1aa;
+            font-weight: 300;
+        }
+
+        .stats {
+            display: flex;
+            gap: 2.5rem;
+        }
+
+        .stat-item {
+            text-align: right;
+        }
+
+        .stat-value {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: #4ade80;
+        }
+
+        .stat-label {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: #a1a1aa;
+            margin-top: 0.25rem;
+        }
+
+        .footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+        }
+
+        .title-panel h2 {
+            margin: 0;
+            font-size: 1.75rem;
+            font-weight: 300;
+            letter-spacing: -0.5px;
+        }
+
+        .title-panel .indicator {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-top: 0.75rem;
+            font-size: 0.85rem;
+            color: #4ade80;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .pulse {
+            width: 8px;
+            height: 8px;
+            background-color: #4ade80;
+            border-radius: 50%;
+            box-shadow: 0 0 0 0 rgba(74, 222, 128, 0.7);
+            animation: pulsing 2s infinite;
+        }
+
+        @keyframes pulsing {
+            0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(74, 222, 128, 0.7); }
+            70% { transform: scale(1); box-shadow: 0 0 0 10px rgba(74, 222, 128, 0); }
+            100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(74, 222, 128, 0); }
+        }
+
+        .controls button {
+            background: rgba(255, 255, 255, 0.05);
+            color: #fff;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            font-family: inherit;
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .controls button:hover {
+            background: rgba(255, 255, 255, 0.15);
+            border-color: rgba(255, 255, 255, 0.4);
+            transform: translateY(-2px);
+        }
+    </style>
+</head>
+<body>
+    <!-- Live 3D Codebase Visualization (Mindwalk) -->
+    <iframe id="mindwalk-iframe" src="http://127.0.0.1:58596"></iframe>
+
+    <!-- UI Overlay -->
+    <div class="ui-layer">
+        <header class="header">
+            <div class="glass-panel branding">
+                <h1>Invisible Accountant</h1>
+                <p>The Future of HMRC MTD</p>
+            </div>
+            
+            <div class="glass-panel stats">
+                <div class="stat-item">
+                    <div class="stat-value">3.2M</div>
+                    <div class="stat-label">TAM: Sole Traders</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value">£150M</div>
+                    <div class="stat-label">ARR Projection</div>
+                </div>
+            </div>
+        </header>
+
+        <footer class="footer">
+            <div class="glass-panel title-panel">
+                <h2>Live Codebase & AI Architecture</h2>
+                <div class="indicator">
+                    <div class="pulse"></div>
+                    System Online
+                </div>
+            </div>
+
+            <div class="controls glass-panel">
+                <button id="toggle-view-btn">Toggle Abstract Cinematic View</button>
+            </div>
+        </footer>
+    </div>
+
+    <script>
+        document.getElementById('toggle-view-btn').addEventListener('click', function() {
+            const btn = this;
+            if (btn.innerText.includes('Abstract')) {
+                btn.innerText = 'Switch to Structural View';
+            } else {
+                btn.innerText = 'Toggle Abstract Cinematic View';
+            }
+        });
+    </script>
+</body>
+</html>

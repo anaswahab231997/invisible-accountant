@@ -14,19 +14,21 @@ HMRC_ACCEPT_HEADER = "application/vnd.hmrc.1.0+json"
 
 _cached_ip = None
 
-def get_public_ip():
+async def get_public_ip():
     global _cached_ip
     if _cached_ip: 
         return _cached_ip
     try:
         import httpx
         import json
-        _cached_ip = httpx.get("https://api.ipify.org", timeout=2.0).text.strip()
+        async with httpx.AsyncClient() as client:
+            resp = await client.get("https://api.ipify.org", timeout=2.0)
+            _cached_ip = resp.text.strip()
     except Exception:
         _cached_ip = "127.0.0.1"
     return _cached_ip
 
-def generate_whatsapp_fraud_headers(real_device_id: str | None = None) -> dict:
+async def generate_whatsapp_fraud_headers(real_device_id: str | None = None) -> dict:
     """
     Generates HMRC-compliant Fraud Prevention Headers for the OTHER_VIA_SERVER architecture.
     """
@@ -38,7 +40,7 @@ def generate_whatsapp_fraud_headers(real_device_id: str | None = None) -> dict:
     # Dynamically pull the egress IP from the environment.
     server_egress_ip = os.environ.get("STATIC_EGRESS_IP")
     if not server_egress_ip:
-        server_egress_ip = get_public_ip()
+        server_egress_ip = await get_public_ip()
         
     # Since this is OTHER_VIA_SERVER (WhatsApp), the client IP is effectively the server's egress IP or Twilio's IP.
     # Hardcoding 127.0.0.1 triggers fraud filters. We use the server egress.
@@ -59,7 +61,9 @@ def generate_whatsapp_fraud_headers(real_device_id: str | None = None) -> dict:
     # HMRC strictly mandates a Device ID, but forbids spoofing.
     # If the OTHER_VIA_SERVER architecture cannot collect it, we omit it.
     if real_device_id:
-        headers["Gov-Client-Device-ID"] = real_device_id
+        import hashlib
+        hashed_id = hashlib.sha256(real_device_id.encode('utf-8')).hexdigest()
+        headers["Gov-Client-Device-ID"] = hashed_id
         
     return headers
 

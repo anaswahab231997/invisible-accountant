@@ -1,0 +1,456 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Invisible Accountant — Brand Asset Master Suite</title>
+  <style>
+    :root {
+      --bg: #0B0F19;
+      --card-bg: #111827;
+      --border: #1E293B;
+      --border-accent: rgba(197, 168, 128, 0.35);
+      --gold: #C5A880;
+      --text-main: #F8FAFC;
+      --text-muted: #94A3B8;
+      --navy: #0F172A;
+      --blue: #1D4ED8;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text-main);
+      padding: 40px 24px 80px;
+      line-height: 1.5;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    header {
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 32px;
+      margin-bottom: 48px;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      flex-wrap: wrap;
+      gap: 20px;
+    }
+
+    .brand-title {
+      font-size: 13px;
+      text-transform: uppercase;
+      letter-spacing: 0.18em;
+      color: var(--gold);
+      margin-bottom: 8px;
+      font-weight: 700;
+    }
+
+    h1 {
+      font-size: 32px;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      color: #FFFFFF;
+    }
+
+    .subtitle {
+      font-size: 15px;
+      color: var(--text-muted);
+      margin-top: 6px;
+    }
+
+    .meta-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 14px;
+      border-radius: 4px;
+      background: rgba(197, 168, 128, 0.1);
+      border: 1px solid var(--border-accent);
+      font-size: 12px;
+      color: var(--gold);
+      letter-spacing: 0.05em;
+      font-family: monospace;
+    }
+
+    .section-title {
+      font-size: 18px;
+      font-weight: 600;
+      letter-spacing: -0.01em;
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .section-title::after {
+      content: "";
+      flex: 1;
+      height: 1px;
+      background: var(--border);
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+      gap: 24px;
+      margin-bottom: 56px;
+    }
+
+    .card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      transition: transform 0.15s ease, border-color 0.15s ease;
+    }
+
+    .card:hover {
+      border-color: var(--gold);
+      transform: translateY(-2px);
+    }
+
+    .preview-box {
+      height: 260px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      padding: 24px;
+    }
+
+    .preview-box.dark {
+      background: #070A11;
+    }
+
+    .preview-box.light {
+      background: #F8FAFC;
+    }
+
+    .preview-box.checkered {
+      background-color: #0d131f;
+      background-image: 
+        linear-gradient(45deg, #151e2e 25%, transparent 25%), 
+        linear-gradient(-45deg, #151e2e 25%, transparent 25%), 
+        linear-gradient(45deg, transparent 75%, #151e2e 75%), 
+        linear-gradient(-45deg, transparent 75%, #151e2e 75%);
+      background-size: 20px 20px;
+      background-position: 0 0, 0 10px, 10px -10px, -10px 0px;
+    }
+
+    .preview-box img {
+      max-width: 80%;
+      max-height: 80%;
+      object-fit: contain;
+    }
+
+    .card-info {
+      padding: 20px;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      border-top: 1px solid var(--border);
+    }
+
+    .asset-name {
+      font-size: 15px;
+      font-weight: 600;
+      color: #FFFFFF;
+      margin-bottom: 4px;
+    }
+
+    .asset-desc {
+      font-size: 13px;
+      color: var(--text-muted);
+      margin-bottom: 16px;
+      line-height: 1.4;
+    }
+
+    .asset-specs {
+      font-family: monospace;
+      font-size: 11px;
+      color: var(--gold);
+      background: rgba(11, 15, 25, 0.6);
+      padding: 6px 10px;
+      border-radius: 4px;
+      margin-bottom: 16px;
+      display: inline-block;
+    }
+
+    .btn-row {
+      display: flex;
+      gap: 10px;
+    }
+
+    .btn {
+      flex: 1;
+      padding: 8px 12px;
+      font-size: 12px;
+      font-weight: 600;
+      text-align: center;
+      border-radius: 4px;
+      text-decoration: none;
+      transition: all 0.15s ease;
+      cursor: pointer;
+    }
+
+    .btn-primary {
+      background: var(--gold);
+      color: #0B0F19;
+      border: 1px solid var(--gold);
+    }
+
+    .btn-primary:hover {
+      background: #D4B992;
+    }
+
+    .btn-secondary {
+      background: transparent;
+      color: var(--text-main);
+      border: 1px solid var(--border);
+    }
+
+    .btn-secondary:hover {
+      background: rgba(255, 255, 255, 0.05);
+      border-color: var(--text-muted);
+    }
+
+    .color-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 16px;
+      margin-bottom: 56px;
+    }
+
+    .color-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      overflow: hidden;
+    }
+
+    .color-swatch {
+      height: 80px;
+    }
+
+    .color-details {
+      padding: 14px;
+    }
+
+    .color-name {
+      font-size: 13px;
+      font-weight: 600;
+      color: #FFFFFF;
+      margin-bottom: 4px;
+    }
+
+    .color-code {
+      font-family: monospace;
+      font-size: 12px;
+      color: var(--gold);
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <div>
+        <div class="brand-title">Institutional Brand Package</div>
+        <h1>Invisible Accountant</h1>
+        <div class="subtitle">The Sovereign Monoline Ledger Cipher & Brand Identity System</div>
+      </div>
+      <div>
+        <span class="meta-badge">OFFICIAL ASSETS • V1.0 • UK MTD</span>
+      </div>
+    </header>
+
+    <!-- SECTION 1: THE SOVEREIGN MONOLINE EMBLEM -->
+    <div class="section-title">The Sovereign Monoline Ledger Cipher (Emblem)</div>
+    <div class="grid">
+      <div class="card">
+        <div class="preview-box dark">
+          <img src="svg/sovereign_ledger_dark.svg" alt="Dark Emblem">
+        </div>
+        <div class="card-info">
+          <div>
+            <div class="asset-name">Sovereign Ledger (Obsidian Ground)</div>
+            <div class="asset-desc">Presentation primary crest. Obsidian slate ground, dual gilt hairlines, sovereign white monoline cipher.</div>
+            <div class="asset-specs">4096 × 4096 px (PNG) + Scalable Vector (SVG)</div>
+          </div>
+          <div class="btn-row">
+            <a href="png/sovereign_ledger_crest_4k.png" download class="btn btn-primary">Download 4K PNG</a>
+            <a href="svg/sovereign_ledger_dark.svg" target="_blank" class="btn btn-secondary">Open SVG</a>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="preview-box checkered">
+          <img src="svg/sovereign_ledger_transparent.svg" alt="Transparent Emblem">
+        </div>
+        <div class="card-info">
+          <div>
+            <div class="asset-name">Sovereign Ledger (Transparent Alpha)</div>
+            <div class="asset-desc">Zero background. Perfect for dark video overlays, app splash screens, and dark pitch decks.</div>
+            <div class="asset-specs">2048 × 2048 px (PNG) + Scalable Vector (SVG)</div>
+          </div>
+          <div class="btn-row">
+            <a href="png/sovereign_ledger_crest_2k_transparent.png" download class="btn btn-primary">Download 2K PNG</a>
+            <a href="svg/sovereign_ledger_transparent.svg" target="_blank" class="btn btn-secondary">Open SVG</a>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="preview-box light">
+          <img src="svg/sovereign_ledger_light.svg" alt="Light Emblem">
+        </div>
+        <div class="card-info">
+          <div>
+            <div class="asset-name">Sovereign Ledger (Pure Light)</div>
+            <div class="asset-desc">High-contrast inverted edition on pure white ground. Tailored for statutory filings, paper print, and legal deeds.</div>
+            <div class="asset-specs">2048 × 2048 px (PNG) + Scalable Vector (SVG)</div>
+          </div>
+          <div class="btn-row">
+            <a href="png/sovereign_ledger_crest_2k_light.png" download class="btn btn-primary">Download 2K PNG</a>
+            <a href="svg/sovereign_ledger_light.svg" target="_blank" class="btn btn-secondary">Open SVG</a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SECTION 2: FULL BRAND LOCKUPS -->
+    <div class="section-title">Horizontal Brand Lockups</div>
+    <div class="grid">
+      <div class="card">
+        <div class="preview-box dark" style="height: 180px;">
+          <img src="svg/invisible_accountant_lockup_dark.svg" alt="Dark Lockup" style="max-width: 90%;">
+        </div>
+        <div class="card-info">
+          <div>
+            <div class="asset-name">Horizontal Brand Lockup (Dark Ground)</div>
+            <div class="asset-desc">Full horizontal logo for pitch deck headers, corporate portal navigation, and investment memorandums.</div>
+            <div class="asset-specs">4096 × 960 px (Ultra-HD PNG) + Vector (SVG)</div>
+          </div>
+          <div class="btn-row">
+            <a href="png/invisible_accountant_lockup_dark_4k.png" download class="btn btn-primary">Download 4K PNG</a>
+            <a href="svg/invisible_accountant_lockup_dark.svg" target="_blank" class="btn btn-secondary">Open SVG</a>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="preview-box light" style="height: 180px;">
+          <img src="svg/invisible_accountant_lockup_light.svg" alt="Light Lockup" style="max-width: 90%;">
+        </div>
+        <div class="card-info">
+          <div>
+            <div class="asset-name">Horizontal Brand Lockup (Light Ground)</div>
+            <div class="asset-desc">Full horizontal lockup on pure white. Designed for SEIS term sheets, investor invoices, and letterheads.</div>
+            <div class="asset-specs">4096 × 960 px (Ultra-HD PNG) + Vector (SVG)</div>
+          </div>
+          <div class="btn-row">
+            <a href="png/invisible_accountant_lockup_light_4k.png" download class="btn btn-primary">Download 4K PNG</a>
+            <a href="svg/invisible_accountant_lockup_light.svg" target="_blank" class="btn btn-secondary">Open SVG</a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SECTION 3: APP ICONS & AVATARS -->
+    <div class="section-title">App Icons & Digital Avatars</div>
+    <div class="grid">
+      <div class="card">
+        <div class="preview-box dark" style="height: 200px;">
+          <img src="icons/app_icon_512x512.png" alt="512 Icon" style="width: 120px; height: 120px; border-radius: 24px; box-shadow: 0 10px 25px rgba(0,0,0,0.5);">
+        </div>
+        <div class="card-info">
+          <div>
+            <div class="asset-name">WhatsApp Profile / App Icon (512×512)</div>
+            <div class="asset-desc">Optimized for Meta WhatsApp Business verified avatar, PWA mobile icon, and App Store submission.</div>
+            <div class="asset-specs">512 × 512 px PNG (Lossless)</div>
+          </div>
+          <div class="btn-row">
+            <a href="icons/app_icon_512x512.png" download class="btn btn-primary">Download Icon</a>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="preview-box dark" style="height: 200px;">
+          <div style="display: flex; gap: 20px; align-items: center;">
+            <img src="icons/app_icon_192x192.png" alt="192 Icon" style="width: 64px; height: 64px; border-radius: 12px;">
+            <img src="icons/app_icon_64x64.png" alt="64 Icon" style="width: 48px; height: 48px; border-radius: 8px;">
+            <img src="icons/app_icon_32x32.png" alt="32 Icon" style="width: 32px; height: 32px; border-radius: 6px;">
+          </div>
+        </div>
+        <div class="card-info">
+          <div>
+            <div class="asset-name">Favicon & Browser Icon Suite</div>
+            <div class="asset-desc">Pre-rasterized pixel-crisp favicons for web portals, browser tabs, and desktop shortcuts.</div>
+            <div class="asset-specs">192×192 px • 64×64 px • 32×32 px</div>
+          </div>
+          <div class="btn-row">
+            <a href="icons/app_icon_192x192.png" download class="btn btn-primary">192px</a>
+            <a href="icons/app_icon_64x64.png" download class="btn btn-secondary">64px</a>
+            <a href="icons/app_icon_32x32.png" download class="btn btn-secondary">32px</a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SECTION 4: COLOR PALETTE -->
+    <div class="section-title">Institutional Color Palette</div>
+    <div class="color-grid">
+      <div class="color-card">
+        <div class="color-swatch" style="background: #0B0F19; border-bottom: 1px solid var(--border);"></div>
+        <div class="color-details">
+          <div class="color-name">Obsidian Slate</div>
+          <div class="color-code">#0B0F19</div>
+        </div>
+      </div>
+      <div class="color-card">
+        <div class="color-swatch" style="background: #C5A880;"></div>
+        <div class="color-details">
+          <div class="color-name">Antique Sovereign Gilt</div>
+          <div class="color-code">#C5A880</div>
+        </div>
+      </div>
+      <div class="color-card">
+        <div class="color-swatch" style="background: #FFFFFF;"></div>
+        <div class="color-details">
+          <div class="color-name">Sovereign Monoline White</div>
+          <div class="color-code">#FFFFFF</div>
+        </div>
+      </div>
+      <div class="color-card">
+        <div class="color-swatch" style="background: #1D4ED8;"></div>
+        <div class="color-details">
+          <div class="color-name">Admiralty Blue (Anchor)</div>
+          <div class="color-code">#1D4ED8</div>
+        </div>
+      </div>
+      <div class="color-card">
+        <div class="color-swatch" style="background: #0F172A;"></div>
+        <div class="color-details">
+          <div class="color-name">Oxford Blue (Print)</div>
+          <div class="color-code">#0F172A</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

@@ -1,75 +1,108 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="scroll-smooth">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Privacy Policy - Invisible Accountant</title>
-    <style>
-        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif; line-height: 1.6; color: #333; max-width: 800px; margin: 0 auto; padding: 2rem; background: #f9fafb; }
-        h1, h2, h3 { color: #111; }
-        a { color: #0066cc; text-decoration: none; }
-        a:hover { text-decoration: underline; }
-        .container { background: #fff; padding: 2.5rem; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
-        code { background: #eee; padding: 0.2rem 0.4rem; border-radius: 4px; font-size: 0.9em; }
-    </style>
+    <title>Privacy Policy | Invisible Accountant</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        heading: ['"DM Sans"', 'sans-serif'],
+                        body: ['Inter', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
 </head>
-<body>
-    <div class="container">
-        <a href="/">&larr; Back to Home</a>
-        <h1>Privacy Policy for Invisible Accountant</h1>
-        <p><strong>Last Updated:</strong> 29 August 2026</p>
+<body class="bg-gray-50 text-gray-800 font-body antialiased selection:bg-blue-100 selection:text-blue-900">
+    
+    <!-- Simple Header -->
+    <header class="bg-white border-b border-gray-100">
+        <div class="max-w-4xl mx-auto px-6 py-6 flex items-center justify-between">
+            <a href="/" class="flex items-center gap-2 group">
+                <div class="w-8 h-8 rounded-lg bg-blue-600 flex items-center justify-center text-white font-bold group-hover:bg-blue-700 transition-colors">IA</div>
+                <span class="font-heading font-semibold text-gray-900 text-xl tracking-tight">Invisible Accountant</span>
+            </a>
+            <a href="/" class="text-sm font-medium text-gray-500 hover:text-gray-900 transition-colors">Back to Home</a>
+        </div>
+    </header>
 
-        <h2>1. Introduction</h2>
-        <p>Welcome to Invisible Accountant. We are committed to protecting and respecting your privacy. This Privacy Policy explains how we collect, use, store, and protect your personal data when you use our WhatsApp-based Making Tax Digital for Income Tax Self Assessment (MTD for ITSA) application.</p>
-        <p>For the purposes of the UK General Data Protection Regulation (UK GDPR) and the Data Protection Act 2018, Invisible Accountant acts as the <strong>Data Controller</strong> for the personal data we hold about you on our servers. Once your data is transmitted to HM Revenue & Customs (HMRC), HMRC acts as an independent Data Controller.</p>
+    <!-- Main Content -->
+    <main class="max-w-4xl mx-auto px-6 py-16">
+        <div class="bg-white rounded-3xl shadow-sm border border-gray-100 p-8 md:p-12">
+            <h1 class="font-heading text-4xl md:text-5xl font-bold text-gray-900 tracking-tight mb-4">Privacy Policy</h1>
+            <p class="text-gray-500 text-sm font-medium uppercase tracking-wider mb-12">Last updated: September 2026</p>
 
-        <h2>2. The Data We Collect</h2>
-        <p>We collect and process the following data to provide our MTD for ITSA services:</p>
-        <ul>
-            <li><strong>Contact Information:</strong> Your mobile phone number (used for WhatsApp communication).</li>
-            <li><strong>Tax and Identity Information:</strong> Your National Insurance Number (NINO), Unique Taxpayer Reference (UTR), and business details required by HMRC.</li>
-            <li><strong>HMRC OAuth Tokens:</strong> Authentication tokens allowing us to securely submit data to HMRC on your behalf.</li>
-            <li><strong>Financial Records:</strong> Images of receipts, invoices, and other income/expense data you submit via WhatsApp.</li>
-        </ul>
+            <!-- HMRC AUDIT NOTICE -->
+            <div class="bg-blue-50 border border-blue-200 rounded-xl p-6 mb-10">
+                <h2 class="font-heading text-blue-900 font-semibold mb-2 flex items-center gap-2">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                    HMRC Audit & Sandbox Notice
+                </h2>
+                <p class="text-blue-800 text-sm leading-relaxed">
+                    This application is currently operating in a <strong>Sandbox / Pre-Production environment</strong> for testing and HMRC auditing purposes. While current testing infrastructure utilizes secure EEA-based cloud processing, <strong>upon receiving HMRC production credentials, our entire architecture will be migrated exclusively to a UK-based data center (e.g., AWS London)</strong> to permanently fulfill the UK-exclusive data processing clauses outlined below.
+                </p>
+            </div>
 
-        <h3>2.1 HMRC Fraud Prevention Headers (Mandatory Telemetry)</h3>
-        <p>Under the <em>Delivery of Tax Information through Software Regulations 2019</em>, HMRC legally mandates that all third-party software collects specific device and network telemetry to detect and prevent tax fraud. Because you interact with our service via WhatsApp, we cannot collect your physical device telemetry. Instead, we act as an intermediary server. To comply with HMRC’s Fraud Prevention rules, we cryptographically hash your WhatsApp phone number to generate a secure, anonymous <code>Gov-Client-Device-ID</code>, which is transmitted to HMRC along with our server's IP addresses and timezone during every tax submission. <strong>This data sharing is mandatory to use the service.</strong></p>
+            
+            <div class="space-y-10">
+                <section>
+                    <h2 class="font-heading text-2xl font-semibold text-gray-900 mb-4">1. Introduction & How Our Product Works</h2>
+                    <p class="text-gray-600 leading-relaxed">Invisible Accountant ("we", "our") is a commercial software service that enables UK sole traders to manage their business expenses via WhatsApp. When you send a message or photo of a receipt, our AI extracts the vendor, amount, and category, and subsequently files this data with HM Revenue & Customs (HMRC) via their official Making Tax Digital (MTD) APIs.</p>
+                </section>
 
-        <h2>3. How We Use Your Data</h2>
-        <p>We process your personal data for the following purposes:</p>
-        <ul>
-            <li>To authenticate your identity and link your account with HMRC via OAuth 2.0.</li>
-            <li>To record, categorise, and manage your income and expenses.</li>
-            <li>To submit your quarterly updates and End of Period Statements to HMRC.</li>
-        </ul>
+                <section>
+                    <h2 class="font-heading text-2xl font-semibold text-gray-900 mb-4">2. Data We Collect & Legal Basis</h2>
+                    <p class="text-gray-600 leading-relaxed mb-4">To provide this service, we collect and process:</p>
+                    <ul class="list-disc pl-6 space-y-2 text-gray-600">
+                        <li><strong class="text-gray-900">WhatsApp Phone Number:</strong> Used as your unique identifier and to communicate with you.</li>
+                        <li><strong class="text-gray-900">HMRC OAuth Tokens:</strong> Used strictly to authenticate and transmit your data to HMRC APIs on your behalf. These tokens are granted for an 18-month duration.</li>
+                        <li><strong class="text-gray-900">Financial Data:</strong> The amounts, categories, and vendors of the expenses you submit to us.</li>
+                    </ul>
+                    <p class="text-gray-600 leading-relaxed mt-4">Our legal basis for processing this data under UK GDPR is the performance of our contract with you to deliver the Invisible Accountant service.</p>
+                </section>
 
-        <h2>4. How We Secure Your Data</h2>
-        <ul>
-            <li><strong>Encryption at Rest:</strong> Your HMRC OAuth tokens and highly sensitive identifiers are encrypted in our database using military-grade <strong>AES-GCM</strong> encryption.</li>
-            <li><strong>Data Transit:</strong> All data transmitted between our servers, WhatsApp, and HMRC is encrypted using strict TLS protocols.</li>
-        </ul>
+                <section>
+                    <h2 class="font-heading text-2xl font-semibold text-gray-900 mb-4">3. Data Security & Encryption</h2>
+                    <p class="text-gray-600 leading-relaxed mb-4">We implement rigorous security controls to protect your data. All personally identifiable information (PII) such as National Insurance Numbers (NINO) and Unique Taxpayer References (UTR) are actively masked and redacted before being saved to our databases. Your HMRC OAuth tokens and identity data are encrypted at rest using AES-256-GCM encryption, mathematically bound to your specific identity to ensure strict customer data separation.</p>
+                    <p class="text-gray-600 leading-relaxed">We process and store all customer data exclusively on secure cloud servers located within the United Kingdom (London region).</p>
+                </section>
 
-        <h2>5. Data Retention</h2>
-        <p>We retain your personal data and financial records only for as long as necessary to fulfill the purposes outlined in this policy and to comply with legal obligations. Specifically:</p>
-        <ul>
-            <li><strong>WhatsApp Messages and Receipts:</strong> Images and message history are retained for the duration of the tax year plus six years, in accordance with HMRC record-keeping requirements.</li>
-            <li><strong>Expense Ledger Data:</strong> Kept for six years following the end of the relevant tax year.</li>
-        </ul>
-        <p>If you wish to request earlier deletion of your data where legally permissible, please contact us.</p>
+                <section>
+                    <h2 class="font-heading text-2xl font-semibold text-gray-900 mb-4">4. Your Data Rights (Portability, Access & Deletion)</h2>
+                    <p class="text-gray-600 leading-relaxed mb-4">Under UK GDPR, you maintain full control over your data. You have the right to access, amend, export, or permanently delete your data if you choose to move to another provider or stop using our service.</p>
+                    <p class="text-gray-600 leading-relaxed bg-blue-50 p-4 rounded-xl text-blue-900 border border-blue-100">You can exercise your "Right to be Forgotten" or request a data export at any time by texting <strong>"DELETE MY DATA"</strong> or <strong>"EXPORT MY DATA"</strong> to the Invisible Accountant WhatsApp bot, or by emailing our Data Protection Officer at privacy@invisibleaccountant.co.uk.</p>
+                </section>
 
-        <h2>6. Your UK GDPR Rights</h2>
-        <p>Under the UK GDPR, you have the following rights regarding your personal data:</p>
-        <ul>
-            <li><strong>Right to Access:</strong> You have the right to request a copy of the personal data we hold about you.</li>
-            <li><strong>Right to be Forgotten (Right to Erasure):</strong> You have the right to request that we delete your personal data, subject to our legal obligation to retain certain tax records for HMRC.</li>
-            <li><strong>Right to Rectification:</strong> You can ask us to correct inaccurate or incomplete data.</li>
-        </ul>
+                <section>
+                    <h2 class="font-heading text-2xl font-semibold text-gray-900 mb-4">5. Third Parties & Data Sharing</h2>
+                    <p class="text-gray-600 leading-relaxed">We use Twilio Inc. exclusively to route your WhatsApp messages to our servers. We transmit your finalized tax data directly to HM Revenue & Customs (HMRC). We <strong>never</strong> sell or share your personal data with third parties for marketing purposes.</p>
+                </section>
+                
+                <section>
+                    <h2 class="font-heading text-2xl font-semibold text-gray-900 mb-4">6. Security Incident Reporting</h2>
+                    <p class="text-gray-600 leading-relaxed">If we become aware of a personal data breach, we will notify the Information Commissioner's Office (ICO) and HMRC within 72 hours, and we will inform affected users without undue delay. If you wish to report a security vulnerability, please email <a href="mailto:security@invisibleaccountant.co.uk" class="text-blue-600 hover:underline">security@invisibleaccountant.co.uk</a>.</p>
+                </section>
+            </div>
+        </div>
+    </main>
 
-        <h2>7. OAuth Consent & Revocation</h2>
-        <p>By linking your account, you grant Invisible Accountant the "Authority to Interact with HMRC on your behalf." You can revoke this OAuth consent at any time directly through your personal HMRC Government Gateway account online.</p>
-
-        <h2>8. Contact Us</h2>
-        <p>To exercise your GDPR rights, contact our Data Protection Officer at: support@invisibleaccountant.co.uk</p>
-    </div>
+    <!-- Footer -->
+    <footer class="bg-gray-50 py-12 text-center">
+        <div class="max-w-4xl mx-auto px-6">
+            <div class="flex flex-col md:flex-row justify-center items-center gap-4 md:gap-8 mb-6">
+                <a href="/terms" class="text-sm font-medium text-gray-500 hover:text-blue-600 transition-colors">Terms & Conditions</a>
+                <a href="/privacy" class="text-sm font-medium text-gray-500 hover:text-blue-600 transition-colors">Privacy Policy</a>
+                <a href="/accessibility" class="text-sm font-medium text-gray-500 hover:text-blue-600 transition-colors">Accessibility</a>
+                <a href="mailto:security@invisibleaccountant.co.uk" class="text-sm font-medium text-gray-500 hover:text-blue-600 transition-colors">Report Security Issue</a>
+            </div>
+            <p class="text-sm text-gray-400">&copy; 2026 Invisible Accountant Ltd. Registered in England & Wales.</p>
+        </div>
+    </footer>
 </body>
 </html>

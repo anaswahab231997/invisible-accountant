@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 160" width="100%" height="100%" fill="none">
+  <rect width="160" height="160" fill="#0B0F19"/>
+  <rect x="8" y="8" width="144" height="144" stroke="#1E293B" stroke-width="1"/>
+  <rect x="12" y="12" width="136" height="136" stroke="#C5A880" stroke-width="0.5" stroke-opacity="0.3"/>
+
+  <!-- Left Column: The Monumental 'I' -->
+  <rect x="44" y="34" width="10" height="92" fill="#FFFFFF"/>
+  <!-- Architectural Plinth Lines -->
+  <line x1="36" y1="34" x2="62" y2="34" stroke="#FFFFFF" stroke-width="2"/>
+  <line x1="36" y1="126" x2="62" y2="126" stroke="#FFFFFF" stroke-width="2"/>
+
+  <!-- Right Structure: The Majestic 'A' -->
+  <!-- Apex at (102, 34) -->
+  <!-- Right Leg: Vertical Stately Pillar (x=108..118, y=56..126) -->
+  <rect x="108" y="56" width="10" height="70" fill="#FFFFFF"/>
+  <line x1="102" y1="126" x2="124" y2="126" stroke="#FFFFFF" stroke-width="2"/>
+  
+  <!-- Left Diagonal Strut of 'A' (from 102,34 down to 72,126) -->
+  <polygon points="98,34 108,34 84,126 74,126" fill="#FFFFFF"/>
+  <!-- Apex connector -->
+  <polygon points="98,34 118,56 108,56 98,42" fill="#FFFFFF"/>
+
+  <!-- The Golden Ratio Ledger Beam (Hallmarked Antique Gilt) -->
+  <!-- Bridging from inner edge of 'I' (54) to inner edge of 'A' (108) at y=80 -->
+  <line x1="54" y1="80" x2="108" y2="80" stroke="#C5A880" stroke-width="3" stroke-linecap="square"/>
+  
+  <!-- Sovereign Admiralty Accent Pivot -->
+  <rect x="79" y="78.5" width="3" height="3" fill="#1D4ED8"/>
+</svg>

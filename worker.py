@@ -223,7 +223,7 @@ async def process_hmrc_queue():
         try:
             pending_items = await get_pending_hmrc_queue()
 
-            for item in pending_items:
+            async def process_item(item):
                 try:
                     await rate_limiter.consume()
                     
@@ -234,18 +234,23 @@ async def process_hmrc_queue():
                     await hmrc_breaker.async_call(submit_to_hmrc, item, identity)
                     logger.info("Queue ID successfully submitted", queue_id=item["id"])
                 except CircuitBreakerOpenException:
-                    logger.warning(
-                        "Circuit is OPEN. Pausing queue processing",
-                        recovery_timeout=hmrc_breaker.recovery_timeout,
-                    )
-                    await asyncio.sleep(hmrc_breaker.recovery_timeout)
-                    break  # Break out of the batch loop to retry later
+                    logger.warning("Circuit is OPEN. Pausing queue processing", recovery_timeout=hmrc_breaker.recovery_timeout)
+                    raise
                 except Exception as e:
                     logger.error("Queue item failed", queue_id=item["id"], error=str(e))
                     from db import mark_hmrc_failed
                     await mark_hmrc_failed(item["id"])
 
-            await asyncio.sleep(1)  # idle wait if queue is empty
+            if pending_items:
+                tasks = [process_item(item) for item in pending_items]
+                results = await asyncio.gather(*tasks, return_exceptions=True)
+                
+                for r in results:
+                    if isinstance(r, CircuitBreakerOpenException):
+                        await asyncio.sleep(hmrc_breaker.recovery_timeout)
+                        break
+            else:
+                await asyncio.sleep(1)  # idle wait if queue is empty
         except Exception as e:
             logger.critical("Worker critical error", error=str(e), retry_in="5s")
             await asyncio.sleep(5)
@@ -260,15 +265,11 @@ async def process_ttl_sweeper():
                 async with get_connection() as conn:
                     for item in expiring:
                         logger.warning(
-                            "ALERT: Chat Session ID is nearing the 24h WhatsApp policy limit!",
+                            "ALERT: Chat Session ID has expired! Purging PII to satisfy GDPR data minimisation.",
                             chat_id=item["id"],
                         )
-                        logger.info(
-                            "Triggering batch template message for missing data",
-                            sender_id=item["sender_id"],
-                        )
                         await conn.execute(
-                            "UPDATE chat_sessions SET ttl_timestamp = '9999-12-31' WHERE id = $1",
+                            "DELETE FROM chat_sessions WHERE id = $1",
                             item["id"]
                         )
 
