@@ -79,6 +79,7 @@
             padding: 14px;
             background: linear-gradient(145deg, #444, #111);
             border-radius: 60px;
+            max-width: 100%;
             box-shadow: 
                 0 30px 60px -12px rgba(26, 86, 219, 0.3),
                 inset 0 0 0 2px #666,
@@ -101,6 +102,7 @@
             border-radius: 48px;
             background: #FFFFFF; 
             width: 320px; 
+            max-width: 100%;
             height: 660px; 
             position: relative;
             overflow: hidden;
@@ -212,7 +214,7 @@
         }
     </style>
 </head>
-<body class="font-body min-h-screen selection:bg-ukblue selection:text-white">
+<body class="font-body min-h-screen selection:bg-ukblue selection:text-white overflow-x-hidden">
 
     <div class="bg-ukblue text-white text-sm font-medium py-3 text-center px-4 font-heading tracking-wide">
         Making Tax Digital (MTD) becomes mandatory for UK Sole Traders earning over £50k in April 2026. <a href="#waitlist" class="underline hover:text-blue-200">Assess your readiness.</a>
@@ -359,7 +361,7 @@
                         </div>
 
                         <div class="w-full max-w-sm relative z-10">
-                            <div class="receipt-paper mx-auto p-6 my-2 relative">
+                            <div class="receipt-paper mx-auto p-4 sm:p-6 my-2 relative">
                                 <!-- Glowing Scanner Bar -->
                                 <div id="scanner-bar" class="absolute left-0 right-0 h-[2px] bg-hmrcblue shadow-[0_0_15px_4px_rgba(29,112,184,0.6)] z-20 transition-all duration-75" style="top: -10%;"></div>
                                 
