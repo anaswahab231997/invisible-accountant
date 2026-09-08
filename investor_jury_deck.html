@@ -4,124 +4,1106 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Invisible Accountant: Investor Jury</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
-    <script src="https://unpkg.com/lucide@latest"></script>
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    fontFamily: {
-                        heading: ['"DM Sans"', 'sans-serif'],
-                        body: ['Inter', 'sans-serif'],
-                    },
-                    colors: {
-                        ukblue: '#1A56DB',      
-                        wapp: '#25D366',        
-                        mint: '#ECFDF5',        
-                        charcoal: '#1F2937',    
-                        slate: '#4B5563',       
-                        offwhite: '#F9FAFB',    
-                        cardbg: '#FFFFFF',
-                        hmrcblue: '#1D70B8',      
-                        deepslate: '#0F172A',        
-                        sagesuccess: '#2E8555',        
-                        anxietymint: '#E8F3EB',    
-                        warmcaution: '#F47738',       
-                        calmstone: '#F3F4F6'
-                    },
-                    boxShadow: {
-                        'soft': '0 10px 40px -10px rgba(0,0,0,0.08)',
-                        'float': '0 20px 60px -15px rgba(26, 86, 219, 0.15)'
-                    }
-                }
-            }
-        }
-    </script>
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
     <style>
-        body, html { margin: 0; padding: 0; height: 100%; width: 100%; overflow: hidden; }
-        #deck { position: relative; width: 100vw; height: 100vh; max-width: 1560px; margin: 0 auto; display: flex; align-items: center; justify-content: center; padding: 2rem; box-sizing: border-box; }
-        .slide { position: absolute; width: calc(100% - 4rem); height: calc(100% - 6rem); opacity: 0; visibility: hidden; transition: opacity 0.4s, transform 0.4s; transform: translateY(12px); display: grid; grid-template-columns: repeat(12, 1fr); gap: 2rem; }
-        .slide.active { opacity: 1; visibility: visible; transform: translateY(0); }
+        /* Geist alternative since it requires custom loading, using system-ui for highly legible UI */
+        
+        
+        :root {
+            --oxford-blue: #111827;
+            --deep-slate: #1F2937;
+            --heritage-blue: #1A56DB;
+            --crisp-white: #FFFFFF;
+            --off-white: #F9FAFB;
+            --subtle-silver: #E5E7EB;
+            --muted-slate: #4B5563;
+        }
+
+        body, html {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            overflow: hidden;
+            background-color: var(--off-white);
+            color: var(--oxford-blue);
+        }
+
+        h1, h2, h3, h4, h5, h6 {
+            font-family: 'DM Sans', sans-serif; font-weight: 700;
+            margin-top: 0;
+            color: var(--oxford-blue);
+        }
+
+        h1 {
+            font-size: 3rem;
+            letter-spacing: -0.02em;
+            font-weight: 500;
+            margin-bottom: 24px;
+        }
+
+        h2 {
+            font-size: 2.25rem;
+            letter-spacing: -0.01em;
+            font-weight: 500;
+            margin-bottom: 24px;
+        }
+
+        p {
+            font-size: 1rem;
+            line-height: 1.6;
+            margin-bottom: 24px;
+            color: var(--deep-slate);
+        }
+
+        .caption {
+            font-size: 0.875rem;
+            color: var(--muted-slate);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        /* Clean Fintech Background */
+        body {
+            background-color: #F9FAFB !important;
+            background-image: radial-gradient(circle at 50% 0%, rgba(26, 86, 219, 0.04) 0%, transparent 65%) !important;
+        }
+
+        /* Presentation Container */
+        #deck {
+            position: relative;
+            width: 100vw;
+            max-width: 1560px;
+            height: 100vh;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: clamp(16px, 2.5vw, 44px) clamp(16px, 3vw, 56px) 76px clamp(16px, 3vw, 56px);
+            box-sizing: border-box;
+        }
+
+        .slide {
+            position: absolute;
+            width: calc(100% - clamp(32px, 6vw, 112px));
+            height: calc(100% - 84px);
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.4s cubic-bezier(0.2, 0.8, 0.2, 1), transform 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
+            transform: translateY(12px);
+            display: grid;
+            grid-template-columns: repeat(12, 1fr);
+            gap: clamp(16px, 2vw, 32px);
+            align-items: stretch;
+            box-sizing: border-box;
+        }
+
+        .slide.active {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+
+        .card {
+            background-color: #FFFFFF;
+            border: 1px solid #E5E7EB;
+            border-radius: 16px;
+            padding: clamp(24px, 2.5vw, 36px);
+            box-shadow: 0 10px 30px -10px rgba(17, 24, 39, 0.05);
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+            box-sizing: border-box;
+            overflow-y: auto;
+            scrollbar-width: thin;
+            scrollbar-color: rgba(148, 163, 184, 0.35) transparent;
+        }
+
+        
+        .visual-box.card-dark {
+            background-color: var(--oxford-blue) !important;
+        }
+        .card-dark {
+            background-color: var(--oxford-blue);
+            color: var(--crisp-white);
+            border: none;
+            box-sizing: border-box;
+        }
+
+        .card-dark h1, .card-dark h2, .card-dark p {
+            color: var(--crisp-white);
+        }
+
+        .card-dark .caption {
+            color: var(--subtle-silver);
+        }
+
         .col-left-4 { grid-column: span 4; }
         .col-left-5 { grid-column: span 5; }
         .col-left-6 { grid-column: span 6; }
         .col-left-7 { grid-column: span 7; }
+        
         .col-right-8 { grid-column: 5 / 13; }
         .col-right-7 { grid-column: 6 / 13; }
         .col-right-6 { grid-column: 7 / 13; }
         .col-right-5 { grid-column: 8 / 13; }
-        
-        #slide-1, #slide-9 { display: flex; flex-direction: column; }
-    
-        /* Restored Slider CSS */
-        html, body {
-            height: 100vh;
-            overflow: hidden;
-            background-color: #F9FAFB;
-        }
-        .slide {
-            display: none;
-            width: 100%;
-            height: calc(100vh - 100px);
-            padding: 2rem;
+
+        .visual-box {
+            background-color: var(--off-white);
+            border: 1px solid var(--subtle-silver);
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: clamp(20px, 2.5vw, 44px);
+            text-align: center;
             box-sizing: border-box;
+            overflow: hidden;
         }
-        .slide.active {
+
+        .moat-highlight {
+            border-left: 4px solid var(--heritage-blue);
+            padding-left: 20px;
+            margin: 20px 0;
+            background-color: rgba(29, 78, 216, 0.03);
+            padding: 18px 20px;
+        }
+
+        ul {
+            padding-left: 20px;
+            margin-bottom: 20px;
+        }
+
+        li {
+            font-size: clamp(0.88rem, 1vw, 1rem);
+            line-height: 1.55;
+            margin-bottom: 12px;
+            color: var(--deep-slate);
+        }
+
+        .card-dark li {
+            color: var(--crisp-white);
+        }
+
+        /* Floating Elevated Navigation Controls */
+        .controls {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            background: rgba(255, 255, 255, 0.96);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            padding: 8px 18px;
+            border-radius: 9999px;
+            border: 1px solid #E5E7EB;
+            box-shadow: 0 10px 25px -5px rgba(17, 24, 39, 0.1), 0 4px 10px -2px rgba(17, 24, 39, 0.04);
+            z-index: 9999;
+        }
+        .controls button {
+            background: #FFFFFF;
+            color: #111827;
+            border: 1px solid #E5E7EB;
+            padding: 8px 18px;
+            border-radius: 9999px;
+            font-family: 'Inter', sans-serif;
+            font-size: 0.85rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.15s ease;
+        }
+        .controls button:hover:not(:disabled) {
+            background: #F9FAFB;
+            border-color: #D1D5DB;
+        }
+        .controls button.btn-primary {
+            background: #1A56DB;
+            color: #FFFFFF;
+            border-color: #1A56DB;
+        }
+        .controls button.btn-primary:hover:not(:disabled) {
+            background: #1546b5;
+            box-shadow: 0 4px 12px rgba(26, 86, 219, 0.25);
+        }
+        .controls button:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+        }
+        .slide-counter {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.82rem;
+            font-weight: 500;
+            color: #4B5563;
+            padding: 0 8px;
+        }
+
+        .slide-counter {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.78rem;
+            color: #94A3B8;
+            padding: 0 8px;
+            user-select: none;
+            white-space: nowrap;
+            letter-spacing: 0.08em;
+        }
+
+        button {
+            background-color: transparent;
+            color: #FFFFFF;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            padding: 7px 18px;
+            font-family: inherit;
+            font-size: 0.82rem;
+            font-weight: 500;
+            cursor: pointer;
+            border-radius: 9999px;
+            transition: all 0.25s cubic-bezier(0.2, 0.8, 0.2, 1);
+            white-space: nowrap;
+        }
+
+        button:hover:not(:disabled) {
+            background-color: rgba(255, 255, 255, 0.12);
+            border-color: rgba(255, 255, 255, 0.4);
+        }
+
+        button:disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+        }
+
+        .btn-primary {
+            background-color: var(--heritage-blue);
+            color: var(--crisp-white);
+            border-color: var(--heritage-blue);
+        }
+
+        .btn-primary:hover:not(:disabled) {
+            background-color: #2563eb;
+            border-color: #2563eb;
+        }
+
+        .script-notes {
+            margin-top: 20px;
+            padding-top: 16px;
+            border-top: 1px solid var(--subtle-silver);
+            font-size: 0.84rem;
+            color: var(--muted-slate);
+            font-style: italic;
+        }
+
+        .card-dark .script-notes {
+            border-top-color: rgba(255,255,255,0.2);
+            color: rgba(255,255,255,0.7);
+        }
+
+        /* Specific visual elements */
+        .big-number {
+            font-family: 'DM Sans', sans-serif; font-weight: 700;
+            font-size: 5rem;
+            font-weight: 700;
+            color: var(--heritage-blue);
+            line-height: 1;
+            margin-bottom: 16px;
+        }
+
+        .comparison {
+            display: flex;
+            width: 100%;
+            gap: 24px;
+        }
+
+        .comp-item {
+            flex: 1;
+            padding: 24px;
+            border: 1px solid var(--subtle-silver);
+            background: #fff;
+        }
+
+        .comp-header {
+            font-family: 'DM Sans', sans-serif; font-weight: 700;
+            font-weight: 500;
+            margin-bottom: 16px;
+            border-bottom: 1px solid var(--subtle-silver);
+            padding-bottom: 8px;
+        }
+
+        /* -------------------------------------------------------------
+           SLIDE 1: SINGLE-PLANE EXPANSIVE EDITORIAL MEMORANDUM
+           British Institutional Elegance (Coutts / Rothschild / Savile Row)
+           Zero AI Slop: No neon gradients, no glow filters, no drop shadows
+        ------------------------------------------------------------- */
+        #slide-1.slide,
+        #slide-9.slide {
+            display: flex;
+            padding: 0;
+            align-items: stretch;
+            justify-content: stretch;
+        }
+
+        .editorial-memorandum {
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #1A56DB 0%, #113E9E 100%);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 20px;
+            box-shadow: 0 25px 50px -12px rgba(26, 86, 219, 0.25);
+            position: relative;
+            padding: clamp(32px, 3.5vw, 56px);
             display: flex;
             flex-direction: column;
-            justify-content: center;
+            justify-content: space-between;
+            overflow: hidden;
+            box-sizing: border-box;
+        }
+
+        .editorial-memorandum::before {
+            content: "";
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: radial-gradient(circle at top right, rgba(255,255,255,0.12), transparent 70%);
+            pointer-events: none;
+        }
+
+        .memorandum-eyebrow {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-bottom: 20px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+            z-index: 2;
+            gap: 16px;
+        }
+
+        .eyebrow-text {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: clamp(0.68rem, 0.88vw, 0.75rem);
+            font-weight: 600;
+            letter-spacing: clamp(0.12em, 0.2vw, 0.22em);
+            text-transform: uppercase;
+            color: #C5A880;
+            line-height: 1.4;
+        }
+
+        .eyebrow-id {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.72rem;
+            font-weight: 400;
+            letter-spacing: 0.15em;
+            color: #64748B;
+            text-transform: uppercase;
+            white-space: nowrap;
+        }
+
+        @media (max-width: 1080px) {
+            .eyebrow-id {
+                display: none;
+            }
+            .hero-right {
+                padding-left: 24px;
+            }
+        }
+
+        .memorandum-hero {
+            display: grid;
+            grid-template-columns: 7fr 5fr;
+            gap: clamp(36px, 4.5vw, 64px);
+            align-items: center;
+            flex: 1;
+            padding: clamp(20px, 2.8vw, 40px) 0;
+            z-index: 2;
+        }
+
+        .hero-left {
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+        }
+
+        .hero-title {
+            font-family: 'DM Sans', sans-serif; font-weight: 700;
+            font-size: clamp(2.8rem, 4.8vw, 4.2rem);
+            font-weight: 700;
+            letter-spacing: -0.035em;
+            line-height: 1.05;
+            color: #FFFFFF;
+            margin-bottom: 20px;
+        }
+
+        .hero-proposition {
+            font-size: clamp(1.25rem, 1.7vw, 1.5rem);
+            font-weight: 300;
+            line-height: 1.5;
+            color: #94A3B8;
+            margin-bottom: 16px;
+            max-width: 580px;
+        }
+
+        .hero-detail {
+            font-size: clamp(0.92rem, 1.05vw, 1.02rem);
+            font-weight: 400;
+            line-height: 1.6;
+            color: #64748B;
+            max-width: 540px;
+        }
+
+        .hero-right {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            border-left: 1px solid rgba(255, 255, 255, 0.08);
+            padding-left: clamp(28px, 3.5vw, 56px);
+            height: 100%;
+        }
+
+        .emblem-wrapper {
+            width: clamp(170px, 18vw, 220px);
+            height: clamp(170px, 18vw, 220px);
+            position: relative;
+        }
+
+        .emblem-inscription {
+            margin-top: 18px;
+            text-align: center;
+        }
+
+        .emblem-title {
+            font-family: 'DM Sans', sans-serif; font-weight: 700;
+            font-size: 0.95rem;
+            font-weight: 700;
+            letter-spacing: 0.18em;
+            color: #FFFFFF;
+            text-transform: uppercase;
+        }
+
+        .emblem-sub {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.7rem;
+            font-weight: 500;
+            letter-spacing: 0.2em;
+            color: #64748B;
+            margin-top: 6px;
+            text-transform: uppercase;
+        }
+
+        .memorandum-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            padding-top: 16px;
+            border-top: 1px solid rgba(255, 255, 255, 0.08);
+            z-index: 2;
+            gap: 20px;
+            padding-bottom: 4px;
+        }
+
+        .thesis-block {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .thesis-label {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.7rem;
+            font-weight: 600;
+            letter-spacing: 0.2em;
+            color: #C5A880;
+            text-transform: uppercase;
+        }
+
+        .thesis-text {
+            font-size: clamp(0.85rem, 0.98vw, 0.95rem);
+            font-weight: 400;
+            color: #E2E8F0;
+            letter-spacing: -0.01em;
+        }
+
+        .status-block {
+            text-align: right;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            gap: 6px;
+            flex-shrink: 0;
+        }
+
+        .status-badge {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.72rem;
+            font-weight: 600;
+            letter-spacing: 0.14em;
+            color: #C5A880;
+            border: 1px solid rgba(197, 168, 128, 0.35);
+            padding: 5px 12px;
+            text-transform: uppercase;
+            white-space: nowrap;
+        }
+
+        .status-note {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.68rem;
+            letter-spacing: 0.12em;
+            color: #64748B;
+            text-transform: uppercase;
+            white-space: nowrap;
+        }
+
+        /* -------------------------------------------------------------
+           RESPONSIVE BREAKPOINTS: Tablet, Mobile, and Low-Height Laptops
+        ------------------------------------------------------------- */
+        @media (max-width: 1080px) {
+            .eyebrow-id { display: none; }
+            .hero-right { padding-left: 20px; }
+            .col-left-4, .col-left-5, .col-left-6 { grid-column: span 5; }
+            .col-right-8, .col-right-7, .col-right-6 { grid-column: 6 / 13; }
+            .comparison { gap: 14px; }
+            .comp-item { padding: 16px; }
+        }
+
+        @media (max-width: 860px) {
+            body, html {
+                overflow-y: auto !important;
+                height: auto !important;
+                min-height: 100% !important;
+            }
+
+            #deck {
+                height: auto !important;
+                min-height: 100vh;
+                overflow-y: visible !important;
+                padding: 16px 16px 88px 16px !important;
+                display: block !important;
+            }
+
+            .slide {
+                position: relative !important;
+                width: 100% !important;
+                height: auto !important;
+                min-height: calc(100vh - 104px) !important;
+                display: none !important;
+                flex-direction: column !important;
+                gap: 16px !important;
+                transform: none !important;
+            }
+
+            .slide.active {
+                display: flex !important;
+                opacity: 1 !important;
+                transform: none !important;
+            }
+
+            .col-left-4, .col-left-5, .col-left-6, .col-left-7,
+            .col-right-8,
+            .col-right-5, .col-right-6, .col-right-7 {
+                width: 100% !important;
+                grid-column: auto !important;
+                height: auto !important;
+            }
+
+            .card {
+                height: auto !important;
+                min-height: auto !important;
+                padding: 24px 18px !important;
+            }
+
+            .editorial-memorandum {
+                padding: 24px 18px !important;
+                min-height: calc(100vh - 120px) !important;
+            }
+
+            .memorandum-hero {
+                display: flex !important;
+                flex-direction: column-reverse !important;
+                gap: 20px !important;
+                padding: 12px 0 !important;
+            }
+
+            .hero-right {
+                border-left: none !important;
+                border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
+                padding: 0 0 20px 0 !important;
+                width: 100% !important;
+            }
+
+            .hero-title {
+                font-size: clamp(2.2rem, 7vw, 3rem) !important;
+                margin-bottom: 12px !important;
+            }
+
+            .hero-proposition {
+                font-size: 1.15rem !important;
+                margin-bottom: 12px !important;
+            }
+
+            .hero-detail {
+                font-size: 0.9rem !important;
+            }
+
+            .memorandum-footer {
+                flex-direction: column !important;
+                align-items: flex-start !important;
+                gap: 12px !important;
+            }
+
+            .status-block {
+                text-align: left !important;
+                align-items: flex-start !important;
+            }
+
+            .comparison {
+                flex-direction: column !important;
+                height: auto !important;
+                gap: 16px !important;
+            }
+
+            .comp-item {
+                height: auto !important;
+                min-height: 340px !important;
+            }
+        }
+
+        @media (max-height: 820px) and (min-width: 861px) {
+            .card { padding: clamp(16px, 2vw, 24px) 28px !important; }
+            .moat-highlight { margin: 10px 0 !important; padding: 10px 14px !important; }
+            h1 { font-size: 2.2rem !important; margin-bottom: 10px !important; }
+            h2 { font-size: 1.65rem !important; margin-bottom: 10px !important; }
+            p { margin-bottom: 10px !important; font-size: 0.92rem !important; line-height: 1.45 !important; }
+            li { margin-bottom: 6px !important; font-size: 0.88rem !important; }
+            .script-notes { margin-top: 12px !important; padding-top: 10px !important; font-size: 0.8rem !important; }
+            .big-number { font-size: 3.5rem !important; margin-bottom: 8px !important; }
+        }
+    
+        /* -------------------------------------------------------------
+           SLIDE 3: NATIVE SIMULATED UI PANELS
+           Airtight HMRC Statutory Logic, Arithmetic, and Timeline
+        ------------------------------------------------------------- */
+        .legacy-portal {
+            background: #FFFFFF;
+            border: 1px solid #CBD5E1;
+            border-radius: 8px;
+            box-shadow: 0 4px 16px rgba(15, 23, 42, 0.06);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            height: 100%;
+            min-height: 480px;
+            font-size: 0.72rem;
+            color: #1E293B;
+            box-sizing: border-box;
+        }
+
+        .portal-window-bar {
+            background: #F1F5F9;
+            border-bottom: 1px solid #E2E8F0;
+            padding: 6px 10px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-shrink: 0;
+        }
+
+        .window-dots {
+            display: flex;
+            gap: 5px;
             align-items: center;
         }
-        .slide > div {
-            width: 100%;
-            max-width: 1200px;
-            margin: 0 auto;
+
+        .window-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
         }
-    </style>
+
+        .portal-url-bar {
+            flex: 1;
+            background: #FFFFFF;
+            border: 1px solid #CBD5E1;
+            border-radius: 4px;
+            padding: 2px 8px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.62rem;
+            color: #475569;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .portal-org-bar {
+            background: #0F172A;
+            color: #FFFFFF;
+            padding: 8px 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.68rem;
+            flex-shrink: 0;
+        }
+
+        .portal-alert-bar {
+            background: #FEF2F2;
+            border-bottom: 1px solid #FECACA;
+            color: #991B1B;
+            padding: 6px 10px;
+            font-size: 0.65rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            flex-shrink: 0;
+        }
+
+        .portal-feed-container {
+            flex: 1;
+            overflow-y: auto;
+            padding: 8px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            background: #F8FAFC;
+        }
+
+        .reconcile-card-active {
+            background: #FFFFFF;
+            border: 1.5px solid #2563EB;
+            border-radius: 6px;
+            padding: 8px 10px;
+            box-shadow: 0 2px 8px rgba(37, 99, 235, 0.1);
+        }
+
+        .reconcile-header-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            border-bottom: 1px solid #F1F5F9;
+            padding-bottom: 6px;
+            margin-bottom: 6px;
+        }
+
+        .reconcile-form-group {
+            margin-bottom: 6px;
+        }
+
+        .reconcile-label {
+            font-size: 0.6rem;
+            color: #64748B;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            margin-bottom: 3px;
+            display: block;
+            font-weight: 600;
+        }
+
+        .reconcile-select-box {
+            width: 100%;
+            background: #F8FAFC;
+            border: 1px solid #94A3B8;
+            border-radius: 4px;
+            padding: 4px 6px;
+            font-size: 0.66rem;
+            font-weight: 600;
+            color: #0F172A;
+            box-sizing: border-box;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .reconcile-dropdown-peek {
+            margin-top: 4px;
+            background: #FFFFFF;
+            border: 1px solid #CBD5E1;
+            border-radius: 4px;
+            padding: 4px 6px;
+            font-size: 0.61rem;
+            line-height: 1.35;
+            color: #475569;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+        }
+
+        .reconcile-warning {
+            background: #FFFBEB;
+            border: 1px solid #FDE68A;
+            color: #92400E;
+            border-radius: 4px;
+            padding: 4px 6px;
+            font-size: 0.59rem;
+            line-height: 1.3;
+            margin-top: 6px;
+        }
+
+        .reconcile-actions {
+            display: flex;
+            gap: 6px;
+            margin-top: 8px;
+        }
+
+        .portal-pending-row {
+            background: #FFFFFF;
+            border: 1px solid #E2E8F0;
+            border-radius: 4px;
+            padding: 6px 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.63rem;
+            color: #64748B;
+        }
+
+        /* WhatsApp Phone Screen Mockup */
+        .whatsapp-phone {
+            background: #0B0F19;
+            border-radius: 26px;
+            border: 3px solid #1E293B;
+            box-shadow: 0 12px 32px rgba(15, 23, 42, 0.22);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            height: 100%;
+            min-height: 480px;
+            position: relative;
+            box-sizing: border-box;
+        }
+
+        .dynamic-island {
+            width: 72px;
+            height: 16px;
+            background: #000000;
+            border-radius: 10px;
+            margin: 4px auto 2px auto;
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            padding-right: 6px;
+            z-index: 10;
+            flex-shrink: 0;
+        }
+
+        .dynamic-camera {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: #111827;
+            border: 1px solid #1F2937;
+        }
+
+        .ios-status-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 2px 14px 4px 14px;
+            color: #FFFFFF;
+            font-size: 0.65rem;
+            font-weight: 600;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            flex-shrink: 0;
+        }
+
+        .whatsapp-header {
+            background: #008069;
+            color: #FFFFFF;
+            padding: 6px 10px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
+            z-index: 5;
+            flex-shrink: 0;
+        }
+
+        .whatsapp-avatar {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            background: #0B0F19;
+            border: 1.5px solid #C5A880;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #C5A880;
+            font-family: 'DM Sans', sans-serif; font-weight: 700;
+            font-weight: 800;
+            font-size: 0.72rem;
+            flex-shrink: 0;
+        }
+
+        .whatsapp-chat-body {
+            flex: 1;
+            background: #ECE5DD;
+            background-image: radial-gradient(#D5CEBE 1.2px, transparent 1.2px);
+            background-size: 14px 14px;
+            padding: 8px 10px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        }
+
+        .chat-date-pill {
+            align-self: center;
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 6px;
+            padding: 2px 10px;
+            font-size: 0.58rem;
+            font-weight: 600;
+            color: #54656F;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            margin-bottom: 2px;
+        }
+
+        .chat-bubble-out {
+            align-self: flex-end;
+            max-width: 90%;
+            background: #D9FDD3;
+            border-radius: 8px 0 8px 8px;
+            padding: 5px;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+            position: relative;
+        }
+
+        .thermal-receipt {
+            background: #FFFFFF;
+            border-radius: 3px;
+            padding: 6px 8px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.60rem;
+            line-height: 1.35;
+            color: #0F172A;
+            border: 1px dashed #CBD5E1;
+            box-shadow: 0 1px 4px rgba(0, 0, 0, 0.05);
+        }
+
+        .receipt-divider {
+            border-top: 1px dashed #94A3B8;
+            margin: 4px 0;
+        }
+
+        .chat-bubble-in {
+            align-self: flex-start;
+            max-width: 92%;
+            background: #FFFFFF;
+            border-radius: 0 8px 8px 8px;
+            padding: 8px 10px;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+            font-size: 0.66rem;
+            line-height: 1.4;
+            color: #111827;
+            position: relative;
+        }
+
+        .tax-badge-callout {
+            background: #ECFDF5;
+            border: 1px solid #A7F3D0;
+            border-radius: 4px;
+            padding: 4px 6px;
+            margin: 4px 0;
+            font-size: 0.64rem;
+            color: #065F46;
+        }
+
+        .chat-time {
+            font-size: 0.55rem;
+            color: #667781;
+            float: right;
+            margin-left: 6px;
+            margin-top: 2px;
+        }
+
+        .chat-ticks {
+            color: #53BDEB;
+            font-weight: bold;
+            margin-left: 2px;
+        }
+
+        .chat-action-btn {
+            background: #FFFFFF;
+            border: 1px solid #10B981;
+            color: #065F46;
+            border-radius: 6px;
+            padding: 4px 8px;
+            font-size: 0.60rem;
+            font-weight: 600;
+            text-align: center;
+            display: flex;
+            align-items: center;
+            justify-content: flex-start;
+            gap: 4px;
+            cursor: default;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+        }
 
     
-</head>
-<body class="font-body bg-offwhite text-charcoal selection:bg-ukblue selection:text-white">
+        @media (max-height: 820px) and (min-width: 861px) {
+            .legacy-portal, .whatsapp-phone { min-height: 380px !important; }
+            .portal-window-bar { padding: 4px 8px !important; }
+            .portal-org-bar { padding: 5px 8px !important; }
+            .portal-alert-bar { padding: 4px 8px !important; }
+            .reconcile-card-active { padding: 6px 8px !important; }
+            .whatsapp-header { padding: 4px 8px !important; }
+            .whatsapp-chat-body { padding: 6px 8px !important; gap: 6px !important; }
+            .thermal-receipt { padding: 4px 6px !important; }
+            .chat-bubble-in { padding: 6px 8px !important; }
+        }
 
-    <!-- Background Iframe & Overlay -->
-    <iframe id="bg-iframe" src="http://127.0.0.1:58596" title="Mindwalk 3D Codebase"></iframe>
-    <div id="bg-overlay"></div>
+    </style>
+</head>
+<body>
+
+    
 
     <!-- Presentation Deck -->
     <div id="deck">
 
                 <!-- Slide 1: British Institutional Masterpiece -->
         <div class="slide active" id="slide-1">
-            <div class="bg-ukblue rounded-2xl p-12 shadow-soft flex flex-col justify-between h-full w-full">
+            <div class="editorial-memorandum">
                 <!-- Top Regulatory Inscription -->
-                <div class="flex justify-between items-center border-b border-blue-800 pb-4 mb-8">
-                    <div class="font-mono text-sm text-blue-300 uppercase tracking-widest">HMRC Making Tax Digital 2026 · Statutory Compliance Infrastructure</div>
-                    <div class="font-mono text-sm text-blue-300 uppercase tracking-widest">Document Ref: IA-MTD-2026-PRESEED</div>
+                <div class="memorandum-eyebrow">
+                    <div class="eyebrow-text">HMRC Making Tax Digital 2026 · Statutory Compliance Infrastructure</div>
+                    <div class="eyebrow-id">Document Ref: IA-MTD-2026-PRESEED</div>
                 </div>
 
                 <!-- Main Hero: 7:5 Architectural Ratio -->
-                <div class="grid grid-cols-2 gap-12 items-center flex-1">
+                <div class="memorandum-hero">
                     <div class="hero-left">
-                        <h1 class="font-heading font-bold text-5xl text-white mb-6">Invisible Accountant</h1>
-                        <p class="font-body text-xl text-blue-100 mb-4">The end of tax anxiety. Just send a text.</p>
-                        <p class="font-body text-blue-200 mb-4">Autonomous fiscal compliance for 3.2 million UK sole traders delivered natively via WhatsApp. Zero applications to download. Zero chart-of-accounts training. Full statutory HMRC filing.</p>
+                        <h1 class="hero-title">Invisible Accountant</h1>
+                        <p class="hero-proposition">The end of tax anxiety. Just send a text.</p>
+                        <p class="hero-detail">Autonomous fiscal compliance for 3.2 million UK sole traders delivered natively via WhatsApp. Zero applications to download. Zero chart-of-accounts training. Full statutory HMRC filing.</p>
                     </div>
 
                     <div class="hero-right">
-                        <div class="flex flex-col items-center justify-center h-full bg-blue-900/40 border border-blue-700/50 rounded-2xl p-8"><img src="assets/invisible_accountant_logo.svg" class="h-20 mb-4"><div class="font-mono text-xs text-blue-300 uppercase tracking-widest">HMRC MTD Ready · Cloud Ledger</div></div>
+                        <div class="emblem-wrapper">
+                            <img src="assets/invisible_accountant_logo.svg" style="height: 54px; width: auto; max-width: 100%;" alt="Invisible Accountant Logo">
+                        </div>
+                        <div class="emblem-inscription">
+                            <div class="emblem-title">The Sovereign Ledger</div>
+                            <div class="emblem-sub" style="font-family: 'Inter', sans-serif; color: #DBEAFE; font-size: 0.85rem;">HMRC Making Tax Digital Ready</div>
+                        </div>
                     </div>
                 </div>
 
                 <!-- Bottom Institutional Footer -->
-                <div class="flex justify-between items-end border-t border-blue-800 pt-4 mt-8">
+                <div class="memorandum-footer">
                     <div class="thesis-block">
-                        <span class="font-mono text-xs text-blue-300 uppercase tracking-widest">Investment Thesis</span>
-                        <span class="font-body text-sm text-white">The B2C illusion masking a B2B2C enterprise powerhouse.</span>
+                        <span class="thesis-label">Investment Thesis</span>
+                        <span class="thesis-text">The B2C illusion masking a B2B2C enterprise powerhouse.</span>
                     </div>
                     <div class="status-block">
-                        <span class="inline-block border border-blue-300 text-blue-300 px-3 py-1 rounded text-xs uppercase tracking-widest">SEIS / EIS Advance Assurance</span>
-                        <span class="font-mono text-xs text-blue-300 uppercase tracking-widest mt-2">Pre-Seed Syndicate · £350,000 Allocation</span>
+                        <span class="status-badge">SEIS / EIS Advance Assurance</span>
+                        <span class="status-note">Pre-Seed Syndicate · £350,000 Allocation</span>
                     </div>
                 </div>
             </div>
@@ -129,33 +1111,33 @@
 
         <!-- Slide 2 -->
         <div class="slide">
-            <div class="bg-white rounded-2xl p-8 shadow-soft flex flex-col h-full overflow-y-auto col-left-5">
+            <div class="card col-left-5">
                 <div class="caption">Slide 2: The Hook</div>
-                <h2 class="font-heading font-bold text-4xl text-charcoal mb-4">The MTD 2026 Mandate</h2>
-                <p class="font-body text-slate mb-4 text-lg">In April 2026, HMRC’s Making Tax Digital (MTD) mandate comes into full force.</p>
-                <p class="font-body text-slate mb-4 text-lg">This legislation effectively outlaws 'shoebox accounting'. It enforces mandatory digital record-keeping and strict quarterly updates.</p>
+                <h2>The MTD 2026 Mandate</h2>
+                <p>In April 2026, HMRC’s Making Tax Digital (MTD) mandate comes into full force.</p>
+                <p>This legislation effectively outlaws 'shoebox accounting'. It enforces mandatory digital record-keeping and strict quarterly updates.</p>
                 <div class="script-notes">
                     "The urgency of our proposition is driven by a massive, unavoidable government mandate. In April 2026, HMRC’s Making Tax Digital (MTD) mandate comes into full force for 3.2 million UK sole traders. This is not a gradual market shift; it is a forced-adoption event of unprecedented scale..."
                 </div>
             </div>
-            <div class="bg-white rounded-2xl p-8 shadow-soft flex flex-col h-full overflow-y-auto col-right-7">
+            <div class="card col-right-7">
                 <div class="visual-box" style="flex-direction: column; border: none; background: transparent; padding:0;">
-                    <div class="font-heading font-bold text-6xl text-ukblue mb-4">April 2026</div>
-                    <h2 class="font-heading font-bold text-4xl text-charcoal mb-4" style="margin-top: 24px;">3.2 Million UK Sole Traders</h2>
-                    <p class="font-body text-slate mb-4 text-lg" style="color: var(--muted-slate); font-size: 1.25rem;">A forced-adoption event of unprecedented scale.</p>
+                    <div class="big-number">April 2026</div>
+                    <h2 style="margin-top: 24px;">3.2 Million UK Sole Traders</h2>
+                    <p style="color: var(--muted-slate); font-size: 1.25rem;">A forced-adoption event of unprecedented scale.</p>
                 </div>
             </div>
         </div>
 
         <!-- Slide 3 -->
         <div class="slide">
-            <div class="bg-white rounded-2xl p-8 shadow-soft flex flex-col h-full overflow-y-auto col-left-4">
+            <div class="card col-left-4">
                 <div class="caption">Slide 3: Behavioral Architecture</div>
-                <h2 class="font-heading font-bold text-4xl text-charcoal mb-4">Meet 'Emma': Behavioral UX</h2>
-                <p class="font-body text-slate mb-4 text-lg">Traditional accounting software imposes corporate double-entry bookkeeping on sole traders, triggering the <strong>'Shoebox Avoidance Loop'</strong>—administrative dread that leads to missed deductions and HMRC penalties.</p>
-                <p class="font-body text-slate mb-4 text-lg">Emma lives entirely inside <strong>WhatsApp</strong>. By attaching receipt capture to an existing physical micro-habit at the trade counter, we achieve zero switching friction.</p>
+                <h2>Meet 'Emma': Behavioral UX</h2>
+                <p>Traditional accounting software imposes corporate double-entry bookkeeping on sole traders, triggering the <strong>'Shoebox Avoidance Loop'</strong>—administrative dread that leads to missed deductions and HMRC penalties.</p>
+                <p>Emma lives entirely inside <strong>WhatsApp</strong>. By attaching receipt capture to an existing physical micro-habit at the trade counter, we achieve zero switching friction.</p>
                 <div class="moat-highlight" style="margin: 16px 0; padding: 14px 18px; border-left-color: #10B981; background: rgba(16, 185, 129, 0.04);">
-                    <div style="font-family: 'Geist Mono', monospace; font-size: 0.75rem; color: #10B981; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 4px;">Loss Aversion (Kahneman & Tversky)</div>
+                    <div style="font-family: 'JetBrains Mono', monospace; font-size: 0.75rem; color: #10B981; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 4px;">Loss Aversion (Kahneman & Tversky)</div>
                     <div style="font-size: 0.95rem; color: var(--deep-slate); font-weight: 500;">
                         Logging £48.50 at Screwfix preserves <strong style="color: #10B981;">£12.61 in cash tax relief</strong> (20% Income Tax + 6% Class 4 NIC). Emma turns a boring chore into an active wealth defense tool.
                     </div>
@@ -171,7 +1153,7 @@
                         <div class="comp-header" style="color: var(--muted-slate); font-weight: 600; display: flex; flex-direction: column; gap: 4px; margin-bottom: 10px; padding-bottom: 6px;">
                             <div style="display: flex; justify-content: space-between; align-items: center;">
                                 <span style="font-size: 0.95rem; color: var(--oxford-blue); font-weight: 700;">Legacy Desktop Software</span>
-                                <span style="color: #EF4444; font-size: 0.68rem; font-family: 'Geist Mono', monospace; background: rgba(239, 68, 68, 0.1); padding: 2px 8px; border-radius: 4px; border: 1px solid rgba(239, 68, 68, 0.25); font-weight: 600;">47 Unreconciled Items</span>
+                                <span style="color: #EF4444; font-size: 0.68rem; font-family: 'JetBrains Mono', monospace; background: rgba(239, 68, 68, 0.1); padding: 2px 8px; border-radius: 4px; border: 1px solid rgba(239, 68, 68, 0.25); font-weight: 600;">47 Unreconciled Items</span>
                             </div>
                             <span style="font-size: 0.72rem; color: var(--muted-slate); font-weight: 400;">Manual Web Portal · 50+ Chart-of-Account Dropdowns</span>
                         </div>
@@ -196,7 +1178,7 @@
                                     <strong style="color: #F8FAFC;">Dave Jenkins Plumbing</strong>
                                     <span style="color: #94A3B8; margin-left: 6px; font-size: 0.62rem;">(Sole Trader · UTR: 84920 11928)</span>
                                 </div>
-                                <div style="font-family: 'Geist Mono', monospace; font-size: 0.62rem; color: #38BDF8;">
+                                <div style="font-family: 'JetBrains Mono', monospace; font-size: 0.62rem; color: #38BDF8;">
                                     HMRC ITSA 2026/27
                                 </div>
                             </div>
@@ -216,12 +1198,12 @@
                                 <div class="reconcile-card-active">
                                     <div class="reconcile-header-row">
                                         <div>
-                                            <span style="font-family: 'Geist Mono', monospace; font-size: 0.64rem; color: #64748B;">14 MAY 2026</span>
+                                            <span style="font-family: 'JetBrains Mono', monospace; font-size: 0.64rem; color: #64748B;">14 MAY 2026</span>
                                             <div style="font-weight: 700; color: #0F172A; font-size: 0.72rem;">POS 4821 SCREWFIX BISHOPSGATE</div>
                                             <span style="font-size: 0.60rem; color: #64748B;">Card Payment · Till 02</span>
                                         </div>
                                         <div style="text-align: right;">
-                                            <div style="font-family: 'DM Sans', sans-serif; font-size: 0.92rem; font-weight: 700; color: #DC2626;">-£48.50</div>
+                                            <div style="font-family: 'DM Sans', sans-serif; font-weight: 700; font-size: 0.92rem; font-weight: 700; color: #DC2626;">-£48.50</div>
                                             <span style="font-size: 0.58rem; color: #DC2626; background: #FEE2E2; padding: 1px 4px; border-radius: 2px;">Unmatched</span>
                                         </div>
                                     </div>
@@ -296,7 +1278,7 @@
                         <div class="comp-header" style="color: var(--heritage-blue); font-weight: 700; display: flex; flex-direction: column; gap: 4px; border-bottom-color: rgba(29, 78, 216, 0.2); margin-bottom: 10px; padding-bottom: 6px;">
                             <div style="display: flex; justify-content: space-between; align-items: center;">
                                 <span style="font-size: 1rem; color: var(--oxford-blue); font-weight: 700;">User Point of View: Emma</span>
-                                <span style="color: #10B981; font-size: 0.68rem; font-family: 'Geist Mono', monospace; background: rgba(16, 185, 129, 0.1); padding: 2px 8px; border-radius: 4px; border: 1px solid rgba(16, 185, 129, 0.3); font-weight: 600;">● Native WhatsApp</span>
+                                <span style="color: #10B981; font-size: 0.68rem; font-family: 'JetBrains Mono', monospace; background: rgba(16, 185, 129, 0.1); padding: 2px 8px; border-radius: 4px; border: 1px solid rgba(16, 185, 129, 0.3); font-weight: 600;">● Native WhatsApp</span>
                             </div>
                             <span style="font-size: 0.72rem; color: #10B981; font-weight: 600;">Point-of-Sale Snap · Instant £12.61 Tax Relief Preserved</span>
                         </div>
@@ -395,7 +1377,7 @@
                                     </div>
                                     <div style="font-size: 0.64rem; line-height: 1.4; color: #334155;">
                                         <div>• <strong>Allowable Expense:</strong> £48.50 (Trade Consumables)</div>
-                                        <div>• <strong>HMRC Category:</strong> <span style="font-family: 'Geist Mono', monospace; font-weight: 600; color: #1D4ED8;">BIM37000</span> (Tools & Materials)</div>
+                                        <div>• <strong>HMRC Category:</strong> <span style="font-family: 'JetBrains Mono', monospace; font-weight: 600; color: #1D4ED8;">BIM37000</span> (Tools & Materials)</div>
                                     </div>
 
                                     <!-- Tax Preserved Callout -->
@@ -438,10 +1420,10 @@
 
         <!-- Slide 4 -->
         <div class="slide">
-            <div class="bg-white rounded-2xl p-8 shadow-soft flex flex-col h-full overflow-y-auto col-left-6">
+            <div class="card col-left-6">
                 <div class="caption">Slide 4: Statutory Defensibility</div>
-                <h2 class="font-heading font-bold text-4xl text-charcoal mb-4">The Statutory Tax Engine</h2>
-                <p class="font-body text-slate mb-4 text-lg">Generic LLMs hallucinate and fail UK tax tribunals. Our inference engine is custom fine-tuned on HMRC's <strong>Business Income Manual (BIM)</strong>.</p>
+                <h2>The Statutory Tax Engine</h2>
+                <p>Generic LLMs hallucinate and fail UK tax tribunals. Our inference engine is custom fine-tuned on HMRC's <strong>Business Income Manual (BIM)</strong>.</p>
                 <ul style="margin: 12px 0 14px 0; padding-left: 20px;">
                     <li style="margin-bottom: 6px;"><strong>Allowable Deductions:</strong> Automatically approves trade purchases under <em>BIM37000</em> (e.g. Screwfix tools/materials).</li>
                     <li style="margin-bottom: 6px;"><strong>Statutory Disallowances:</strong> Strictly disallows client hospitality under <em>BIM45000</em> & <em>s.45 ITTOIA 2005</em>, protecting users from Schedule 24 FA 2007 careless error penalties.</li>
@@ -449,7 +1431,7 @@
                     <li style="margin-bottom: 6px;"><strong>In-Year True-Up Engine:</strong> Automated reconciliation of provisional quarterly reserves against capital allowances (CAA 2001) prior to final HMRC declaration.</li>
                 </ul>
                 <div class="moat-highlight" style="margin-top: 10px; margin-bottom: 12px; padding: 10px 14px; border-left-color: #0284C7; background: rgba(2, 132, 199, 0.05);">
-                    <div style="font-family: 'Geist Mono', monospace; font-size: 0.70rem; color: #0284C7; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 2px; font-weight: 600;">Autonomous In-Year True-Up</div>
+                    <div style="font-family: 'JetBrains Mono', monospace; font-size: 0.70rem; color: #0284C7; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 2px; font-weight: 600;">Autonomous In-Year True-Up</div>
                     <div style="font-size: 0.82rem; color: var(--deep-slate); line-height: 1.4;">
                         Provisional quarterly reserves are trued up dynamically before submission—reconciling dual-purpose expenses and capital allowances to prevent year-end penalty surprises.
                     </div>
@@ -458,7 +1440,7 @@
                     "Investors ask: 'Is this just a wrapper?' The answer is categorically no. A generic LLM cannot navigate UK tax law. Emma enforces statutory rules under BIM37000, blocks penalties under BIM45000 and Schedule 24 FA 2007, and automatically trues-up provisional reserves before final quarterly submission..."
                 </div>
             </div>
-            <div class="bg-white rounded-2xl p-8 shadow-soft flex flex-col h-full overflow-y-auto col-right-6" style="padding: 28px; display: flex; flex-direction: column;">
+            <div class="card col-right-6 card-dark" style="padding: 28px; display: flex; flex-direction: column;">
                 <div class="caption" style="color: var(--subtle-silver); margin-bottom: 14px;">Live Telemetry: HMRC Rules Engine</div>
                 
                 <div style="display: flex; gap: 20px; height: 100%;">
@@ -481,11 +1463,22 @@
                     
                     <!-- JSON Output -->
                     <div style="flex: 1.25; background: #0F172A; border: 1px solid rgba(255,255,255,0.2); border-radius: 4px; padding: 12px; font-family: monospace; color: #00f0ff; font-size: 0.72rem; position: relative; overflow: hidden;">
-                        <p class="font-body text-slate mb-4 text-lg"re id="json-output" style="margin: 0; white-space: pre-wrap; line-height: 1.35;"></pre>
+                        <pre id="json-output" style="margin: 0; white-space: pre-wrap; line-height: 1.35;"></pre>
                     </div>
                 </div>
                 
-                
+                <style>
+                    @keyframes scan {
+                        0% { top: 0; opacity: 1; }
+                        90% { top: 100%; opacity: 1; }
+                        100% { top: 100%; opacity: 0; }
+                    }
+                    .typing-cursor::after {
+                        content: '|';
+                        animation: blink 1s step-start infinite;
+                    }
+                    @keyframes blink { 50% { opacity: 0; } }
+                </style>
                 <script>
                     const payload = '{\n  "vendor": "Screwfix Direct",\n  "amount": 48.50,\n  "currency": "GBP",\n  "hmrc_manual": "BIM37000",\n  "status": "100% Allowable",\n  "tax_saved": 12.61,\n  "digital_link": "SI-2021-1076",\n  "true_up_reconciliation": "Auto-Reconciled"\n}';
                     let i = 0;
@@ -506,14 +1499,14 @@
 
         <!-- Slide 5 -->
         <div class="slide">
-            <div class="bg-white rounded-2xl p-8 shadow-soft flex flex-col h-full overflow-y-auto col-left-5">
+            <div class="card col-left-5">
                 <div class="caption">Slide 5: Go-To-Market</div>
-                <h2 class="font-heading font-bold text-4xl text-charcoal mb-4">The B2B2C Trojan Horse</h2>
-                <p class="font-body text-slate mb-4 text-lg">Pure B2C financial apps burn millions on CAC. We bypass this entirely with a <strong>B2B2C Enterprise White-labeling</strong> strategy.</p>
-                <p class="font-body text-slate mb-4 text-lg">By selling an enterprise licence to one accountancy practice, we deploy 'Emma' across 1,000 to 5,000 sole traders overnight.</p>
+                <h2>The B2B2C Trojan Horse</h2>
+                <p>Pure B2C financial apps burn millions on CAC. We bypass this entirely with a <strong>B2B2C Enterprise White-labeling</strong> strategy.</p>
+                <p>By selling an enterprise licence to one accountancy practice, we deploy 'Emma' across 1,000 to 5,000 sole traders overnight.</p>
                 
                 <div class="moat-highlight" style="margin: 12px 0; padding: 12px 14px; border-left-color: #1D4ED8; background: rgba(29, 78, 216, 0.04);">
-                    <div style="font-family: 'Geist Mono', monospace; font-size: 0.70rem; color: #1D4ED8; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 3px; font-weight: 600;">Zero Practice Disruption</div>
+                    <div style="font-family: 'JetBrains Mono', monospace; font-size: 0.70rem; color: #1D4ED8; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 3px; font-weight: 600;">Zero Practice Disruption</div>
                     <div style="font-size: 0.84rem; color: var(--deep-slate); line-height: 1.45;">
                         Emma does <strong>not</strong> replace Xero, Iris, or Sage. Emma acts as the autonomous frontline ingestion conduit, converting messy WhatsApp receipts into pre-reconciled, digitally linked journals piped straight into the accountant's current software.
                     </div>
@@ -542,7 +1535,26 @@
                         </div>
                     </div>
                     
-                    
+                    <style>
+                        .pulse-ring {
+                            animation: pulse 3s infinite cubic-bezier(0.2, 0.8, 0.2, 1);
+                        }
+                        @keyframes pulse {
+                            0% { transform: scale(1); opacity: 1; }
+                            100% { transform: scale(6); opacity: 0; }
+                        }
+                        .b2c-node {
+                            position: absolute;
+                            width: 8px;
+                            height: 8px;
+                            background: white;
+                            border-radius: 50%;
+                            box-shadow: 0 0 8px white;
+                            opacity: 0;
+                            transition: opacity 0.5s ease-out;
+                        }
+                
+        </style>
                     <script>
                         const container = document.querySelector('.b2c-nodes');
                         const cacCounter = document.getElementById('cac-counter');
@@ -587,10 +1599,10 @@
 
         <!-- Slide 6 -->
         <div class="slide">
-            <div class="bg-white rounded-2xl p-8 shadow-soft flex flex-col h-full overflow-y-auto col-left-7">
+            <div class="card col-left-7">
                 <div class="caption">Slide 6: Defensibility</div>
-                <h2 class="font-heading font-bold text-4xl text-charcoal mb-4">The Technical Moat: Enterprise Rigour</h2>
-                <p class="font-body text-slate mb-4 text-lg">This is not a ChatGPT wrapper. Our moat is built on deep HMRC integration and banking-grade security architecture.</p>
+                <h2>The Technical Moat: Enterprise Rigour</h2>
+                <p>This is not a ChatGPT wrapper. Our moat is built on deep HMRC integration and banking-grade security architecture.</p>
                 <ul style="margin: 12px 0 14px 0; padding-left: 20px;">
                     <li style="margin-bottom: 7px;"><strong>HMRC Production Gate:</strong> Formally submitted for Production API Credentials (Ticket 2026-OUP153) with schema-validated JSON payloads and automated digital linking under <em>SI 2021/1076</em>.</li>
                     <li style="margin-bottom: 7px;"><strong>FIPS 140-3 CloudHSM Vault:</strong> Envelope encryption with automated 90-day AES-256-GCM master key rotation, SHA-256 salted PII hashing, and tamper-evident AEAD authentication tags.</li>
@@ -627,26 +1639,32 @@
                     </div>
                 </div>
                 
-                
+                <style>
+                    @keyframes float { 0% { transform: translateY(0); opacity: 0; } 50% { opacity: 1; } 100% { transform: translateY(20px) translateX(20px); opacity: 0; } }
+                    .packet { animation: shoot 2s infinite cubic-bezier(0.4, 0, 0.2, 1); opacity: 0; left: 0; }
+                    .packet-delay { animation-delay: 1s; }
+                    @keyframes shoot { 0% { left: -20px; opacity: 0; } 20% { opacity: 1; } 80% { opacity: 1; } 100% { left: 100%; opacity: 0; } }
+            
+        </style>
             </div>
         </div>
 
         <!-- Slide 7 -->
         <div class="slide">
-            <div class="bg-white rounded-2xl p-8 shadow-soft flex flex-col h-full overflow-y-auto col-left-7">
+            <div class="card col-left-7">
                 <div class="caption">Slide 7: Roadmap & Defensibility</div>
-                <h2 class="font-heading font-bold text-4xl text-charcoal mb-4">The "Zero-Friction" Compliance Roadmap</h2>
+                <h2>The "Zero-Friction" Compliance Roadmap</h2>
                 <div style="display: flex; flex-direction: column; gap: 16px;">
                     <div style="border-left: 4px solid var(--heritage-blue); padding: 16px 18px; background-color: rgba(29, 78, 216, 0.03); border-radius: 0 4px 4px 0;">
                         <h3 style="margin-top: 0; margin-bottom: 6px; color: var(--heritage-blue); font-size: 1.12rem;">Phase 1: Zero-Friction Launch & Multi-Rail Insulation</h3>
-                        <p class="font-body text-slate mb-4 text-lg" style="margin-bottom: 6px; font-size: 0.86rem; line-height: 1.42;">Bypass the 12-month FCA authorization bottleneck. HMRC rules confirm a photo of a trade receipt satisfies the statutory digital link under <em>SI 2021/1076</em>. <strong>£0 regulatory licensing, immediate market capture.</strong></p>
+                        <p style="margin-bottom: 6px; font-size: 0.86rem; line-height: 1.42;">Bypass the 12-month FCA authorization bottleneck. HMRC rules confirm a photo of a trade receipt satisfies the statutory digital link under <em>SI 2021/1076</em>. <strong>£0 regulatory licensing, immediate market capture.</strong></p>
                         <div style="font-size: 0.78rem; color: #0284C7; font-weight: 600; line-height: 1.35;">
                             🛡️ <strong>Platform Risk Insulation:</strong> Meta Cloud API (99.9% SLA) fortified by automated failover to Twilio Enterprise SMS and offline Web PWA—guaranteeing zero single-vendor lock-in.
                         </div>
                     </div>
                     <div style="border-left: 4px solid var(--oxford-blue); padding: 16px 18px; background-color: rgba(15, 23, 42, 0.03); border-radius: 0 4px 4px 0;">
                         <h3 style="margin-top: 0; margin-bottom: 6px; font-size: 1.12rem;">Phase 2: Premium Banking-as-a-Service Auto-Reconciliation</h3>
-                        <p class="font-body text-slate mb-4 text-lg" style="margin-bottom: 0; font-size: 0.86rem; line-height: 1.42;">Partner with TrueLayer (BaaS). They absorb the FCA compliance risk; our engine consumes their Open Banking API to automatically match WhatsApp receipts against live bank feeds—delivering institutional-grade auto-reconciliation.</p>
+                        <p style="margin-bottom: 0; font-size: 0.86rem; line-height: 1.42;">Partner with TrueLayer (BaaS). They absorb the FCA compliance risk; our engine consumes their Open Banking API to automatically match WhatsApp receipts against live bank feeds—delivering institutional-grade auto-reconciliation.</p>
                     </div>
                 </div>
                 <div class="script-notes">
@@ -682,7 +1700,19 @@
                     </div>
                 </div>
                 
-                
+                <style>
+                    .stream { animation: flow 1s linear infinite; }
+                    .stream-top { stroke-dashoffset: 20; }
+                    .stream-bot { stroke-dashoffset: 20; animation-duration: 0.8s; }
+                    @keyframes flow { to { stroke-dashoffset: 0; } }
+                    
+                    .merge-node { animation: pulse-node 2s infinite; }
+                    @keyframes pulse-node { 0%, 100% { transform: translateX(-50%) scale(1); box-shadow: 0 0 10px white; } 50% { transform: translateX(-50%) scale(1.2); box-shadow: 0 0 30px #10b981; } }
+                    
+                    .reconciled-box { animation: appear-hash 2s infinite; }
+                    @keyframes appear-hash { 0%, 40% { opacity: 0; transform: translateX(-10px); } 50%, 90% { opacity: 1; transform: translateX(0); } 100% { opacity: 0; } }
+            
+        </style>
                 <script>
                     const hashEl = document.getElementById('hash-text');
                     setInterval(() => {
@@ -695,29 +1725,29 @@
 
         <!-- Slide 8 -->
         <div class="slide">
-            <div class="bg-white rounded-2xl p-8 shadow-soft flex flex-col h-full overflow-y-auto col-left-6">
+            <div class="card col-left-6">
                 <div class="caption">Slide 8: Commercial Term Sheet</div>
-                <h2 class="font-heading font-bold text-4xl text-charcoal mb-4">Pre-Seed Syndicate & Terms</h2>
-                <div class="font-heading font-bold text-6xl text-ukblue mb-4">£350,000</div>
-                <p class="font-body text-slate mb-4 text-lg" style="font-size: 1.05rem; font-weight: 600; color: #10B981; margin-top: 0; margin-bottom: 12px;">
+                <h2>Pre-Seed Syndicate & Terms</h2>
+                <div class="big-number" style="font-size: 2.7rem; margin-bottom: 4px;">£350,000</div>
+                <p style="font-size: 1.05rem; font-weight: 600; color: #10B981; margin-top: 0; margin-bottom: 12px;">
                     Firm Allocation on £3.2M Post-Money Cap · SEIS / EIS Confirmed
                 </p>
                 
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 12px;">
                     <div style="background: #F8FAFC; border: 1px solid #E2E8F0; padding: 10px 12px; border-radius: 4px;">
-                        <div style="font-size: 0.62rem; color: #64748B; text-transform: uppercase; font-family: 'Geist Mono', monospace;">Runway & Breakeven</div>
+                        <div style="font-size: 0.62rem; color: #64748B; text-transform: uppercase; font-family: 'JetBrains Mono', monospace;">Runway & Breakeven</div>
                         <div style="font-size: 0.95rem; font-weight: 700; color: #0F172A; margin-top: 2px;">18 Mo · Mo 14 B/E</div>
                         <div style="font-size: 0.65rem; color: #64748B;">4,200 active trade seats</div>
                     </div>
                     <div style="background: #F8FAFC; border: 1px solid #E2E8F0; padding: 10px 12px; border-radius: 4px;">
-                        <div style="font-size: 0.62rem; color: #64748B; text-transform: uppercase; font-family: 'Geist Mono', monospace;">Statutory Tax Relief</div>
+                        <div style="font-size: 0.62rem; color: #64748B; text-transform: uppercase; font-family: 'JetBrains Mono', monospace;">Statutory Tax Relief</div>
                         <div style="font-size: 0.95rem; font-weight: 700; color: #10B981; margin-top: 2px;">50% / 30% Relief</div>
                         <div style="font-size: 0.65rem; color: #64748B;">HMRC Advance Assurance</div>
                     </div>
                 </div>
 
                 <div class="moat-highlight" style="margin-top: 0; margin-bottom: 12px; padding: 10px 14px; background: rgba(29, 78, 216, 0.04); border-left-color: #1D4ED8;">
-                    <div style="font-family: 'Geist Mono', monospace; font-size: 0.68rem; color: #1D4ED8; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 4px; font-weight: 600;">Use of Proceeds Allocation</div>
+                    <div style="font-family: 'JetBrains Mono', monospace; font-size: 0.68rem; color: #1D4ED8; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 4px; font-weight: 600;">Use of Proceeds Allocation</div>
                     <div style="font-size: 0.78rem; color: var(--deep-slate); display: flex; justify-content: space-between;">
                         <span>• 55% Core HMRC Engineering</span>
                         <span>• 25% FIPS Security & Audits</span>
@@ -729,24 +1759,24 @@
                     "We are closing a £350,000 Pre-Seed syndicate allocation on a £3.2M post-money valuation. HMRC SEIS/EIS Advance Assurance is confirmed, giving investors up to 50% income tax relief. We have 18 months of runway, reaching operational breakeven at month 14 on 4,200 paying seats..."
                 </div>
             </div>
-            <div class="bg-white rounded-2xl p-8 shadow-soft flex flex-col h-full overflow-y-auto col-right-6">
+            <div class="card col-right-6">
                 <div class="caption">Exit Architecture</div>
                 <h3 style="margin-top: 8px; font-size: 1.5rem;">10x to 20x M&A Return Target</h3>
-                <p class="font-body text-slate mb-4 text-lg" style="color: var(--muted-slate); font-size: 0.88rem; margin-bottom: 14px; line-height: 1.45;">Targeting £32M - £64M strategic trade exit as the primary client acquisition engine for the 3.2M UK sole trader market.</p>
+                <p style="color: var(--muted-slate); font-size: 0.88rem; margin-bottom: 14px; line-height: 1.45;">Targeting £32M - £64M strategic trade exit as the primary client acquisition engine for the 3.2M UK sole trader market.</p>
                 <div style="display: flex; flex-direction: column; gap: 12px;">
                     <div style="border: 1px solid var(--subtle-silver); padding: 16px; border-radius: 4px; background: #FFFFFF;">
                         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
                             <h4 style="margin: 0; color: var(--oxford-blue); font-size: 0.98rem;">Legacy Cloud Incumbents</h4>
-                            <span style="font-family: 'Geist Mono', monospace; font-size: 0.65rem; color: #2563EB; background: #EFF6FF; padding: 2px 6px; border-radius: 2px;">Strategic Acquisition</span>
+                            <span style="font-family: 'JetBrains Mono', monospace; font-size: 0.65rem; color: #2563EB; background: #EFF6FF; padding: 2px 6px; border-radius: 2px;">Strategic Acquisition</span>
                         </div>
-                        <p class="font-body text-slate mb-4 text-lg" style="margin: 0; font-size: 0.82rem; color: var(--muted-slate); line-height: 1.4;"><strong>Xero, Intuit (QuickBooks), Sage, IRIS:</strong> Squeezed by churn among sole traders unable to use desktop portals; acquiring Emma to capture frontline conversational ingestion.</p>
+                        <p style="margin: 0; font-size: 0.82rem; color: var(--muted-slate); line-height: 1.4;"><strong>Xero, Intuit (QuickBooks), Sage, IRIS:</strong> Squeezed by churn among sole traders unable to use desktop portals; acquiring Emma to capture frontline conversational ingestion.</p>
                     </div>
                     <div style="border: 1px solid var(--subtle-silver); padding: 16px; border-radius: 4px; background: #FFFFFF;">
                         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
                             <h4 style="margin: 0; color: var(--oxford-blue); font-size: 0.98rem;">Challenger Neo-Banks</h4>
-                            <span style="font-family: 'Geist Mono', monospace; font-size: 0.65rem; color: #059669; background: #ECFDF5; padding: 2px 6px; border-radius: 2px;">Ecosystem Moat</span>
+                            <span style="font-family: 'JetBrains Mono', monospace; font-size: 0.65rem; color: #059669; background: #ECFDF5; padding: 2px 6px; border-radius: 2px;">Ecosystem Moat</span>
                         </div>
-                        <p class="font-body text-slate mb-4 text-lg" style="margin: 0; font-size: 0.82rem; color: var(--muted-slate); line-height: 1.4;"><strong>Monzo, Revolut, Starling, Tide:</strong> Aggressively packaging business accounts with automated HMRC MTD compliance to achieve primary operating account lock-in.</p>
+                        <p style="margin: 0; font-size: 0.82rem; color: var(--muted-slate); line-height: 1.4;"><strong>Monzo, Revolut, Starling, Tide:</strong> Aggressively packaging business accounts with automated HMRC MTD compliance to achieve primary operating account lock-in.</p>
                     </div>
                 </div>
             </div>
@@ -754,22 +1784,22 @@
 
         <!-- Slide 9: Conclusion & Inquiries -->
         <div class="slide" id="slide-9">
-            <div class="bg-ukblue rounded-2xl p-12 shadow-soft flex flex-col justify-between h-full w-full">
+            <div class="editorial-memorandum">
                 <!-- Top Regulatory Inscription -->
-                <div class="flex justify-between items-center border-b border-blue-800 pb-4 mb-8">
-                    <div class="font-mono text-sm text-blue-300 uppercase tracking-widest">HMRC Making Tax Digital 2026 · Pre-Seed Syndicate Close</div>
-                    <div class="font-mono text-sm text-blue-300 uppercase tracking-widest">Document Ref: IA-MTD-2026-SYNDICATE</div>
+                <div class="memorandum-eyebrow">
+                    <div class="eyebrow-text">HMRC Making Tax Digital 2026 · Pre-Seed Syndicate Close</div>
+                    <div class="eyebrow-id">Document Ref: IA-MTD-2026-SYNDICATE</div>
                 </div>
 
                 <!-- Main Hero: 7:5 Architectural Ratio -->
-                <div class="grid grid-cols-2 gap-12 items-center flex-1">
+                <div class="memorandum-hero">
                     <div class="hero-left">
                         <div class="caption" style="color: #C5A880; margin-bottom: 8px; font-weight: 600; letter-spacing: 0.15em;">CONCLUDING REMARKS & Q&A</div>
-                        <h1 class="font-heading font-bold text-5xl text-charcoal mb-6" class="font-heading font-bold text-5xl text-white mb-6" style="margin-bottom: 16px;">Thank You.</h1>
-                        <p class="font-body text-slate mb-4 text-lg" class="font-body text-xl text-blue-100 mb-4" style="color: #F8FAFC; font-size: clamp(1.3rem, 1.8vw, 1.65rem); font-weight: 400; margin-bottom: 20px;">
+                        <h1 class="hero-title" style="margin-bottom: 16px;">Thank You.</h1>
+                        <p class="hero-proposition" style="color: #F8FAFC; font-size: clamp(1.3rem, 1.8vw, 1.65rem); font-weight: 400; margin-bottom: 20px;">
                             Presented by <span style="color: #FFFFFF; font-weight: 700; border-bottom: 2px solid #C5A880; padding-bottom: 2px;">Anas Wahab</span>
                         </p>
-                        <p class="font-body text-slate mb-4 text-lg" class="font-body text-blue-200 mb-4" style="color: #94A3B8; margin-bottom: 20px;">
+                        <p class="hero-detail" style="color: #94A3B8; margin-bottom: 20px;">
                             Founder & Systems Architect · Invisible Accountant<br>
                             Autonomous Fiscal Compliance Infrastructure for UK Micro-Enterprise
                         </p>
@@ -777,12 +1807,12 @@
                         <!-- Contact & Diligence Box -->
                         <div style="display: flex; gap: 20px; margin-top: 10px; padding: 16px 20px; background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 4px; max-width: 580px;">
                             <div style="flex: 1;">
-                                <div style="font-family: 'Geist Mono', monospace; font-size: 0.65rem; color: #C5A880; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 4px;">Direct Founder Contact</div>
+                                <div style="font-family: 'JetBrains Mono', monospace; font-size: 0.65rem; color: #C5A880; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 4px;">Direct Founder Contact</div>
                                 <div style="font-size: 0.90rem; color: #FFFFFF; font-weight: 600; margin-bottom: 2px;">anas@invisibleaccountant.co.uk</div>
                                 <div style="font-size: 0.75rem; color: #64748B;">London, United Kingdom · Available for Diligence</div>
                             </div>
                             <div style="border-left: 1px solid rgba(255, 255, 255, 0.1); padding-left: 18px; flex: 1;">
-                                <div style="font-family: 'Geist Mono', monospace; font-size: 0.65rem; color: #10B981; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 4px;">Syndicate Allocation</div>
+                                <div style="font-family: 'JetBrains Mono', monospace; font-size: 0.65rem; color: #10B981; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 4px;">Syndicate Allocation</div>
                                 <div style="font-size: 0.90rem; color: #FFFFFF; font-weight: 600; margin-bottom: 2px;">£350,000 Allocation</div>
                                 <div style="font-size: 0.75rem; color: #10B981;">HMRC SEIS / EIS Confirmed</div>
                             </div>
@@ -790,21 +1820,25 @@
                     </div>
 
                     <div class="hero-right">
-                        <div class="flex flex-col items-center justify-center h-full"><img src="assets/invisible_accountant_logo.svg" class="h-16 mb-4"></div>
-                            <div class="emblem-sub">The End of Tax Anxiety · London EC2</div>
+                        <div class="emblem-wrapper">
+                            <img src="assets/invisible_accountant_logo.svg" style="height: 54px; width: auto; max-width: 100%;" alt="Invisible Accountant Logo">
+                        </div>
+                        <div class="emblem-inscription">
+                            <div class="emblem-title" style="font-family: 'DM Sans', sans-serif; font-weight: 700; color: #FFFFFF; font-size: 1.15rem;">Invisible Accountant</div>
+                            <div class="emblem-sub" style="font-family: 'Inter', sans-serif; color: #DBEAFE; font-size: 0.85rem;">The End of Tax Anxiety · London EC2</div>
                         </div>
                     </div>
                 </div>
 
                 <!-- Bottom Institutional Footer -->
-                <div class="flex justify-between items-end border-t border-blue-800 pt-4 mt-8">
+                <div class="memorandum-footer">
                     <div class="thesis-block">
-                        <span class="font-mono text-xs text-blue-300 uppercase tracking-widest">Floor Open</span>
-                        <span class="font-body text-sm text-white">Questions, Technical Architecture Deep Dive & Due Diligence Discussion.</span>
+                        <span class="thesis-label">Floor Open</span>
+                        <span class="thesis-text">Questions, Technical Architecture Deep Dive & Due Diligence Discussion.</span>
                     </div>
                     <div class="status-block">
-                        <span class="inline-block border border-blue-300 text-blue-300 px-3 py-1 rounded text-xs uppercase tracking-widest">Term Sheet Executable</span>
-                        <span class="font-mono text-xs text-blue-300 uppercase tracking-widest mt-2">Pre-Seed Syndicate · £3.2M Post-Money Cap</span>
+                        <span class="status-badge">Term Sheet Executable</span>
+                        <span class="status-note">Pre-Seed Syndicate · £3.2M Post-Money Cap</span>
                     </div>
                 </div>
             </div>
@@ -813,10 +1847,10 @@
     </div>
 
     <!-- Presentation Controls Dock -->
-    <div class="fixed bottom-6 left-1/2 -translate-x-1/2 flex items-center gap-4 bg-white/90 backdrop-blur-md border border-gray-200 px-4 py-2 rounded-full shadow-lg z-50">
-        <button id="prevBtn" class="bg-ukblue text-white rounded-full px-6 py-2 transition hover:bg-blue-700">← Prev</button>
-        <div class="font-mono text-sm text-slate px-2" id="slideCounter">1 / 9</div>
-        <button id="nextBtn" class="bg-ukblue text-white rounded-full px-6 py-2 transition hover:bg-blue-700">Next →</button>
+    <div class="controls">
+        <button id="prevBtn" title="Previous Slide (Left Arrow)">← Prev</button>
+        <div class="slide-counter" id="slideCounter">1 / 9</div>
+        <button id="nextBtn" class="btn-primary" title="Next Slide (Right Arrow or Space)">Next →</button>
     </div>
 
     <script>
