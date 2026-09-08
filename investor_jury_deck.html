@@ -53,7 +53,33 @@
         .col-right-5 { grid-column: 8 / 13; }
         
         #slide-1, #slide-9 { display: flex; flex-direction: column; }
+    
+        /* Restored Slider CSS */
+        html, body {
+            height: 100vh;
+            overflow: hidden;
+            background-color: #F9FAFB;
+        }
+        .slide {
+            display: none;
+            width: 100%;
+            height: calc(100vh - 100px);
+            padding: 2rem;
+            box-sizing: border-box;
+        }
+        .slide.active {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+        .slide > div {
+            width: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
     </style>
+
     
 </head>
 <body class="font-body bg-offwhite text-charcoal selection:bg-ukblue selection:text-white">
