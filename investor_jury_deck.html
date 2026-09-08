@@ -401,7 +401,7 @@
             white-space: nowrap;
         }
 
-        @media (max-width: 1080px) {
+        @media screen and (max-width: 1080px) {
             .eyebrow-id {
                 display: none;
             }
@@ -562,7 +562,7 @@
         /* -------------------------------------------------------------
            RESPONSIVE BREAKPOINTS: Tablet, Mobile, and Low-Height Laptops
         ------------------------------------------------------------- */
-        @media (max-width: 1080px) {
+        @media screen and (max-width: 1080px) {
             .eyebrow-id { display: none; }
             .hero-right { padding-left: 20px; }
             .col-left-4, .col-left-5, .col-left-6 { grid-column: span 5; }
@@ -571,7 +571,7 @@
             .comp-item { padding: 16px; }
         }
 
-        @media (max-width: 860px) {
+        @media screen and (max-width: 860px) {
             body, html {
                 overflow-y: auto !important;
                 height: auto !important;
@@ -673,7 +673,7 @@
             }
         }
 
-        @media (max-height: 820px) and (min-width: 861px) {
+        @media screen and (max-height: 820px) and (min-width: 861px) {
             .card { padding: clamp(16px, 2vw, 24px) 28px !important; }
             .moat-highlight { margin: 10px 0 !important; padding: 10px 14px !important; }
             h1 { font-size: 2.2rem !important; margin-bottom: 10px !important; }
@@ -1049,7 +1049,7 @@
         }
 
     
-        @media (max-height: 820px) and (min-width: 861px) {
+        @media screen and (max-height: 820px) and (min-width: 861px) {
             .legacy-portal, .whatsapp-phone { min-height: 380px !important; }
             .portal-window-bar { padding: 4px 8px !important; }
             .portal-org-bar { padding: 5px 8px !important; }
@@ -1095,7 +1095,7 @@
         }
 
         /* Narrow Tablets & Large Mobile (<768px) */
-        @media (max-width: 768px) {
+        @media screen and (max-width: 768px) {
             .receipt-json-flex {
                 flex-direction: column !important;
             }
@@ -1124,7 +1124,7 @@
         }
 
         /* Compact Smartphones (<480px) */
-        @media (max-width: 480px) {
+        @media screen and (max-width: 480px) {
             .kpi-dashboard-grid {
                 grid-template-columns: 1fr !important;
                 gap: 10px !important;
@@ -1189,59 +1189,158 @@
            Produces 9 clean 16:9 full-bleed landscape pages
         ------------------------------------------------------------- */
         @media print {
-            @page {
-                size: 16in 9in;
-                margin: 0;
-            }
-            html, body {
-                width: 16in !important;
-                height: auto !important;
-                background: #F9FAFB !important;
-                -webkit-print-color-adjust: exact !important;
-                print-color-adjust: exact !important;
-                margin: 0 !important;
-                padding: 0 !important;
-                overflow: visible !important;
-            }
-            .controls, .slide-counter {
-                display: none !important;
-            }
-            #deck, .presentation-deck {
-                display: block !important;
-                width: 16in !important;
-                height: auto !important;
-                padding: 0 !important;
-                margin: 0 !important;
-                overflow: visible !important;
-            }
-            .slide {
-                display: grid !important;
-                opacity: 1 !important;
-                visibility: visible !important;
-                position: relative !important;
-                width: 16in !important;
-                height: 9in !important;
-                min-height: 9in !important;
-                max-height: 9in !important;
-                page-break-after: always !important;
-                break-after: page !important;
-                padding: 0.5in 0.6in !important;
-                box-sizing: border-box !important;
-                overflow: hidden !important;
-                transform: none !important;
-            }
-            .slide#slide-1, .slide#slide-9 {
-                display: flex !important;
-                flex-direction: column !important;
-                background: #1A56DB !important;
-            }
-            .editorial-memorandum {
-                height: 100% !important;
-                min-height: 100% !important;
-                box-sizing: border-box !important;
-            }
+        @page {
+            size: landscape;
+            margin: 0;
         }
-    </style>
+
+        *, *::before, *::after {
+            -webkit-print-color-adjust: exact !important;
+            print-color-adjust: exact !important;
+        }
+
+        html, body {
+            width: 100vw !important;
+            height: 100vh !important;
+            margin: 0 !important;
+            padding: 0 !important;
+            background: #F9FAFB !important;
+            overflow: visible !important;
+            font-size: 14px !important;
+        }
+
+        .controls, .slide-counter {
+            display: none !important;
+        }
+
+        #deck, .presentation-deck {
+            display: block !important;
+            width: 100vw !important;
+            height: auto !important;
+            padding: 0 !important;
+            margin: 0 !important;
+            overflow: visible !important;
+            position: static !important;
+            max-width: none !important;
+        }
+
+        .slide {
+            display: flex !important;
+            flex-direction: row !important;
+            align-items: stretch !important;
+            justify-content: space-between !important;
+            opacity: 1 !important;
+            visibility: visible !important;
+            position: relative !important;
+            width: 100vw !important;
+            height: 100vh !important;
+            min-height: 100vh !important;
+            max-height: 100vh !important;
+            page-break-before: always !important;
+            break-before: page !important;
+            page-break-after: always !important;
+            break-after: page !important;
+            page-break-inside: avoid !important;
+            break-inside: avoid !important;
+            padding: 28px 36px !important;
+            box-sizing: border-box !important;
+            overflow: hidden !important;
+            transform: none !important;
+            gap: 20px !important;
+            background: #F9FAFB !important;
+        }
+
+        /* First slide avoids break-before so we don't get a blank page */
+        .slide:first-child, .slide#slide-1 {
+            page-break-before: avoid !important;
+            break-before: avoid !important;
+            display: flex !important;
+            flex-direction: column !important;
+            background: #1A56DB !important;
+            padding: 0 !important;
+        }
+
+        .slide#slide-9 {
+            display: flex !important;
+            flex-direction: column !important;
+            background: #1A56DB !important;
+            padding: 0 !important;
+        }
+
+        /* Rock-solid flex column widths in print (zero grid collapsing) */
+        .col-left-4 { flex: 0 0 calc(33.333% - 10px) !important; width: calc(33.333% - 10px) !important; max-width: calc(33.333% - 10px) !important; }
+        .col-left-5 { flex: 0 0 calc(41.666% - 10px) !important; width: calc(41.666% - 10px) !important; max-width: calc(41.666% - 10px) !important; }
+        .col-left-6 { flex: 0 0 calc(50% - 10px) !important; width: calc(50% - 10px) !important; max-width: calc(50% - 10px) !important; }
+        .col-left-7 { flex: 0 0 calc(58.333% - 10px) !important; width: calc(58.333% - 10px) !important; max-width: calc(58.333% - 10px) !important; }
+
+        .col-right-8 { flex: 0 0 calc(66.666% - 10px) !important; width: calc(66.666% - 10px) !important; max-width: calc(66.666% - 10px) !important; }
+        .col-right-7 { flex: 0 0 calc(58.333% - 10px) !important; width: calc(58.333% - 10px) !important; max-width: calc(58.333% - 10px) !important; }
+        .col-right-6 { flex: 0 0 calc(50% - 10px) !important; width: calc(50% - 10px) !important; max-width: calc(50% - 10px) !important; }
+        .col-right-5 { flex: 0 0 calc(41.666% - 10px) !important; width: calc(41.666% - 10px) !important; max-width: calc(41.666% - 10px) !important; }
+
+        .card {
+            height: 100% !important;
+            min-height: 100% !important;
+            box-sizing: border-box !important;
+            padding: 24px 28px !important;
+            box-shadow: none !important;
+            border: 1px solid #E2E8F0 !important;
+            overflow: hidden !important;
+        }
+
+        .editorial-memorandum {
+            width: 100% !important;
+            height: 100% !important;
+            min-height: 100% !important;
+            box-sizing: border-box !important;
+            padding: 36px 52px !important;
+            display: flex !important;
+            flex-direction: column !important;
+            justify-content: space-between !important;
+        }
+
+        .memorandum-hero {
+            display: flex !important;
+            flex-direction: row !important;
+            align-items: center !important;
+            justify-content: space-between !important;
+            gap: 36px !important;
+        }
+
+        .hero-left {
+            flex: 1.2 !important;
+        }
+
+        .hero-right {
+            flex: 0.8 !important;
+        }
+
+        .kpi-dashboard-grid {
+            display: grid !important;
+            grid-template-columns: 1fr 1fr !important;
+            gap: 12px !important;
+        }
+
+        .pricing-dashboard-grid {
+            display: grid !important;
+            grid-template-columns: repeat(3, 1fr) !important;
+            gap: 8px !important;
+        }
+
+        .receipt-json-flex {
+            display: flex !important;
+            flex-direction: row !important;
+            gap: 12px !important;
+        }
+
+        .security-pipeline-row {
+            display: flex !important;
+            flex-direction: row !important;
+            align-items: center !important;
+            justify-content: space-between !important;
+        }
+    }
+</style>
 </head>
 <body>
 
