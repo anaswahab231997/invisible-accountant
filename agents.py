@@ -23,6 +23,7 @@ from enum import Enum
 
 
 class HMRCCategory(str, Enum):
+    TURNOVER_SALES = "Turnover / Sales Income"
     COST_OF_GOODS_SOLD = "Cost of goods sold"
     CONSTRUCTION_INDUSTRY_COSTS = "Construction industry costs"
     STAFF_COSTS = "Staff costs"
@@ -39,6 +40,10 @@ class HMRCCategory(str, Enum):
 
 
 class ExpenseCategorization(BaseModel):
+    transaction_type: str = Field(
+        default="EXPENSE",
+        description="'EXPENSE' for business purchases/costs, or 'INCOME' for customer sales/turnover/invoices."
+    )
     reasoning_step_1_amount_and_vendor: str = Field(
         description="Extract the exact numerical amount and vendor name from the text."
     )
@@ -52,14 +57,18 @@ class ExpenseCategorization(BaseModel):
         description="Determine the appropriate HMRC category and whether auditor clarification is needed."
     )
     vendor: str = Field(
-        description="The name of the shop, person, or business the money was paid to."
+        description="The name of the shop, client, or business entity associated with the transaction."
     )
     amount: float = Field(description="The monetary amount (as a float).")
     category: HMRCCategory = Field(
-        description="Map the expense to exactly ONE of the official HMRC MTD ITSA categories."
+        description="Map the transaction to exactly ONE of the official HMRC MTD ITSA categories."
+    )
+    extraction_confidence: float = Field(
+        default=0.98,
+        description="Confidence score from 0.0 to 1.0 in amount, vendor, and category extraction. If <0.92, set is_ambiguous to true."
     )
     is_ambiguous: bool = Field(
-        description="Set to true if this expense might not be wholly and exclusively for business, or is entertainment."
+        description="Set to true if this transaction might not be wholly for business, is entertainment, or confidence <0.92."
     )
     auditor_question: str = Field(
         description="If is_ambiguous is true, what short question should the Auditor ask?"
@@ -171,31 +180,46 @@ async def process_expense_message(
     4. Commuting: Regular travel from home to a permanent workplace is not allowable.
     5. Use of home as office: Claiming a portion of home bills is allowable but requires identifying hours worked or the exact proportion of space used.
     6. Clothing: Everyday wear (even suits) is not allowable. Only protective clothing, uniforms with logos, or costumes for actors are allowable.
+    7. Business Income & Invoicing: If the user message or receipt describes money received from a client, customer payments, or sales invoices (e.g. 'Client paid £350 for tile installation' or 'Invoice #104 settled £600'), set `transaction_type: 'INCOME'`, `category: 'Turnover / Sales Income'`, and vendor to the client name.
     -------------------------------------------------------
     
     --- FEW-SHOT EXAMPLES ---
     Example 1:
     User: "Bought a new suit for client meetings, £200 at Marks & Spencer."
     Analysis: Clothing is everyday wear. Not allowable.
+    transaction_type: "EXPENSE"
     is_ambiguous: true
     auditor_question: "I've noted the £200 at Marks & Spencer. Unfortunately, HMRC doesn't allow claims for everyday clothing like suits, even if bought specifically for work, as they have a 'duality of purpose'. I'll keep this recorded but we can't offset it against tax."
 
     Example 2:
     User: "Paid £50 for O2 mobile bill."
     Analysis: Duality of purpose. Mobile phones are often used personally too.
+    transaction_type: "EXPENSE"
     is_ambiguous: true
     auditor_question: "Got the £50 O2 bill. Do you use this phone for personal calls too? If so, roughly what percentage is for business?"
     
     Example 3:
     User: "£100 for timber from B&Q."
     Analysis: Wholly for trade. Construction industry costs / Cost of goods sold.
+    transaction_type: "EXPENSE"
+    is_ambiguous: false
+    auditor_question: ""
+
+    Example 4:
+    User: "Customer Dave Jenkins paid me £450 for bathroom tiling."
+    Analysis: Trade turnover / sales income.
+    transaction_type: "INCOME"
+    category: "Turnover / Sales Income"
+    vendor: "Dave Jenkins"
+    amount: 450.0
     is_ambiguous: false
     auditor_question: ""
     -------------------------------------------------------
     
-    A sole trader has just sent you a message about an expense.
+    A sole trader has just sent you a message about a business expense or income receipt.
     Extract the entities based strictly on the user message.
-    If the expense violates HMRC rules (like client lunches), set `is_ambiguous` to true and ask a concise clarification question or inform them of the rule casually.
+    Assess your extraction confidence (0.0 to 1.0). If confidence is below 0.92, set `is_ambiguous` to true.
+    If the transaction violates HMRC rules (like client lunches) or lacks clarity, set `is_ambiguous` to true and ask a concise clarification question.
     """
 
     try:
@@ -208,6 +232,12 @@ async def process_expense_message(
         result = await _call_gemini(
             system_instruction, raw_message, media_urls, model="gemini-2.5-flash", sender_id=sender_id
         )
+
+        # Confidence safeguard: reasonable care under Schedule 24 FA 2007
+        if result.get("extraction_confidence", 1.0) < 0.92 and not result.get("is_ambiguous"):
+            result["is_ambiguous"] = True
+            if not result.get("auditor_question"):
+                result["auditor_question"] = "Just to be 100% compliant with HMRC, could you confirm the business purpose for this?"
 
         # Phase 2: Deep Audit Escalation (Gemini 2.5 Pro)
         if result.get("is_ambiguous"):
@@ -226,7 +256,8 @@ async def process_expense_message(
         if turn_count >= 2 and result.get("is_ambiguous"):
             logger.info("Turn limit reached. Forcing category to 'Other expenses'")
             result["is_ambiguous"] = False
-            result["category"] = "Other expenses"
+            if result.get("transaction_type") != "INCOME":
+                result["category"] = "Other expenses"
 
         return result
 

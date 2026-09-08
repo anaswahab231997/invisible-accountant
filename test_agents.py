@@ -31,6 +31,12 @@ def run_tests():
             "message": "Bought a new suit for £200 for a conference at M&S",
             "expected_ambiguous": True,
         },
+        {
+            "name": "5. Business Income / Sales Turnover",
+            "message": "Customer Sarah Jenkins paid £420 for plumbing repairs",
+            "expected_ambiguous": False,
+            "expected_type": "INCOME"
+        },
     ]
 
     for case in test_cases:
