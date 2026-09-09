@@ -6,7 +6,7 @@
 
 ## Slide 1: Introduction & The Core Proposition
 
-**[Visual: The Sovereign Monoline Ledger emblem in hallmarked antique gilt and obsidian slate. 7:5 architectural ratio. SEIS/EIS Advance Assurance confirmed badge. Clean British typography.]**
+**[Visual: The Sovereign Monoline Ledger emblem in hallmarked antique gilt and obsidian slate. 7:5 architectural ratio. £250k SEIS + £100k EIS Eligible badge. Clean British typography.]**
 
 **Presenter Script:**
 "Ladies and gentlemen of the jury, good morning. 
@@ -101,33 +101,34 @@ Crucially, we have insulated against Meta platform risk: our primary rail operat
 ---
 
 ## Slide 8: Commercial Term Sheet & The Exit Landscape
-
-**[Visual: £350,000 Pre-Seed allocation on £3.2M post-money valuation. 18-month runway, month-14 cashflow breakeven at 4,200 active seats. Confirmed HMRC SEIS/EIS Advance Assurance. M&A acquisition landscape targeting 10x-20x returns.]**
-
+ 
+**[Visual: £350,000 Pre-Seed allocation on £3.2M post-money valuation. 18-month runway, Month 10 operational breakeven at 1,950 seats, Month 14 run-rate of £504k ARR (£42k MRR, £22.5k net profit/mo). Dual-Tranche £250k SEIS + £100k EIS syndicate allocation. M&A acquisition landscape targeting 10x-20x returns.]**
+ 
 **Presenter Script:**
 "We are closing a £350,000 Pre-Seed syndicate allocation on a £3.2M post-money valuation:
-
-- **Downside Protection:** HMRC SEIS and EIS Advance Assurance are confirmed, offering UK angel investors up to 50% income tax relief, capital gains tax exemption, and loss relief.
-- **Capital Efficiency & Runway:** This capital gives us 18 months of runway. With our B2B2C distribution engine, we reach operational cashflow breakeven at Month 14 on just 4,200 active trade seats.
+ 
+- **Downside Protection:** Structured under statutory HMRC rules as a dual-tranche round: £250,000 maximum statutory SEIS offering 50% income tax relief, plus £100,000 EIS offering 30% relief—delivering £155,000 (44.3% blended) in immediate tax write-offs, capital gains exemption, and loss relief.
+- **Capital Efficiency & Runway:** This capital provides 18 months of runway. With our B2B2C distribution engine, we reach operational cashflow breakeven at Month 10 on 1,950 seats, accelerating to £504,000 ARR (£42,000 MRR) and £22,500 net profit per month by Month 14.
 - **Use of Proceeds:** 55% Core HMRC Engineering, 25% FIPS Security & CREST Audits, and 20% Accountancy Practice Partner Onboarding.
 - **The Exit Landscape:** We are targeting a 10x to 20x return (£32M to £64M exit). We are building the indispensable acquisition asset for two distinct acquirers:
   1. **Legacy Cloud Incumbents (Xero, Intuit, Sage, IRIS):** Stymied by high churn among sole traders unable to use desktop software; desperate to acquire conversational frontline capture.
   2. **Challenger Neo-Banks (Monzo, Revolut, Starling, Tide):** Aggressively bundling business accounts with automated HMRC MTD compliance to win primary operating account status.
-
+ 
 Thank you. We welcome your questions."
+
 ---
 
 ## Slide 9: Conclusion & Investor Inquiries
-
-**[Visual: Concluding Sovereign Obsidian Memorandum. The Sovereign Monoline Ledger emblem in antique gilt. 'Thank You. Presented by Anas Wahab - Founder & Systems Architect'. Syndicate allocation terms (£350,000 on £3.2M post-money cap, SEIS/EIS confirmed) and direct diligence contact details.]**
-
+ 
+**[Visual: Concluding Sovereign Obsidian Memorandum. The Sovereign Monoline Ledger emblem in antique gilt. 'Thank You. Presented by Anas Wahab - Founder & Systems Architect'. Syndicate allocation terms (£350,000 on £3.2M post-money cap, £250k SEIS + £100k EIS dual tranche) and direct diligence contact details.]**
+ 
 **Presenter Script:**
 "Ladies and gentlemen of the jury, thank you very much for your time and consideration.
-
+ 
 My name is Anas Wahab, Founder and Architect of Invisible Accountant. 
-
+ 
 In summary, the April 2026 MTD ITSA mandate is not an incremental trend—it is a forced-compliance event for 3.2 million UK sole traders. By meeting users where they already live, inside WhatsApp, and automating the statutory tax engine with FIPS 140-3 banking-grade security, we eliminate tax anxiety for the consumer while building a scalable B2B2C enterprise asset for our accountancy partners.
-
-With HMRC SEIS and EIS Advance Assurance confirmed, an 18-month runway to Month-14 cashflow breakeven, and a highly defined 10x to 20x acquisition horizon, we invite you to join our £350,000 Pre-Seed syndicate.
-
+ 
+With our dual-tranche £250k SEIS and £100k EIS syndicate structure offering up to £155,000 in immediate tax relief, an 18-month runway to cashflow breakeven at Month 10, and a highly defined 10x to 20x acquisition horizon, we invite you to join our £350,000 Pre-Seed syndicate.
+ 
 I would now be delighted to open the floor and take your questions."
