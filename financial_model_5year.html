@@ -1,0 +1,710 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Invisible Accountant — 5-Year Financial Model & Unit Economics</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@500;600;700;800&family=Inter:wght@400;500;600;700&family=Geist+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+  @page {
+    size: A4 portrait;
+    margin: 12mm 14mm 12mm 14mm;
+  }
+  * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
+  body {
+    font-family: 'Inter', sans-serif;
+    color: #1F2937;
+    background: #FFFFFF;
+    line-height: 1.45;
+    font-size: 8.8pt;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+  .page {
+    width: 100%;
+    page-break-after: always;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    height: 270mm;
+    overflow: hidden;
+  }
+  .page:last-child {
+    page-break-after: avoid;
+  }
+  
+  /* Header */
+  header {
+    border-bottom: 1.5px solid #E5E7EB;
+    padding-bottom: 10px;
+    margin-bottom: 12px;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+  }
+  .brand-block {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .brand-title {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 16pt;
+    font-weight: 800;
+    color: #0F172A;
+    letter-spacing: -0.02em;
+    line-height: 1.1;
+  }
+  .brand-sub {
+    font-size: 8.5pt;
+    color: #1D70B8;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+  }
+  .header-meta {
+    text-align: right;
+    font-family: 'Geist Mono', monospace;
+    font-size: 7.2pt;
+    color: #4B5563;
+    line-height: 1.4;
+  }
+  .badge-seis {
+    display: inline-block;
+    background: #ECFDF5;
+    color: #065F46;
+    border: 1px solid #A7F3D0;
+    padding: 2px 7px;
+    border-radius: 4px;
+    font-weight: 700;
+    font-size: 7pt;
+    margin-bottom: 3px;
+  }
+
+  /* Section Styles */
+  .section-title {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 10.5pt;
+    font-weight: 700;
+    color: #0F172A;
+    border-left: 3px solid #1A56DB;
+    padding-left: 8px;
+    margin-bottom: 7px;
+    margin-top: 10px;
+    letter-spacing: -0.01em;
+  }
+  p.intro {
+    font-size: 8pt;
+    color: #4B5563;
+    margin-bottom: 8px;
+    line-height: 1.4;
+  }
+
+  /* Key Metrics Grid */
+  .metrics-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 8px;
+    margin-bottom: 12px;
+  }
+  .metric-card {
+    background: #F9FAFB;
+    border: 1px solid #E5E7EB;
+    border-radius: 6px;
+    padding: 8px 10px;
+  }
+  .metric-label {
+    font-family: 'Geist Mono', monospace;
+    font-size: 6.8pt;
+    color: #64748B;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 2px;
+  }
+  .metric-val {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13pt;
+    font-weight: 700;
+    color: #0F172A;
+    line-height: 1.1;
+  }
+  .metric-sub {
+    font-size: 7pt;
+    color: #10B981;
+    font-weight: 600;
+    margin-top: 2px;
+  }
+
+  /* Table Styles */
+  table.fin-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 10px;
+    font-size: 7.8pt;
+  }
+  table.fin-table th {
+    background: #0F172A;
+    color: #FFFFFF;
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 700;
+    text-align: right;
+    padding: 6px 8px;
+    font-size: 7.5pt;
+    letter-spacing: 0.02em;
+  }
+  table.fin-table th:first-child {
+    text-align: left;
+    border-top-left-radius: 5px;
+  }
+  table.fin-table th:last-child {
+    border-top-right-radius: 5px;
+  }
+  table.fin-table td {
+    padding: 5.5px 8px;
+    border-bottom: 1px solid #E5E7EB;
+    text-align: right;
+    font-family: 'Geist Mono', monospace;
+  }
+  table.fin-table td:first-child {
+    text-align: left;
+    font-family: 'Inter', sans-serif;
+    font-weight: 600;
+    color: #1F2937;
+  }
+  table.fin-table tr:nth-child(even) {
+    background: #F8FAFC;
+  }
+  table.fin-table tr.highlight-row td {
+    background: #EFF6FF;
+    font-weight: 700;
+    color: #1E40AF;
+  }
+  table.fin-table tr.total-row td {
+    background: #F0FDF4;
+    font-weight: 700;
+    color: #065F46;
+    border-top: 1.5px solid #10B981;
+    border-bottom: 1.5px solid #10B981;
+  }
+
+  /* Two Column Layout */
+  .two-col {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-bottom: 10px;
+  }
+  .card-box {
+    background: #FFFFFF;
+    border: 1px solid #E5E7EB;
+    border-radius: 6px;
+    padding: 10px 12px;
+  }
+  .card-box-header {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 9pt;
+    font-weight: 700;
+    color: #0F172A;
+    margin-bottom: 6px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  /* List & Specs */
+  .spec-list {
+    list-style: none;
+  }
+  .spec-list li {
+    font-size: 7.6pt;
+    padding: 3px 0;
+    border-bottom: 1px solid #F1F5F9;
+    display: flex;
+    justify-content: space-between;
+    color: #334155;
+  }
+  .spec-list li:last-child {
+    border-bottom: none;
+  }
+  .spec-label {
+    color: #64748B;
+  }
+  .spec-val {
+    font-family: 'Geist Mono', monospace;
+    font-weight: 600;
+    color: #0F172A;
+  }
+
+  /* Use of funds bars */
+  .fund-bar-group {
+    margin-bottom: 6px;
+  }
+  .fund-bar-label {
+    display: flex;
+    justify-content: space-between;
+    font-size: 7.4pt;
+    font-weight: 600;
+    margin-bottom: 2px;
+  }
+  .fund-bar-container {
+    width: 100%;
+    height: 6px;
+    background: #E2E8F0;
+    border-radius: 3px;
+    overflow: hidden;
+  }
+  .fund-bar-fill {
+    height: 100%;
+    border-radius: 3px;
+  }
+
+  /* Footer */
+  footer {
+    border-top: 1px solid #E5E7EB;
+    padding-top: 6px;
+    margin-top: 8px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-family: 'Geist Mono', monospace;
+    font-size: 6.8pt;
+    color: #64748B;
+  }
+</style>
+</head>
+<body>
+
+<!-- ================= PAGE 1 ================= -->
+<div class="page">
+  <div>
+    <header>
+      <div class="brand-block">
+        <!-- Live SVG Crest -->
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="38" height="38" fill="none">
+          <rect width="100" height="100" rx="20" fill="#F3F6FD"/>
+          <rect x="4" y="4" width="92" height="92" rx="16" stroke="#BFDBFE" stroke-width="1.5"/>
+          <g transform="translate(15, 15)">
+            <g stroke="#1D70B8" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="25" y1="15" x2="25" y2="55"/>
+              <line x1="18" y1="15" x2="32" y2="15"/>
+              <line x1="18" y1="55" x2="32" y2="55"/>
+              <line x1="50" y1="15" x2="35" y2="55"/>
+              <line x1="50" y1="15" x2="65" y2="55"/>
+              <line x1="28" y1="55" x2="42" y2="55"/>
+              <line x1="58" y1="55" x2="72" y2="55"/>
+              <line x1="43" y1="15" x2="57" y2="15"/>
+            </g>
+            <line x1="23" y1="35" x2="62" y2="35" stroke="#25D366" stroke-width="4.5" stroke-linecap="round"/>
+            <circle cx="42.5" cy="35" r="3" fill="#1D70B8"/>
+          </g>
+        </svg>
+        <div>
+          <div class="brand-title">Invisible Accountant</div>
+          <div class="brand-sub">5-Year SaaS Financial Trajectory &amp; Unit Economics (2026–2031)</div>
+        </div>
+      </div>
+      <div class="header-meta">
+        <span class="badge-seis">SEIS 50% ADVANCE ASSURANCE</span><br>
+        <strong>ROUND:</strong> £350,000 Seed Syndicate<br>
+        <strong>VALUATION:</strong> £3.20M Post-Money Cap<br>
+        <strong>DATE:</strong> September 2026
+      </div>
+    </header>
+
+    <div class="metrics-grid">
+      <div class="metric-card">
+        <div class="metric-label">Year 5 Target ARR</div>
+        <div class="metric-val">£10.02M</div>
+        <div class="metric-sub">128,500 Active Subscribers</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-label">Wholesale Price</div>
+        <div class="metric-val">£6.00/mo</div>
+        <div class="metric-sub">40% Practice Rebilling Margin</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-label">Operational Breakeven</div>
+        <div class="metric-val">Month 10–12</div>
+        <div class="metric-sub">2,500 Active Seats</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-label">Year 5 Exit Valuation</div>
+        <div class="metric-val">£65M–£100M</div>
+        <div class="metric-sub">6.5x–10.0x ARR Trade Sale</div>
+      </div>
+    </div>
+
+    <div class="section-title">1. Consolidated 5-Year Financial Statement (FY 2026/27 – FY 2030/31)</div>
+    <p class="intro">
+      Financials are anchored to the phased statutory enforcement of HMRC Making Tax Digital (MTD ITSA). Phased regulatory expansion drives programmatic subscriber growth from Year 1 (qualifying income &gt;£50k) through Year 5 universal saturation.
+    </p>
+
+    <table class="fin-table">
+      <thead>
+        <tr>
+          <th>Metric (GBP £)</th>
+          <th>Year 1 (2026/27)</th>
+          <th>Year 2 (2027/28)</th>
+          <th>Year 3 (2028/29)</th>
+          <th>Year 4 (2029/30)</th>
+          <th>Year 5 (2030/31)</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Active Subscribers (Ending)</td>
+          <td>2,500</td>
+          <td>12,500</td>
+          <td>36,000</td>
+          <td>75,000</td>
+          <td>128,500</td>
+        </tr>
+        <tr>
+          <td>Wholesale Practice Seats (70%)</td>
+          <td>1,750</td>
+          <td>8,750</td>
+          <td>25,200</td>
+          <td>52,500</td>
+          <td>90,000</td>
+        </tr>
+        <tr>
+          <td>Retail Self-Serve Seats (30%)</td>
+          <td>750</td>
+          <td>3,750</td>
+          <td>10,800</td>
+          <td>22,500</td>
+          <td>38,500</td>
+        </tr>
+        <tr class="highlight-row">
+          <td>Turnover (Recognised Revenue)</td>
+          <td>£105,000</td>
+          <td>£621,000</td>
+          <td>£1,964,000</td>
+          <td>£4,396,000</td>
+          <td>£7,998,000</td>
+        </tr>
+        <tr>
+          <td>Ending Annualised Run-Rate (ARR)</td>
+          <td>£210,000</td>
+          <td>£1,035,000</td>
+          <td>£2,920,000</td>
+          <td>£5,940,000</td>
+          <td>£10,020,000</td>
+        </tr>
+        <tr>
+          <td>Cost of Sales (WhatsApp API &amp; Server KMS)</td>
+          <td>(£23,000)</td>
+          <td>(£130,000)</td>
+          <td>(£392,000)</td>
+          <td>(£879,000)</td>
+          <td>(£1,599,000)</td>
+        </tr>
+        <tr>
+          <td>Gross Profit (78–80% Margin)</td>
+          <td>£82,000</td>
+          <td>£491,000</td>
+          <td>£1,572,000</td>
+          <td>£3,517,000</td>
+          <td>£6,399,000</td>
+        </tr>
+        <tr>
+          <td>Operating Expenses (R&amp;D, Sales, G&amp;A)</td>
+          <td>(£182,000)</td>
+          <td>(£486,000)</td>
+          <td>(£1,253,000)</td>
+          <td>(£2,603,000)</td>
+          <td>(£4,470,000)</td>
+        </tr>
+        <tr class="total-row">
+          <td>Net Profit / (Loss)</td>
+          <td>(£100,000)</td>
+          <td>+£5,000</td>
+          <td>+£319,000</td>
+          <td>+£914,000</td>
+          <td>+£1,929,000</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="section-title">2. Statutory Regulatory Growth Drivers</div>
+    <div class="two-col">
+      <div class="card-box">
+        <div class="card-box-header">
+          <span>HMRC MTD Phasing Wave</span>
+          <span style="color: #1A56DB; font-family: 'Geist Mono'; font-size: 7pt;">STATUTORY MANDATE</span>
+        </div>
+        <ul class="spec-list">
+          <li>
+            <span class="spec-label">April 2026 (Phase 1 Active):</span>
+            <span class="spec-val">&gt;£50k Gross Revenue (850k Sole Traders)</span>
+          </li>
+          <li>
+            <span class="spec-label">April 2027 (Phase 2):</span>
+            <span class="spec-val">&gt;£30k Gross Revenue (+1.2M Sole Traders)</span>
+          </li>
+          <li>
+            <span class="spec-label">April 2028 (Phase 3):</span>
+            <span class="spec-val">&gt;£20k Gross Revenue (+750k Sole Traders)</span>
+          </li>
+          <li>
+            <span class="spec-label">2029–2031 (Universal Saturation):</span>
+            <span class="spec-val">All 3.2M UK Sole Traders &amp; Landlords</span>
+          </li>
+        </ul>
+      </div>
+
+      <div class="card-box">
+        <div class="card-box-header">
+          <span>Practice Viral Adoption Dynamics</span>
+          <span style="color: #10B981; font-family: 'Geist Mono'; font-size: 7pt;">ZERO-CAC WHOLESALE</span>
+        </div>
+        <ul class="spec-list">
+          <li>
+            <span class="spec-label">Average Practice Client Base:</span>
+            <span class="spec-val">150–350 Sole Trader Clients</span>
+          </li>
+          <li>
+            <span class="spec-label">Accountant Time Saved:</span>
+            <span class="spec-val">~8.5 Hours/Week on Receipt Chasing</span>
+          </li>
+          <li>
+            <span class="spec-label">Target Practice Network (Yr 5):</span>
+            <span class="spec-val">450+ High-Street Accountancy Firms</span>
+          </li>
+          <li>
+            <span class="spec-label">Market Share Penetration (Yr 5):</span>
+            <span class="spec-val">2.81% of Total UK Sole Trader TAM</span>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <footer>
+    <div>CONFIDENTIAL &amp; PROPRIETARY · PREPARED FOR ANGEL INVESTMENT NETWORK</div>
+    <div>PAGE 1 OF 2 · INVISIBLE ACCOUNTANT FINANCIAL MODEL</div>
+  </footer>
+</div>
+
+<!-- ================= PAGE 2 ================= -->
+<div class="page">
+  <div>
+    <header>
+      <div class="brand-block">
+        <div>
+          <div class="brand-title">Unit Economics, Round Structure &amp; Strategic Exit</div>
+          <div class="brand-sub">Capital Allocation, Operating Leverage &amp; Diligence Metrics</div>
+        </div>
+      </div>
+      <div class="header-meta">
+        <strong>CONTACT:</strong> anaswahabofficial@gmail.com<br>
+        <strong>LOCATION:</strong> India (Relocating to London, UK)<br>
+        <strong>SYNDICATE CHECK:</strong> £5,000 Min
+      </div>
+    </header>
+
+    <div class="two-col">
+      <!-- Unit Economics -->
+      <div class="card-box">
+        <div class="card-box-header">
+          <span>B2B2C Wholesale Unit Economics</span>
+          <span style="color: #1D70B8; font-family: 'Geist Mono'; font-size: 7pt;">£6/MO CORE PRICING</span>
+        </div>
+        <ul class="spec-list">
+          <li>
+            <span class="spec-label">Wholesale Practice Price:</span>
+            <span class="spec-val">£6.00 / client / month</span>
+          </li>
+          <li>
+            <span class="spec-label">Practice Recommended Retail:</span>
+            <span class="spec-val">£10.00 / client / month</span>
+          </li>
+          <li>
+            <span class="spec-label">Accountancy Practice Profit Margin:</span>
+            <span class="spec-val" style="color: #059669;">40.0% Net Margin</span>
+          </li>
+          <li>
+            <span class="spec-label">Retail Direct Self-Serve Price:</span>
+            <span class="spec-val">£10.00 / client / month</span>
+          </li>
+          <li>
+            <span class="spec-label">Blended Average Revenue Per User (ARPU):</span>
+            <span class="spec-val">£6.85 / client / month</span>
+          </li>
+          <li>
+            <span class="spec-label">COGS (WhatsApp Cloud + OCR + Cloud DB):</span>
+            <span class="spec-val">£1.45 / client / month</span>
+          </li>
+          <li>
+            <span class="spec-label">Gross Margin per Active Subscriber:</span>
+            <span class="spec-val" style="color: #059669;">78.8% Gross Margin</span>
+          </li>
+          <li>
+            <span class="spec-label">Customer Acquisition Cost (CAC via Practice):</span>
+            <span class="spec-val">£0.50 / seat (£75/practice)</span>
+          </li>
+          <li>
+            <span class="spec-label">Customer Lifetime Value (LTV - 36 mo):</span>
+            <span class="spec-val">£246.60</span>
+          </li>
+          <li>
+            <span class="spec-label">LTV / CAC Ratio:</span>
+            <span class="spec-val" style="color: #059669;">16.4x (World-Class SaaS Efficiency)</span>
+          </li>
+        </ul>
+      </div>
+
+      <!-- Use of Funds -->
+      <div class="card-box">
+        <div class="card-box-header">
+          <span>Seed Capital Allocation (£350,000)</span>
+          <span style="color: #1A56DB; font-family: 'Geist Mono'; font-size: 7pt;">18-MONTH RUNWAY</span>
+        </div>
+
+        <div class="fund-bar-group" style="margin-top: 6px;">
+          <div class="fund-bar-label">
+            <span>AI &amp; Backend Engineering (40.0%)</span>
+            <span>£140,000</span>
+          </div>
+          <div class="fund-bar-container">
+            <div class="fund-bar-fill" style="width: 40%; background: #1A56DB;"></div>
+          </div>
+        </div>
+
+        <div class="fund-bar-group">
+          <div class="fund-bar-label">
+            <span>B2B Accountancy Partnerships &amp; GTM (31.4%)</span>
+            <span>£110,000</span>
+          </div>
+          <div class="fund-bar-container">
+            <div class="fund-bar-fill" style="width: 31.4%; background: #10B981;"></div>
+          </div>
+        </div>
+
+        <div class="fund-bar-group">
+          <div class="fund-bar-label">
+            <span>Security, Audits &amp; HMRC Regulatory (17.1%)</span>
+            <span>£60,000</span>
+          </div>
+          <div class="fund-bar-container">
+            <div class="fund-bar-fill" style="width: 17.1%; background: #F59E0B;"></div>
+          </div>
+        </div>
+
+        <div class="fund-bar-group">
+          <div class="fund-bar-label">
+            <span>Working Capital &amp; Operational Runway (11.5%)</span>
+            <span>£40,000</span>
+          </div>
+          <div class="fund-bar-container">
+            <div class="fund-bar-fill" style="width: 11.5%; background: #64748B;"></div>
+          </div>
+        </div>
+
+        <div style="background: #F8FAFC; border: 1px dashed #CBD5E1; border-radius: 4px; padding: 6px 8px; margin-top: 10px; font-size: 7.2pt; color: #475569;">
+          <strong>Breakeven Curve:</strong> Monthly cashflow breakeven crossed at Month 10–12 at ~2,500 active seats (£17.5k MRR run-rate), minimizing follow-on dilution risk.
+        </div>
+      </div>
+    </div>
+
+    <div class="section-title">3. Round Structure &amp; Dual-Tranche Tax Relief</div>
+    <div class="two-col">
+      <div class="card-box">
+        <div class="card-box-header">
+          <span>Investment Terms Summary</span>
+          <span style="color: #10B981; font-family: 'Geist Mono'; font-size: 7pt;">EXECUTABLE</span>
+        </div>
+        <ul class="spec-list">
+          <li>
+            <span class="spec-label">Total Seed Syndicate Allocation:</span>
+            <span class="spec-val">£350,000</span>
+          </li>
+          <li>
+            <span class="spec-label">Equity Allocation Offered:</span>
+            <span class="spec-val">10.94% Ordinary Shares</span>
+          </li>
+          <li>
+            <span class="spec-label">Pre-Money Valuation:</span>
+            <span class="spec-val">£2,850,000</span>
+          </li>
+          <li>
+            <span class="spec-label">Post-Money Valuation Cap:</span>
+            <span class="spec-val">£3,200,000</span>
+          </li>
+          <li>
+            <span class="spec-label">Minimum Angel Ticket Size:</span>
+            <span class="spec-val">£5,000</span>
+          </li>
+        </ul>
+      </div>
+
+      <div class="card-box">
+        <div class="card-box-header">
+          <span>Dual-Tranche HMRC Tax Relief</span>
+          <span style="color: #059669; font-family: 'Geist Mono'; font-size: 7pt;">HMRC AUTHORISED</span>
+        </div>
+        <ul class="spec-list">
+          <li>
+            <span class="spec-label">Tranche 1 (SEIS - 50% Income Tax Relief):</span>
+            <span class="spec-val" style="color: #059669;">£250,000 Allocation</span>
+          </li>
+          <li>
+            <span class="spec-label">Tranche 2 (EIS - 30% Income Tax Relief):</span>
+            <span class="spec-val">£100,000 Allocation</span>
+          </li>
+          <li>
+            <span class="spec-label">Capital Gains Tax (CGT) Exemption:</span>
+            <span class="spec-val">100% Tax-Free Gains on Exit</span>
+          </li>
+          <li>
+            <span class="spec-label">Loss Relief Protection:</span>
+            <span class="spec-val">Up to 86.5% Effective Downside Cover</span>
+          </li>
+          <li>
+            <span class="spec-label">Company UK Permanent Establishment:</span>
+            <span class="spec-val">London, UK Headquarters</span>
+          </li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="section-title">4. Year 5 Strategic Trade-Sale Exit Multiples (2030/31)</div>
+    <div class="card-box" style="margin-bottom: 6px;">
+      <p style="font-size: 7.5pt; color: #475569; margin-bottom: 6px;">
+        Acquisition targets include incumbent UK accounting platforms seeking to protect market share against autonomous WhatsApp ingestion, or Tier-1 UK challenger banks executing on SME embedded tax rails.
+      </p>
+      <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; text-align: center;">
+        <div style="background: #F8FAFC; border: 1px solid #E2E8F0; padding: 6px; border-radius: 4px;">
+          <div style="font-size: 6.8pt; color: #64748B; font-weight: 600;">CONSERVATIVE (6.5x ARR)</div>
+          <div style="font-size: 11pt; font-weight: 700; color: #0F172A; font-family: 'DM Sans';">£65.13M EV</div>
+          <div style="font-size: 6.8pt; color: #059669; font-weight: 600;">20.4x Gross Return · 36.5x Net (SEIS)</div>
+        </div>
+        <div style="background: #EFF6FF; border: 1px solid #BFDBFE; padding: 6px; border-radius: 4px;">
+          <div style="font-size: 6.8pt; color: #1E40AF; font-weight: 600;">BASE CASE (8.0x ARR)</div>
+          <div style="font-size: 11pt; font-weight: 700; color: #1E40AF; font-family: 'DM Sans';">£80.16M EV</div>
+          <div style="font-size: 6.8pt; color: #059669; font-weight: 600;">25.1x Gross Return · 44.9x Net (SEIS)</div>
+        </div>
+        <div style="background: #F0FDF4; border: 1px solid #BBF7D0; padding: 6px; border-radius: 4px;">
+          <div style="font-size: 6.8pt; color: #065F46; font-weight: 600;">AGGRESSIVE (10.0x ARR)</div>
+          <div style="font-size: 11pt; font-weight: 700; color: #065F46; font-family: 'DM Sans';">£100.20M EV</div>
+          <div style="font-size: 6.8pt; color: #059669; font-weight: 600;">31.3x Gross Return · 56.2x Net (SEIS)</div>
+        </div>
+      </div>
+      <div style="margin-top: 6px; font-size: 6.8pt; color: #64748B; text-align: center;">
+        <strong>Strategic Acquirers:</strong> Sage Group plc, Intuit (QuickBooks UK), Xero, NatWest Group (FreeAgent Model), Revolut Business.
+      </div>
+    </div>
+  </div>
+
+  <footer>
+    <div>CONFIDENTIAL &amp; PROPRIETARY · PREPARED FOR ANGEL INVESTMENT NETWORK</div>
+    <div>PAGE 2 OF 2 · INVISIBLE ACCOUNTANT FINANCIAL MODEL</div>
+  </footer>
+</div>
+
+</body>
+</html>
