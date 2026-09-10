@@ -1,0 +1,134 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1080 450" width="1080" height="450" fill="none">
+  <!-- Master Foundation Canvas: Deep Oxford Blue (#0B0F19) -->
+  <rect width="1080" height="450" fill="#0B0F19"/>
+  
+  <!-- Architectural Drafting Grid (Subtle Geometric Coordinates) -->
+  <defs>
+    <pattern id="archGrid" width="60" height="60" patternUnits="userSpaceOnUse">
+      <path d="M 60 0 L 0 0 0 60" fill="none" stroke="#1E293B" stroke-width="0.75" stroke-opacity="0.35"/>
+      <circle cx="60" cy="0" r="1" fill="#D4AF37" fill-opacity="0.25"/>
+    </pattern>
+    <radialGradient id="bannerGlow" cx="80%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#1D4ED8" stop-opacity="0.18"/>
+      <stop offset="100%" stop-color="#1D4ED8" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <rect width="1080" height="450" fill="url(#archGrid)"/>
+  <rect width="1080" height="450" fill="url(#bannerGlow)"/>
+
+  <!-- Neoclassical Architectural Double Hairline Frame -->
+  <rect x="24" y="24" width="1032" height="402" stroke="#1E293B" stroke-width="1.5" fill="none"/>
+  <rect x="34" y="34" width="1012" height="382" stroke="#D4AF37" stroke-width="1" stroke-opacity="0.55" fill="none"/>
+
+  <!-- Corner Drafting Registration Brackets (Gilt) -->
+  <g stroke="#D4AF37" stroke-width="1.5">
+    <path d="M 28 34 L 46 34 M 34 28 L 34 46"/>
+    <path d="M 1052 34 L 1034 34 M 1046 28 L 1046 46"/>
+    <path d="M 28 416 L 46 416 M 34 422 L 34 404"/>
+    <path d="M 1052 416 L 1034 416 M 1046 422 L 1046 404"/>
+  </g>
+
+  <!-- ================= LEFT COLUMN: INSTITUTIONAL PROPOSITION ================= -->
+  <!-- Header Monogram & Regulatory Lineage -->
+  <g transform="translate(64, 60)">
+    <!-- Small Gilt Crest Seal -->
+    <g transform="scale(0.32)">
+      <g stroke="#FFFFFF" stroke-width="4">
+        <line x1="46" y1="38" x2="46" y2="122"/>
+        <line x1="34" y1="38" x2="58" y2="38"/>
+        <line x1="34" y1="122" x2="58" y2="122"/>
+        <line x1="96" y1="38" x2="68" y2="122"/>
+        <line x1="96" y1="38" x2="114" y2="122"/>
+        <line x1="58" y1="122" x2="78" y2="122"/>
+        <line x1="104" y1="122" x2="124" y2="122"/>
+        <line x1="86" y1="38" x2="106" y2="38"/>
+      </g>
+      <line x1="46" y1="80" x2="114" y2="80" stroke="#D4AF37" stroke-width="3.5"/>
+      <rect x="73" y="77" width="6" height="6" fill="#1D4ED8" stroke="#D4AF37" stroke-width="1"/>
+    </g>
+
+    <text x="56" y="24" font-family="'JetBrains Mono', 'Segoe UI Mono', monospace" font-size="11" font-weight="600" letter-spacing="0.22em" fill="#D4AF37">HMRC MAKING TAX DIGITAL · SOVEREIGN COMPLIANCE INFRASTRUCTURE</text>
+  </g>
+
+  <!-- Primary Stately Wordmark -->
+  <text x="64" y="148" font-family="'DM Sans', 'Cabinet Grotesk', 'Segoe UI', sans-serif" font-size="46" font-weight="700" letter-spacing="0.12em" fill="#FFFFFF">INVISIBLE ACCOUNTANT</text>
+
+  <!-- Mission Line -->
+  <text x="64" y="195" font-family="'DM Sans', 'Inter', 'Segoe UI', sans-serif" font-size="20" font-weight="400" fill="#E2E8F0">The Sovereign Frontline Ledger for 3.2M UK Sole Traders</text>
+  
+  <!-- Strategic Thesis -->
+  <text x="64" y="235" font-family="'Inter', 'Segoe UI', sans-serif" font-size="14.5" font-weight="400" fill="#94A3B8" line-height="1.6">
+    Replacing bloated desktop dashboards with zero-friction WhatsApp receipt capture.
+  </text>
+  <text x="64" y="258" font-family="'Inter', 'Segoe UI', sans-serif" font-size="14.5" font-weight="400" fill="#94A3B8">
+    Autonomous multimodal inference, unbroken digital links, and direct HMRC API synchronization.
+  </text>
+
+  <!-- Hairline Divider -->
+  <line x1="64" y1="295" x2="620" y2="295" stroke="#1E293B" stroke-width="1.2"/>
+  <line x1="64" y1="295" x2="160" y2="295" stroke="#D4AF37" stroke-width="1.2"/>
+
+  <!-- Institutional Badges (Crisp Architectural Plaques, NO Silicon Valley bubbles) -->
+  <g transform="translate(64, 320)">
+    <!-- Badge 1: Seed Syndicate -->
+    <rect x="0" y="0" width="165" height="42" fill="#0F172A" stroke="#334155" stroke-width="1"/>
+    <line x1="0" y1="0" x2="0" y2="42" stroke="#D4AF37" stroke-width="2.5"/>
+    <text x="14" y="17" font-family="'JetBrains Mono', monospace" font-size="8.5" letter-spacing="0.12em" fill="#94A3B8">ROUND ALLOCATION</text>
+    <text x="14" y="32" font-family="'DM Sans', sans-serif" font-size="13" font-weight="700" fill="#FFFFFF">£350,000 Seed</text>
+
+    <!-- Badge 2: Tax Relief -->
+    <rect x="180" y="0" width="165" height="42" fill="#0F172A" stroke="#334155" stroke-width="1"/>
+    <line x1="180" y1="0" x2="180" y2="42" stroke="#10B981" stroke-width="2.5"/>
+    <text x="194" y="17" font-family="'JetBrains Mono', monospace" font-size="8.5" letter-spacing="0.12em" fill="#94A3B8">HMRC TAX INCENTIVE</text>
+    <text x="194" y="32" font-family="'DM Sans', sans-serif" font-size="13" font-weight="700" fill="#10B981">50% SEIS Relief</text>
+
+    <!-- Badge 3: Wholesale Model -->
+    <rect x="360" y="0" width="170" height="42" fill="#0F172A" stroke="#334155" stroke-width="1"/>
+    <line x1="360" y1="0" x2="360" y2="42" stroke="#1D4ED8" stroke-width="2.5"/>
+    <text x="374" y="17" font-family="'JetBrains Mono', monospace" font-size="8.5" letter-spacing="0.12em" fill="#94A3B8">B2B2C DISTRIBUTION</text>
+    <text x="374" y="32" font-family="'DM Sans', sans-serif" font-size="13" font-weight="700" fill="#93C5FD">£6/mo Wholesale</text>
+  </g>
+
+  <!-- ================= RIGHT COLUMN: THE SOVEREIGN LEDGER CREST ================= -->
+  <g transform="translate(685, 50)">
+    <!-- Architectural Plaque Enclosure -->
+    <rect x="0" y="0" width="330" height="350" fill="#0E1626" stroke="#1E293B" stroke-width="1.5"/>
+    <rect x="8" y="8" width="314" height="334" stroke="#D4AF37" stroke-width="1" stroke-opacity="0.4" fill="none"/>
+
+    <!-- Subtle Golden Aura -->
+    <radialGradient id="plaqueAura" cx="50%" cy="45%" r="45%">
+      <stop offset="0%" stop-color="#D4AF37" stop-opacity="0.10"/>
+      <stop offset="100%" stop-color="#D4AF37" stop-opacity="0"/>
+    </radialGradient>
+    <circle cx="165" cy="150" r="130" fill="url(#plaqueAura)"/>
+
+    <!-- The Sovereign Monoline Ledger Crest -->
+    <g transform="translate(55, 30) scale(1.375)">
+      <g stroke="#FFFFFF" stroke-width="3.5" stroke-linecap="square" stroke-linejoin="miter">
+        <line x1="46" y1="38" x2="46" y2="122"/>
+        <line x1="34" y1="38" x2="58" y2="38"/>
+        <line x1="34" y1="122" x2="58" y2="122"/>
+
+        <line x1="96" y1="38" x2="68" y2="122"/>
+        <line x1="96" y1="38" x2="114" y2="122"/>
+        
+        <line x1="58" y1="122" x2="78" y2="122"/>
+        <line x1="104" y1="122" x2="124" y2="122"/>
+        <line x1="86" y1="38" x2="106" y2="38"/>
+      </g>
+
+      <!-- Golden Section Ledger Beam -->
+      <line x1="46" y1="80" x2="114" y2="80" stroke="#D4AF37" stroke-width="3" stroke-linecap="square"/>
+
+      <!-- Central Trust Anchor -->
+      <rect x="73" y="77" width="6" height="6" fill="#1D4ED8" stroke="#D4AF37" stroke-width="1"/>
+    </g>
+
+    <!-- Plaque Inscription -->
+    <text x="165" y="260" font-family="'JetBrains Mono', monospace" font-size="11" font-weight="700" letter-spacing="0.22em" fill="#FFFFFF" text-anchor="middle">THE SOVEREIGN LEDGER</text>
+    <text x="165" y="280" font-family="'JetBrains Mono', monospace" font-size="9.5" font-weight="500" letter-spacing="0.18em" fill="#D4AF37" text-anchor="middle">CITY OF LONDON · EST. 2026</text>
+    
+    <!-- Fine Hash Telemetry Trail -->
+    <text x="165" y="315" font-family="'JetBrains Mono', monospace" font-size="8" letter-spacing="0.10em" fill="#64748B" text-anchor="middle">SHA-256 · IMMUTABLE AUDIT TRAIL · FIPS 140-3</text>
+  </g>
+</svg>
