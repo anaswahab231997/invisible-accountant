@@ -18,10 +18,16 @@ Snap a receipt. Record a voice note. Forward a PDF. That's it.
 Our AI engine instantly extracts the data, categorizes it perfectly according to HMRC rules, and prepares the quarterly updates automatically.
 No new apps to download. Zero passwords. Zero learning curve. Accounting becomes invisible, running entirely via WhatsApp.
 
-## UNFAIR ECONOMICS (B2B2C Model)
-White-label Enterprise Licensing for High-Street Accountancy Firms.
-Zero friction onboarding: One B2B sale brings 1,000+ sole trader clients instantly.
-Drastically lowered CAC via enterprise sales cycles, highly scalable Annual Contract Value (ACV), and 85%+ Gross Margins on the underlying software layer.
+## UNFAIR ECONOMICS (The £10M SaaS Engine)
+We outmaneuver legacy competitors (charging £50+/month for Dext+Xero) with a disruptive "Land and Expand" tiered pricing model:
+- **Starter Tier (£12/mo or £99/yr):** The ultimate "impulse buy" for tradespeople. Frictionless WhatsApp receipt scanning and direct-to-HMRC MTD filing. Generates instant upfront cash flow.
+- **Pro Tier (£29.99/mo):** (Roadmap) Introduces Automated Invoicing and Open Banking Reconciliation.
+**The Math to £1M ARR:** At a blended ARPU of £180/year, we reach £1M ARR with just 5,555 users. With an 85%+ Gross Margin and LTV:CAC ratio > 3:1, the path to a £10M+ valuation is strictly mathematical.
+## B2B ENTERPRISE GTM (The Wholesale Wedge)
+To rapidly scale acquisition, we white-label our engine to High-Street Accounting Firms under a highly defensible, margin-protected Enterprise contract:
+- **Platform Base Fee (£49/mo):** Recurring revenue for custom branding and partner dashboard access.
+- **Tiered Seats (Lite £9/mo | Pro £15/mo):** Aligns variable tech costs with firm revenue. 
+- **Margin Protection (Auto-Deflection):** Contractual passthrough billing and a hardcoded "Auto-Deflection Protocol" immediately mute conversational LLM usage if a client spams the bot, shielding our Gross Margin from third-party exploitation.
 
 ## GLOBAL SCALABILITY (Year 3 Expansion)
 The true value is the underlying **AI receipt-extraction and categorization engine**.

@@ -15,9 +15,18 @@ While our User Experience (UX) layer leverages WhatsApp to eliminate adoption fr
 *   **The Digital Link:** We securely bridge the gap between unstructured communication and the strict HMRC API Gateway without human intervention, satisfying the MTD mandate's most complex technical hurdle.
 
 ## 2. Viability (Go-To-Market & Risk Mitigation)
-We recognize that Direct-to-Consumer (B2C) acquisition for sole traders involves prohibitively high Customer Acquisition Costs (CAC). Therefore, our primary commercial model is **B2B2C (White-labeling for Accountancy Firms)**.
+We outmaneuver legacy incumbents (charging £50+/month for Dext+Xero) with an aggressive, margin-protected dual-distribution pricing engine:
 
-*   **Go-To-Market Strategy:** We will sell Enterprise licenses to traditional high-street accountancy firms. These firms are currently panicking about how to force their digitally illiterate clients to comply with the 2026 MTD software mandate. By white-labeling our WhatsApp bot, accountants can seamlessly onboard their entire client base overnight.
+*   **Commercial Pricing & Tiered Economics:**
+    *   **B2C Starter Tier (£12/month or £99/year upfront):** The frictionless "impulse buy" for tradespeople and sole traders. Features pure WhatsApp receipt scanning and direct-to-HMRC MTD quarterly submissions. Upfront annual billing delivers immediate non-dilutive working capital with under £0.50/month Meta COGS, locking in **90%+ Gross Margin**.
+    *   **B2C Pro Tier (£29.99/month):** (Roadmap) Introduces automated client invoicing and FCA Open Banking AISP real-time bank reconciliation.
+    *   **The Math to £1M ARR:** At a blended ARPU of £180/year across tiers, we achieve £1M ARR with just 5,555 users. Combined with an 85%+ Gross Margin and an LTV:CAC ratio exceeding 3:1, unit economics are highly profitable and defensible.
+*   **B2B Enterprise Distribution (The Wholesale Wedge):**
+    *   **Platform Base Fee (£49/month):** Recurring enterprise revenue covering practice branding, partner portal access, and multi-client compliance oversight.
+    *   **Tiered Client Seats (Lite £9/seat/month | Pro £15/seat/month):** Aligns software costs directly with accountancy practice client billings, enabling firms to capture 25%–40% margin while saving 8+ hours/week chasing receipts.
+    *   **Zero-Disruption Integration:** Emma does not displace Xero, Iris, or Sage; she functions as the frontline ingestion conduit piping pre-reconciled, digitally linked journals straight into existing practice software.
+*   **Margin Defense (The Auto-Deflection Protocol):**
+    *   To shield unit economics against "chatty users" consuming unbounded Gemini tokens or Meta WhatsApp fees, the engine enforces strict contractual passthrough limits and an automated **Auto-Deflection Protocol**. If an end-user treats the bot as an unstructured conversational chat assistant rather than a receipt/turnover logger, Emma gracefully deflects queries back to compliance actions, firmly defending gross margins above 85%.
 *   **Platform Risk Mitigation:** While Meta's WhatsApp is our primary delivery mechanism, our Live Inference Engine is platform-agnostic. Our continuity plan includes an instant fallback to SMS via Twilio and a lightweight Progressive Web App (PWA) should Meta alter its terms of service for financial bots.
 *   **Data Security:** Our architecture utilizes a "Bank-level security vault" where PII and financial data are instantly decoupled from the chat interface and stored in a highly secure, encrypted PostgreSQL staging environment.
 
