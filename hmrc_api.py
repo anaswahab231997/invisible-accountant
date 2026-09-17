@@ -196,3 +196,48 @@ class HMRCClient:
         endpoint = f"/individuals/business/property/{nino}"
         response = await self._request("GET", endpoint)
         return response.json()
+
+    async def get_itsa_penalties(self, nino: str) -> dict:
+        """
+        Fetches the taxpayer's ITSA penalties and dunning lock status from Self Assessment Accounts API v4.
+        Released in HMRC Production on 15 September 2026.
+        """
+        if not self.access_token:
+            logger.warning("No HMRC_ACCESS_TOKEN provided. Simulating successful penalties retrieval.")
+            return {
+                "simulated": True,
+                "nino": nino,
+                "penaltyPointsTotal": 0,
+                "financialPenaltiesTotal": 0.00,
+                "dunningLock": False,
+                "penalties": [],
+                "status": "CLEAN"
+            }
+
+        endpoint = f"/individuals/business/accounts/penalties/{nino}"
+        response = await self._request("GET", endpoint)
+        return response.json()
+
+    async def submit_annual_adjustments(self, nino: str, income_source_id: str, tax_year: str, adjustments: dict) -> dict:
+        """
+        Submits annual adjustments for self-employment business, supporting the new optional
+        adjustmentToProfitsForClass4 field in the adjustments object per HMRC Self Employment
+        Business API v5 (Sept 15, 2026 Production Release).
+        """
+        if not self.access_token:
+            logger.warning("No HMRC_ACCESS_TOKEN provided. Simulating successful annual adjustments submission.")
+            return {
+                "simulated": True,
+                "nino": nino,
+                "incomeSourceId": income_source_id,
+                "taxYear": tax_year,
+                "adjustments": adjustments,
+                "status": "SUBMITTED"
+            }
+
+        endpoint = f"/income-tax/ni/{nino}/self-employments/{income_source_id}/annual-submissions/{tax_year}"
+        headers = {"Content-Type": "application/json"}
+        payload = {"adjustments": adjustments}
+
+        response = await self._request("POST", endpoint, headers=headers, content=json.dumps(payload))
+        return response.json()
