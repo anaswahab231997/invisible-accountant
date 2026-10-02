@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Invisible Accountant: Market Evidence Addendum</title>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@500;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --oxford-blue: #111827;
+            --deep-slate: #1F2937;
+            --heritage-blue: #1A56DB;
+            --muted-slate: #4B5563;
+        }
+        body {
+            margin: 0; padding: 0; 
+            font-family: 'Inter', sans-serif; 
+            background: #FFFFFF; color: var(--oxford-blue);
+            width: 800px; 
+        }
+        .page {
+            width: 800px;
+            min-height: 1100px;
+            padding: 80px 80px;
+            box-sizing: border-box;
+            background-image: radial-gradient(circle at 50% 0%, rgba(26, 86, 219, 0.03) 0%, transparent 50%);
+        }
+        .header {
+            border-bottom: 2px solid var(--heritage-blue);
+            padding-bottom: 20px; margin-bottom: 40px;
+        }
+        .ref-tag {
+            font-family: 'JetBrains Mono', monospace; font-size: 0.75rem; 
+            color: var(--heritage-blue); text-transform: uppercase; letter-spacing: 0.1em; font-weight: 600;
+            margin-bottom: 12px; display: inline-block; background: rgba(26, 86, 219, 0.1); padding: 4px 10px; border-radius: 4px;
+        }
+        h1 { font-family: 'DM Sans', sans-serif; font-size: 2.2rem; color: var(--oxford-blue); margin: 0; letter-spacing: -0.02em;}
+        p.subtitle { margin-top: 12px; color: var(--muted-slate); font-size: 0.95rem; line-height: 1.5; }
+        
+        .section-title { font-family: 'DM Sans', sans-serif; font-size: 1.3rem; color: var(--oxford-blue); margin-top: 40px; margin-bottom: 20px; font-weight: 700; display: flex; align-items: center;}
+        .section-title::before {
+            content: ''; display: inline-block; width: 4px; height: 18px; background: var(--heritage-blue); margin-right: 12px; border-radius: 2px;
+        }
+        
+        .review-card {
+            background: #F9FAFB; border: 1px solid #E5E7EB; border-left: 4px solid #EF4444; /* Red for 1-star */
+            border-radius: 0 8px 8px 0; padding: 24px; font-family: 'Inter', sans-serif;
+            margin-bottom: 24px; box-shadow: 0 4px 12px rgba(0,0,0,0.02);
+            position: relative;
+        }
+        .review-card.dext { border-left-color: #F59E0B; } /* Orange/yellow for Dext */
+        
+        .stars { color: #EF4444; font-size: 1.2rem; margin-bottom: 10px; letter-spacing: 2px;}
+        .review-text { font-size: 0.95rem; color: var(--deep-slate); line-height: 1.6; font-style: italic;}
+        .review-source { 
+            font-family: 'JetBrains Mono', monospace; font-size: 0.75rem; 
+            color: var(--muted-slate); text-transform: uppercase; font-weight: 600; margin-top: 16px;
+        }
+        .highlight { background: rgba(239, 68, 68, 0.1); padding: 0 4px; border-radius: 2px; color: #B91C1C;}
+    </style>
+</head>
+<body>
+    <div class="page">
+        <div class="header">
+            <div class="ref-tag">IA-EVIDENCE-2026</div>
+            <h1>Market Failure Evidence</h1>
+            <p class="subtitle">Live data scraped directly from Trustpilot (UK) in September 2026. This data proves that legacy incumbents are fundamentally incompatible with the millions of sole traders forced into the HMRC MTD Phase 1 & 2 mandates.</p>
+        </div>
+        
+        <div class="section-title">The Xero Usability Crisis</div>
+        
+        <div class="review-card">
+            <div class="stars">★☆☆☆☆</div>
+            <p class="review-text">"Xero is a disaster. What were easy processes with Sage, Xero makes <span class="highlight">extremely difficult or not possible at all</span>. It's unprofessional, frustrating... even terms used are insensible. It's also totally inflexible... there is absolutely no magic at all, just despair."</p>
+            <div class="review-source">Source: Trustpilot UK | Verified Xero User | Sept 2026</div>
+        </div>
+
+        <div class="review-card">
+            <div class="stars">★☆☆☆☆</div>
+            <p class="review-text">"We opened a support case in June and have spent months pursuing a solution... The issue remains unresolved, customer service has been poor, and there appears to be little accountability... <span class="highlight">so much for all the good marketing</span> around Xero."</p>
+            <div class="review-source">Source: Trustpilot UK | Verified Xero User | Sept 2026</div>
+        </div>
+        
+        <div class="section-title">The Dext (Receipt Bank) Pricing Crisis</div>
+
+        <div class="review-card dext">
+            <div class="stars" style="color: #F59E0B;">★☆☆☆☆</div>
+            <p class="review-text">"This company operated well when it was Receipt Bank; however, after the acquisition and rebranding to Dext, the quality of service has significantly declined. Their business practices have become concerning, particularly with a <span class="highlight">pricing structure that changes frequently and lacks transparency</span>... In our experience, these issues have resulted in thousands of dollars in unnecessary expenses."</p>
+            <div class="review-source">Source: Trustpilot UK | Verified Dext B2B Partner | Sept 2026</div>
+        </div>
+
+        <div class="review-card dext">
+            <div class="stars" style="color: #F59E0B;">★☆☆☆☆</div>
+            <p class="review-text">"Predatory, unhelpful customer service. As a professional bookkeeper, I signed up for a monthly subscription for Dext... <span class="highlight">It just became too expensive</span>. I transferred my clients back to pay for their own subscriptions and tried to cancel mine... Will I ever go back to Dext? No freaking way."</p>
+            <div class="review-source">Source: Trustpilot UK | Verified Dext Bookkeeper | Sept 2026</div>
+        </div>
+        
+    </div>
+</body>
+</html>

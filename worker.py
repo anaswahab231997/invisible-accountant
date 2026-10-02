@@ -6,6 +6,7 @@ import httpx
 from dotenv import load_dotenv
 
 load_dotenv()
+DRY_RUN = os.getenv("DRY_RUN", "true").lower() == "true"
 
 from circuit_breaker import CircuitBreaker, CircuitBreakerOpenException
 from db import (
@@ -17,23 +18,52 @@ from db import (
     store_identity_in_vault
 )
 from logger import get_logger
-from hmrc_api import HMRCClient, HMRCApiError, generate_whatsapp_fraud_headers
+class HMRCApiError(Exception):
+    def __init__(self, message, status_code, payload):
+        super().__init__(message)
+        self.status_code = status_code
+        self.payload = payload
 from aes_gcm_security import TokenEncryptionEngine
 
 logger = get_logger(__name__)
 
+def get_twilio_client():
+    from twilio.rest import Client
+    sid = os.environ.get('TWILIO_ACCOUNT_SID')
+    token = os.environ.get('TWILIO_AUTH_TOKEN')
+    if sid and token: return Client(sid, token)
+    return None
+
+async def send_failure_sms(sender_id: str):
+    if not sender_id or sender_id.startswith("demo_web_"): return
+    import asyncio
+    client = get_twilio_client()
+    if not client: return
+    to_formatted = f"whatsapp:{sender_id}" if not sender_id.startswith("whatsapp:") else sender_id
+    from_number = os.environ.get('TWILIO_WHATSAPP_NUMBER', 'whatsapp:+17372508034')
+    try:
+        await asyncio.to_thread(
+            client.messages.create,
+            body="Alert: Your expense submission failed due to an integration issue (e.g. token expired). Please re-authenticate.",
+            from_=from_number,
+            to=to_formatted
+        )
+    except Exception as e:
+        logger.error("Failed to send Twilio SMS", error=str(e))
+
+
 # Initialize Token Encryption Engine
-encryption_key = os.getenv("DB_ENCRYPTION_KEY_B64")
+encryption_key = os.getenv("ENCRYPTION_MASTER_KEY_B64")
 if not encryption_key:
-    raise ValueError("DB_ENCRYPTION_KEY_B64 environment variable is missing in worker.py.")
+    raise ValueError("ENCRYPTION_MASTER_KEY_B64 environment variable is missing in worker.py.")
     
 token_engine = TokenEncryptionEngine(encryption_key)
 
 class OAuthManager:
     def __init__(self):
-        self.client_id = os.getenv("HMRC_CLIENT_ID")
-        self.client_secret = os.getenv("HMRC_CLIENT_SECRET")
-        self.base_url = os.getenv("HMRC_BASE_URL", "https://test-api.service.hmrc.gov.uk")
+        self.client_id = os.getenv("XERO_CLIENT_ID")
+        self.client_secret = os.getenv("XERO_CLIENT_SECRET")
+        self.base_url = os.getenv("XERO_BASE_URL", "https://identity.xero.com")
 
     async def get_user_identity(self, whatsapp_id: str):
         encrypted_blob = await get_identity_from_vault(whatsapp_id)
@@ -49,7 +79,7 @@ class OAuthManager:
         
         # Check expiry with a 60-second buffer for network latency
         if time.time() + 60 > identity.get("expires_at", 0):
-            logger.info("Access token expired. Refreshing token via HMRC...", whatsapp_id=whatsapp_id)
+            logger.info("Access token expired. Refreshing token via Xero...", whatsapp_id=whatsapp_id)
             identity = await self.refresh_user_token(whatsapp_id, identity)
             
         return identity
@@ -57,7 +87,7 @@ class OAuthManager:
     async def refresh_user_token(self, whatsapp_id: str, identity: dict):
         async with httpx.AsyncClient() as client:
             resp = await client.post(
-                f"{self.base_url}/oauth/token",
+                f"{self.base_url}/connect/token",
                 data={
                     "client_id": self.client_id,
                     "client_secret": self.client_secret,
@@ -84,96 +114,62 @@ class OAuthManager:
             
             return identity
 
-# Token Bucket Rate Limiter for 2.5 requests per second
-class TokenBucket:
-    def __init__(self, rate, capacity):
-        self.rate = rate
-        self.capacity = capacity
-        self.tokens = capacity
-        self.last_refill = time.time()
-        self.lock = None
-
-    async def consume(self):
-        if self.lock is None:
-            self.lock = asyncio.Lock()
-            
-        async with self.lock:
-            now = time.time()
-            elapsed = now - self.last_refill
-            self.tokens = min(self.capacity, self.tokens + elapsed * self.rate)
-            self.last_refill = now
-
-            if self.tokens < 1:
-                wait_time = (1 - self.tokens) / self.rate
-                await asyncio.sleep(wait_time)
-                self.tokens = 0
-                self.last_refill = time.time()
-            else:
-                self.tokens -= 1
-
-
 hmrc_breaker = CircuitBreaker(failure_threshold=3, recovery_timeout=15)
 oauth_manager = OAuthManager()
-rate_limiter = TokenBucket(rate=2.5, capacity=5)
 
 
-async def submit_to_hmrc(item, identity):
-    sender_id = item.get("sender_id", "unknown_whatsapp_user")
-    # We pass None for device ID since we don't capture the physical device on WhatsApp.
-    fraud_headers = generate_whatsapp_fraud_headers(real_device_id=None)
+from adapters.universal_adapter import UniversalAdapter
+from models.unified_record import UnifiedFinancialRecord, TargetSystem
+
+universal_adapter = UniversalAdapter()
+
+async def submit_to_hmrc(item):
+    try:
+        identity = await oauth_manager.get_user_identity(item["sender_id"])
+    except Exception as e:
+        logger.error("Auth expired or failed", error=str(e), queue_id=item["id"])
+        from db import get_connection
+        async with get_connection() as conn:
+            await conn.execute("UPDATE hmrc_ledger SET status = 'AUTH_EXPIRED' WHERE id = $1", item["id"])
+        return
+    fin_data = {}
+    if item.get("encrypted_financial_data"):
+        import json
+        enc_dict = json.loads(item["encrypted_financial_data"])
+        decrypted_json = token_engine.decrypt_tokens(enc_dict, associated_data=str(item["chat_id"]))
+        fin_data = json.loads(decrypted_json)
+        amount = float(fin_data.get("gross_amount") or fin_data.get("amount", 0.0))
+    else:
+        amount = float(item["amount"])
+
+    accountant_approved = item.get("accountant_approved", False)
+    if not accountant_approved and ((amount > 500.0 and fin_data.get("transaction_type", "EXPENSE") != "INCOME") or fin_data.get("needs_accountant_review")):
+        from db import get_connection
+        async with get_connection() as conn:
+            await conn.execute("UPDATE hmrc_ledger SET status = 'CAPITAL_ALLOWANCE' WHERE id = $1", item["id"])
+        return
+
+    record = UnifiedFinancialRecord(
+        amount=amount,
+        category=item.get("category", "Other business expenses"),
+        timestamp=item["timestamp"],
+        target_system=TargetSystem.XERO,
+        sender_id=item.get("sender_id", "unknown_whatsapp_user"),
+        extra_data={"id": item["id"], "media_urls": item.get("media_urls"), **fin_data}
+    )
     
-    # Initialize HMRCClient with the user's specific access token
-    client = HMRCClient(access_token=identity["access_token"], fraud_headers=fraud_headers)
-    
-    # Safely pull the user's NINO from their decrypted vault identity
-    nino = identity.get("nino")
-    
-    if not nino:
-        logger.error("NINO missing from decrypted identity vault", queue_id=item["id"])
-        raise Exception("Missing NINO for submission")
-        
-    year = item["timestamp"][:4]
-    from_date = f"{year}-04-06"
-    to_date = f"{int(year)+1}-04-05"
+    if DRY_RUN:
+        logger.info("\033[93mDRY RUN ACTIVE: Dumping payload instead of submitting\033[0m")
+        with open("dry_run_payloads.json", "a") as f:
+            f.write(record.json() + "\n")
+        await mark_hmrc_submitted(item["id"])
+        logger.info("\033[92mPROCESSING -> SUBMITTED (DRY RUN)\033[0m", queue_id=item["id"])
+        return
     
     try:
-        # 1. Fetch Business Details to get incomeSourceId
-        logger.info("Fetching Business Details", queue_id=item["id"])
-        business_details = await client.get_business_details(nino)
-        
-        businesses = business_details.get("businessData", [])
-        if not businesses:
-            raise Exception("No self-employment business found for user.")
-            
-        income_source_id = businesses[0].get("incomeSourceId")
-        
-        # 2. Fetch Obligations to get exact periodDates
-        logger.info("Fetching Obligations", queue_id=item["id"])
-        obligations_resp = await client.get_obligations(nino, from_date, to_date)
-        
-        obligations = obligations_resp.get("obligations", [])
-        if not obligations:
-            raise Exception("No obligations found for the specified period.")
-            
-        details = obligations[0].get("obligationDetails", [])
-        open_obs = [ob for ob in details if ob.get("status") == "O"]
-        
-        if not open_obs:
-            raise Exception("No OPEN obligations found to submit against.")
-            
-        period_start = open_obs[0].get("inboundCorrespondenceFromDate")
-        period_end = open_obs[0].get("inboundCorrespondenceToDate")
-        
-        # 3. Submit periodic update using the dynamic metadata
-        logger.info("Submitting Periodic Update", income_source_id=income_source_id, period_start=period_start, period_end=period_end)
-        await client.submit_periodic_update(
-            nino=nino,
-            income_source_id=income_source_id,
-            amount=item["amount"],
-            period_start=period_start,
-            period_end=period_end
-        )
+        await universal_adapter.dispatch(record, identity)
         await mark_hmrc_submitted(item["id"])
+        logger.info("\033[92mPROCESSING -> SUBMITTED\033[0m", queue_id=item["id"])
     except HMRCApiError as e:
         # Sanitize PII from the payload before logging
         def sanitize_pii(data):
@@ -193,55 +189,74 @@ async def submit_to_hmrc(item, identity):
                 if e.status_code == 401:
                     logger.warning("401 Unauthorized - wiping token for re-auth", whatsapp_id=item["sender_id"])
                     await conn.execute("DELETE FROM hmrc_identity_vault WHERE whatsapp_id = $1", item["sender_id"])
-                    await conn.execute("UPDATE hmrc_ledger SET status = 'FAILED_AUTH' WHERE id = $1", item["id"])
+                    await conn.execute("UPDATE hmrc_ledger SET status = 'AUTH_EXPIRED' WHERE id = $1", item["id"])
+                    logger.info("\033[91mPROCESSING -> AUTH_EXPIRED\033[0m", queue_id=item["id"])
+                    await send_failure_sms(item["sender_id"])
+                    return  # Do not raise to prevent tripping circuit breaker
                 else:
-                    await conn.execute("""
+                    row = await conn.fetchrow("""
                         UPDATE hmrc_ledger 
                         SET status = CASE WHEN retry_count >= 5 THEN 'FAILED' ELSE 'PENDING' END,
                             retry_count = retry_count + 1,
                             next_retry_at = NOW() + (INTERVAL '1 minute' * pow(2, retry_count))
                         WHERE id = $1
+                        RETURNING status
                     """, item["id"])
+                    if row:
+                        logger.info(f"\033[93mPROCESSING -> {row['status']}\033[0m", queue_id=item["id"])
+                        if row["status"] == 'FAILED': await send_failure_sms(item.get("sender_id"))
+                    raise e
         else:
             from db import mark_hmrc_failed
             await mark_hmrc_failed(item["id"])
+            logger.info("\033[91mPROCESSING -> FAILED\033[0m", queue_id=item["id"])
+            await send_failure_sms(item.get("sender_id"))
+            raise e
     except Exception as e:
         logger.error("Unexpected error in worker", queue_id=item["id"], error=str(e))
         from db import get_connection
         async with get_connection() as conn:
-            await conn.execute("""
+            row = await conn.fetchrow("""
                 UPDATE hmrc_ledger 
                 SET status = CASE WHEN retry_count >= 5 THEN 'FAILED' ELSE 'PENDING' END,
                     retry_count = retry_count + 1,
                     next_retry_at = NOW() + (INTERVAL '1 minute' * pow(2, retry_count))
                 WHERE id = $1
+                RETURNING status
             """, item["id"])
+            if row:
+                logger.info(f"\033[91mPROCESSING -> {row['status']}\033[0m", queue_id=item["id"])
+        raise e
 
 
-async def process_hmrc_queue():
+async def process_hmrc_queue(semaphore):
     while True:
         try:
             pending_items = await get_pending_hmrc_queue()
 
             async def process_item(item):
                 try:
-                    await rate_limiter.consume()
-                    
-                    # Fetch identity from the secure vault, refreshing the token if necessary
-                    identity = await oauth_manager.get_user_identity(item["sender_id"])
-                    
-                    logger.info("Submitting Queue ID to HMRC API", queue_id=item["id"])
-                    await hmrc_breaker.async_call(submit_to_hmrc, item, identity)
+                    async with semaphore:
+                        logger.info("Submitting Queue ID to HMRC API", queue_id=item["id"])
+                        await hmrc_breaker.async_call(submit_to_hmrc, item)
                     logger.info("Queue ID successfully submitted", queue_id=item["id"])
                 except CircuitBreakerOpenException:
                     logger.warning("Circuit is OPEN. Pausing queue processing", recovery_timeout=hmrc_breaker.recovery_timeout)
+                    from db import get_connection
+                    async with get_connection() as conn:
+                        await conn.execute("UPDATE hmrc_ledger SET status = 'PENDING' WHERE id = $1", item["id"])
                     raise
                 except Exception as e:
-                    logger.error("Queue item failed", queue_id=item["id"], error=str(e))
-                    from db import mark_hmrc_failed
-                    await mark_hmrc_failed(item["id"])
+                    # submit_to_hmrc handles DB updates (exponential backoff or permanent failure).
+                    # We just log it here so it bubbles up to trigger the circuit breaker.
+                    logger.error("Queue item failed (handled by submit_to_hmrc)", queue_id=item["id"], error=str(e))
+                finally:
+                    # Do not blindly update to PENDING if it's already FAILED or SUBMITTED.
+                    pass
 
             if pending_items:
+                for item in pending_items:
+                    logger.info("\033[94mPENDING -> PROCESSING\033[0m", queue_id=item["id"])
                 tasks = [process_item(item) for item in pending_items]
                 results = await asyncio.gather(*tasks, return_exceptions=True)
                 
@@ -269,7 +284,7 @@ async def process_ttl_sweeper():
                             chat_id=item["id"],
                         )
                         await conn.execute(
-                            "DELETE FROM chat_sessions WHERE id = $1",
+                            "DELETE FROM chat_sessions WHERE id = $1 AND NOT EXISTS (SELECT 1 FROM hmrc_ledger WHERE chat_id = $1)",
                             item["id"]
                         )
 
@@ -281,7 +296,8 @@ async def process_ttl_sweeper():
 
 async def start_workers():
     logger.info("Starting background async workers...")
-    await asyncio.gather(process_hmrc_queue(), process_ttl_sweeper())
+    semaphore = asyncio.Semaphore(5)
+    await asyncio.gather(process_hmrc_queue(semaphore), process_ttl_sweeper())
 
 
 if __name__ == "__main__":

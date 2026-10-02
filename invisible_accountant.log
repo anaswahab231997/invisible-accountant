@@ -1,0 +1,690 @@
+AFC is enabled with max remote calls: 10.
+{"chat_id": 46, "error": "cannot access local variable 'types' where it is not associated with a value", "event": "Error processing intake", "level": "error", "logger": "main", "timestamp": "2026-10-02T14:08:08.053552Z"}
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+{"sender_id": "demo_web_user1", "message": "I've logged the \nG\n1200 laptop from Apple Store. As it's over \nG\n500, we'll need to consider this for Capital Allowances rather than a direct expense. Can you confirm if it's used solely for business?", "event": "Outbound WhatsApp message", "level": "info", "logger": "main", "timestamp": "2026-10-02T14:19:43.686010Z"}
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+{"error": "404 NOT_FOUND. {'error': {'code': 404, 'message': 'This model models/gemini-2.5-pro is no longer available to new users. Please update your code to use models/gemini-3.1-pro-preview for the latest features and improvements. We recommend you to use the Interactions API (https://ai.google.dev/gemini-api/docs/get-started).', 'status': 'NOT_FOUND'}}", "event": "Error calling Gemini API", "level": "error", "logger": "agents", "timestamp": "2026-10-02T14:54:19.688298Z"}
+{"chat_id": 48, "error": "404 NOT_FOUND. {'error': {'code': 404, 'message': 'This model models/gemini-2.5-pro is no longer available to new users. Please update your code to use models/gemini-3.1-pro-preview for the latest features and improvements. We recommend you to use the Interactions API (https://ai.google.dev/gemini-api/docs/get-started).', 'status': 'NOT_FOUND'}}", "event": "Error processing intake", "level": "error", "logger": "main", "timestamp": "2026-10-02T14:54:19.688451Z"}
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+{"error": "Max retries exceeded", "event": "Error calling Gemini API", "level": "error", "logger": "agents", "timestamp": "2026-10-02T15:09:00.105047Z"}
+{"chat_id": 49, "error": "Max retries exceeded", "event": "Error processing intake", "level": "error", "logger": "main", "timestamp": "2026-10-02T15:09:00.105579Z"}
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+{"error": "404 NOT_FOUND. {'error': {'code': 404, 'message': 'models/gemini-1.5-pro is not found for API version v1beta, or is not supported for generateContent. Call ModelService.ListModels to see the list of available models and their supported methods.', 'status': 'NOT_FOUND'}}", "event": "Error calling Gemini API", "level": "error", "logger": "agents", "timestamp": "2026-10-02T15:41:31.717776Z"}
+{"chat_id": 50, "error": "404 NOT_FOUND. {'error': {'code': 404, 'message': 'models/gemini-1.5-pro is not found for API version v1beta, or is not supported for generateContent. Call ModelService.ListModels to see the list of available models and their supported methods.', 'status': 'NOT_FOUND'}}", "event": "Error processing intake", "level": "error", "logger": "main", "timestamp": "2026-10-02T15:41:31.717940Z"}
+AFC is enabled with max remote calls: 10.
+{"error": "name 'schema' is not defined", "event": "Error calling Gemini API", "level": "error", "logger": "agents", "timestamp": "2026-10-02T17:34:33.303839Z"}
+{"error": "name 'dynamic_schema' is not defined", "event": "Error calling Gemini API", "level": "error", "logger": "agents", "timestamp": "2026-10-02T17:35:24.293655Z"}
+{"error": "name 'schema' is not defined", "event": "Error calling Gemini API", "level": "error", "logger": "agents", "timestamp": "2026-10-02T17:41:05.026118Z"}
+{"error": "_call_gemini() got an unexpected keyword argument 'schema'", "event": "Error calling Gemini API", "level": "error", "logger": "agents", "timestamp": "2026-10-02T17:41:22.952396Z"}
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+{"reason": "Flash flagged as ambiguous", "event": "Escalating to Gemini 2.5 Pro for deep audit", "level": "info", "logger": "agents", "timestamp": "2026-10-02T17:53:41.374379Z"}
+AFC is enabled with max remote calls: 10.
+{"reason": "Flash flagged as ambiguous", "event": "Escalating to Gemini 2.5 Pro for deep audit", "level": "info", "logger": "agents", "timestamp": "2026-10-02T17:53:41.743577Z"}
+AFC is enabled with max remote calls: 10.
+{"reason": "Flash flagged as ambiguous", "event": "Escalating to Gemini 2.5 Pro for deep audit", "level": "info", "logger": "agents", "timestamp": "2026-10-02T17:53:41.745973Z"}
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+{"reason": "Flash flagged as ambiguous", "event": "Escalating to Gemini 2.5 Pro for deep audit", "level": "info", "logger": "agents", "timestamp": "2026-10-02T17:53:44.070845Z"}
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+{"reason": "Flash flagged as ambiguous", "event": "Escalating to Gemini 2.5 Pro for deep audit", "level": "info", "logger": "agents", "timestamp": "2026-10-02T17:53:48.294608Z"}
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+{"reason": "Flash flagged as ambiguous", "event": "Escalating to Gemini 2.5 Pro for deep audit", "level": "info", "logger": "agents", "timestamp": "2026-10-02T17:54:05.108382Z"}
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+{"reason": "Flash flagged as ambiguous", "event": "Escalating to Gemini 2.5 Pro for deep audit", "level": "info", "logger": "agents", "timestamp": "2026-10-02T17:54:14.562958Z"}
+AFC is enabled with max remote calls: 10.
+{"reason": "Flash flagged as ambiguous", "event": "Escalating to Gemini 2.5 Pro for deep audit", "level": "info", "logger": "agents", "timestamp": "2026-10-02T17:54:14.758819Z"}
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+{"reason": "Flash flagged as ambiguous", "event": "Escalating to Gemini 2.5 Pro for deep audit", "level": "info", "logger": "agents", "timestamp": "2026-10-02T17:54:15.675697Z"}
+AFC is enabled with max remote calls: 10.
+{"reason": "Flash flagged as ambiguous", "event": "Escalating to Gemini 2.5 Pro for deep audit", "level": "info", "logger": "agents", "timestamp": "2026-10-02T17:54:16.348131Z"}
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+{"reason": "Flash flagged as ambiguous", "event": "Escalating to Gemini 2.5 Pro for deep audit", "level": "info", "logger": "agents", "timestamp": "2026-10-02T17:54:18.142001Z"}
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+{"reason": "Flash flagged as ambiguous", "event": "Escalating to Gemini 2.5 Pro for deep audit", "level": "info", "logger": "agents", "timestamp": "2026-10-02T17:54:21.493220Z"}
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+{"error": "Max retries exceeded", "event": "Error calling Gemini API", "level": "error", "logger": "agents", "timestamp": "2026-10-02T18:00:08.718629Z"}
+{"chat_id": 96, "error": "Max retries exceeded", "event": "Error processing intake", "level": "error", "logger": "main", "timestamp": "2026-10-02T18:00:08.718929Z"}
+{"error": "Max retries exceeded", "event": "Error calling Gemini API", "level": "error", "logger": "agents", "timestamp": "2026-10-02T18:00:08.764355Z"}
+{"chat_id": 85, "error": "Max retries exceeded", "event": "Error processing intake", "level": "error", "logger": "main", "timestamp": "2026-10-02T18:00:08.764534Z"}
+{"error": "Max retries exceeded", "event": "Error calling Gemini API", "level": "error", "logger": "agents", "timestamp": "2026-10-02T18:00:08.779666Z"}
+{"chat_id": 53, "error": "Max retries exceeded", "event": "Error processing intake", "level": "error", "logger": "main", "timestamp": "2026-10-02T18:00:08.779831Z"}
+{"error": "Max retries exceeded", "event": "Error calling Gemini API", "level": "error", "logger": "agents", "timestamp": "2026-10-02T18:00:08.795115Z"}
+{"chat_id": 73, "error": "Max retries exceeded", "event": "Error processing intake", "level": "error", "logger": "main", "timestamp": "2026-10-02T18:00:08.795301Z"}
+{"error": "Max retries exceeded", "event": "Error calling Gemini API", "level": "error", "logger": "agents", "timestamp": "2026-10-02T18:00:08.795400Z"}
+{"chat_id": 60, "error": "Max retries exceeded", "event": "Error processing intake", "level": "error", "logger": "main", "timestamp": "2026-10-02T18:00:08.795447Z"}
+{"error": "Max retries exceeded", "event": "Error calling Gemini API", "level": "error", "logger": "agents", "timestamp": "2026-10-02T18:00:08.857609Z"}
+{"chat_id": 62, "error": "Max retries exceeded", "event": "Error processing intake", "level": "error", "logger": "main", "timestamp": "2026-10-02T18:00:08.857797Z"}
+{"error": "Max retries exceeded", "event": "Error calling Gemini API", "level": "error", "logger": "agents", "timestamp": "2026-10-02T18:00:08.857896Z"}
+{"chat_id": 100, "error": "Max retries exceeded", "event": "Error processing intake", "level": "error", "logger": "main", "timestamp": "2026-10-02T18:00:08.857949Z"}
+{"error": "Max retries exceeded", "event": "Error calling Gemini API", "level": "error", "logger": "agents", "timestamp": "2026-10-02T18:00:08.858019Z"}
+{"chat_id": 98, "error": "Max retries exceeded", "event": "Error processing intake", "level": "error", "logger": "main", "timestamp": "2026-10-02T18:00:08.858062Z"}
+{"error": "Max retries exceeded", "event": "Error calling Gemini API", "level": "error", "logger": "agents", "timestamp": "2026-10-02T18:00:08.873118Z"}
+{"chat_id": 99, "error": "Max retries exceeded", "event": "Error processing intake", "level": "error", "logger": "main", "timestamp": "2026-10-02T18:00:08.873349Z"}
+{"error": "Max retries exceeded", "event": "Error calling Gemini API", "level": "error", "logger": "agents", "timestamp": "2026-10-02T18:00:08.888540Z"}
+{"chat_id": 66, "error": "Max retries exceeded", "event": "Error processing intake", "level": "error", "logger": "main", "timestamp": "2026-10-02T18:00:08.888746Z"}
+{"error": "Max retries exceeded", "event": "Error calling Gemini API", "level": "error", "logger": "agents", "timestamp": "2026-10-02T18:00:08.951278Z"}
+{"chat_id": 63, "error": "Max retries exceeded", "event": "Error processing intake", "level": "error", "logger": "main", "timestamp": "2026-10-02T18:00:08.951534Z"}
+{"error": "Max retries exceeded", "event": "Error calling Gemini API", "level": "error", "logger": "agents", "timestamp": "2026-10-02T18:00:08.951815Z"}
+{"chat_id": 91, "error": "Max retries exceeded", "event": "Error processing intake", "level": "error", "logger": "main", "timestamp": "2026-10-02T18:00:08.951873Z"}
+{"error": "Max retries exceeded", "event": "Error calling Gemini API", "level": "error", "logger": "agents", "timestamp": "2026-10-02T18:00:08.951927Z"}
+{"chat_id": 87, "error": "Max retries exceeded", "event": "Error processing intake", "level": "error", "logger": "main", "timestamp": "2026-10-02T18:00:08.951963Z"}
+{"error": "Max retries exceeded", "event": "Error calling Gemini API", "level": "error", "logger": "agents", "timestamp": "2026-10-02T18:00:08.952006Z"}
+{"chat_id": 78, "error": "Max retries exceeded", "event": "Error processing intake", "level": "error", "logger": "main", "timestamp": "2026-10-02T18:00:08.952039Z"}
+{"error": "Max retries exceeded", "event": "Error calling Gemini API", "level": "error", "logger": "agents", "timestamp": "2026-10-02T18:00:08.952080Z"}
+{"chat_id": 72, "error": "Max retries exceeded", "event": "Error processing intake", "level": "error", "logger": "main", "timestamp": "2026-10-02T18:00:08.952113Z"}
+{"error": "Max retries exceeded", "event": "Error calling Gemini API", "level": "error", "logger": "agents", "timestamp": "2026-10-02T18:00:08.966500Z"}
+{"chat_id": 54, "error": "Max retries exceeded", "event": "Error processing intake", "level": "error", "logger": "main", "timestamp": "2026-10-02T18:00:08.966716Z"}
+{"error": "Max retries exceeded", "event": "Error calling Gemini API", "level": "error", "logger": "agents", "timestamp": "2026-10-02T18:00:08.966832Z"}
+{"chat_id": 64, "error": "Max retries exceeded", "event": "Error processing intake", "level": "error", "logger": "main", "timestamp": "2026-10-02T18:00:08.966882Z"}
+{"error": "Max retries exceeded", "event": "Error calling Gemini API", "level": "error", "logger": "agents", "timestamp": "2026-10-02T18:00:08.982114Z"}
+{"chat_id": 70, "error": "Max retries exceeded", "event": "Error processing intake", "level": "error", "logger": "main", "timestamp": "2026-10-02T18:00:08.982281Z"}
+{"error": "Max retries exceeded", "event": "Error calling Gemini API", "level": "error", "logger": "agents", "timestamp": "2026-10-02T18:00:09.044221Z"}
+{"chat_id": 82, "error": "Max retries exceeded", "event": "Error processing intake", "level": "error", "logger": "main", "timestamp": "2026-10-02T18:00:09.044388Z"}
+{"error": "Max retries exceeded", "event": "Error calling Gemini API", "level": "error", "logger": "agents", "timestamp": "2026-10-02T18:00:09.044469Z"}
+{"chat_id": 88, "error": "Max retries exceeded", "event": "Error processing intake", "level": "error", "logger": "main", "timestamp": "2026-10-02T18:00:09.044561Z"}
+{"error": "Max retries exceeded", "event": "Error calling Gemini API", "level": "error", "logger": "agents", "timestamp": "2026-10-02T18:00:09.121760Z"}
+{"chat_id": 58, "error": "Max retries exceeded", "event": "Error processing intake", "level": "error", "logger": "main", "timestamp": "2026-10-02T18:00:09.122006Z"}
+{"error": "Max retries exceeded", "event": "Error calling Gemini API", "level": "error", "logger": "agents", "timestamp": "2026-10-02T18:00:09.122108Z"}
+{"chat_id": 94, "error": "Max retries exceeded", "event": "Error processing intake", "level": "error", "logger": "main", "timestamp": "2026-10-02T18:00:09.122149Z"}
+{"error": "Max retries exceeded", "event": "Error calling Gemini API", "level": "error", "logger": "agents", "timestamp": "2026-10-02T18:00:09.122197Z"}
+{"chat_id": 95, "error": "Max retries exceeded", "event": "Error processing intake", "level": "error", "logger": "main", "timestamp": "2026-10-02T18:00:09.122232Z"}
+{"error": "Max retries exceeded", "event": "Error calling Gemini API", "level": "error", "logger": "agents", "timestamp": "2026-10-02T18:00:09.137048Z"}
+{"chat_id": 57, "error": "Max retries exceeded", "event": "Error processing intake", "level": "error", "logger": "main", "timestamp": "2026-10-02T18:00:09.137263Z"}
+{"error": "Max retries exceeded", "event": "Error calling Gemini API", "level": "error", "logger": "agents", "timestamp": "2026-10-02T18:00:09.137371Z"}
+{"chat_id": 56, "error": "Max retries exceeded", "event": "Error processing intake", "level": "error", "logger": "main", "timestamp": "2026-10-02T18:00:09.137418Z"}
+{"error": "Max retries exceeded", "event": "Error calling Gemini API", "level": "error", "logger": "agents", "timestamp": "2026-10-02T18:00:09.137473Z"}
+{"chat_id": 83, "error": "Max retries exceeded", "event": "Error processing intake", "level": "error", "logger": "main", "timestamp": "2026-10-02T18:00:09.137514Z"}
+{"error": "Max retries exceeded", "event": "Error calling Gemini API", "level": "error", "logger": "agents", "timestamp": "2026-10-02T18:00:09.137562Z"}
+{"chat_id": 89, "error": "Max retries exceeded", "event": "Error processing intake", "level": "error", "logger": "main", "timestamp": "2026-10-02T18:00:09.137596Z"}
+{"error": "Max retries exceeded", "event": "Error calling Gemini API", "level": "error", "logger": "agents", "timestamp": "2026-10-02T18:00:09.137639Z"}
+{"chat_id": 75, "error": "Max retries exceeded", "event": "Error processing intake", "level": "error", "logger": "main", "timestamp": "2026-10-02T18:00:09.137671Z"}
+{"error": "Max retries exceeded", "event": "Error calling Gemini API", "level": "error", "logger": "agents", "timestamp": "2026-10-02T18:00:09.137713Z"}
+{"chat_id": 61, "error": "Max retries exceeded", "event": "Error processing intake", "level": "error", "logger": "main", "timestamp": "2026-10-02T18:00:09.137747Z"}
+{"error": "Max retries exceeded", "event": "Error calling Gemini API", "level": "error", "logger": "agents", "timestamp": "2026-10-02T18:00:09.137839Z"}
+{"chat_id": 65, "error": "Max retries exceeded", "event": "Error processing intake", "level": "error", "logger": "main", "timestamp": "2026-10-02T18:00:09.137930Z"}
+{"error": "Max retries exceeded", "event": "Error calling Gemini API", "level": "error", "logger": "agents", "timestamp": "2026-10-02T18:00:09.138096Z"}
+{"chat_id": 79, "error": "Max retries exceeded", "event": "Error processing intake", "level": "error", "logger": "main", "timestamp": "2026-10-02T18:00:09.138197Z"}
+{"error": "Max retries exceeded", "event": "Error calling Gemini API", "level": "error", "logger": "agents", "timestamp": "2026-10-02T18:00:09.216039Z"}
+{"chat_id": 71, "error": "Max retries exceeded", "event": "Error processing intake", "level": "error", "logger": "main", "timestamp": "2026-10-02T18:00:09.216250Z"}
+{"error": "Max retries exceeded", "event": "Error calling Gemini API", "level": "error", "logger": "agents", "timestamp": "2026-10-02T18:00:09.216346Z"}
+{"chat_id": 77, "error": "Max retries exceeded", "event": "Error processing intake", "level": "error", "logger": "main", "timestamp": "2026-10-02T18:00:09.216395Z"}
+{"error": "Max retries exceeded", "event": "Error calling Gemini API", "level": "error", "logger": "agents", "timestamp": "2026-10-02T18:00:09.231169Z"}
+{"chat_id": 92, "error": "Max retries exceeded", "event": "Error processing intake", "level": "error", "logger": "main", "timestamp": "2026-10-02T18:00:09.231344Z"}
+{"error": "Max retries exceeded", "event": "Error calling Gemini API", "level": "error", "logger": "agents", "timestamp": "2026-10-02T18:00:09.231439Z"}
+{"chat_id": 93, "error": "Max retries exceeded", "event": "Error processing intake", "level": "error", "logger": "main", "timestamp": "2026-10-02T18:00:09.231490Z"}
+{"error": "Max retries exceeded", "event": "Error calling Gemini API", "level": "error", "logger": "agents", "timestamp": "2026-10-02T18:00:09.231548Z"}
+{"chat_id": 74, "error": "Max retries exceeded", "event": "Error processing intake", "level": "error", "logger": "main", "timestamp": "2026-10-02T18:00:09.231591Z"}
+{"error": "Max retries exceeded", "event": "Error calling Gemini API", "level": "error", "logger": "agents", "timestamp": "2026-10-02T18:00:09.246377Z"}
+{"chat_id": 86, "error": "Max retries exceeded", "event": "Error processing intake", "level": "error", "logger": "main", "timestamp": "2026-10-02T18:00:09.246604Z"}
+{"error": "Max retries exceeded", "event": "Error calling Gemini API", "level": "error", "logger": "agents", "timestamp": "2026-10-02T18:00:09.308507Z"}
+{"chat_id": 97, "error": "Max retries exceeded", "event": "Error processing intake", "level": "error", "logger": "main", "timestamp": "2026-10-02T18:00:09.308746Z"}
+{"error": "Max retries exceeded", "event": "Error calling Gemini API", "level": "error", "logger": "agents", "timestamp": "2026-10-02T18:00:11.388525Z"}
+{"chat_id": 51, "error": "Max retries exceeded", "event": "Error processing intake", "level": "error", "logger": "main", "timestamp": "2026-10-02T18:00:11.388683Z"}
+{"error": "Max retries exceeded", "event": "Error calling Gemini API", "level": "error", "logger": "agents", "timestamp": "2026-10-02T18:00:11.870662Z"}
+{"chat_id": 59, "error": "Max retries exceeded", "event": "Error processing intake", "level": "error", "logger": "main", "timestamp": "2026-10-02T18:00:11.870884Z"}
+{"error": "Max retries exceeded", "event": "Error calling Gemini API", "level": "error", "logger": "agents", "timestamp": "2026-10-02T18:00:11.948743Z"}
+{"chat_id": 76, "error": "Max retries exceeded", "event": "Error processing intake", "level": "error", "logger": "main", "timestamp": "2026-10-02T18:00:11.948903Z"}
+{"error": "Max retries exceeded", "event": "Error calling Gemini API", "level": "error", "logger": "agents", "timestamp": "2026-10-02T18:00:13.946566Z"}
+{"chat_id": 69, "error": "Max retries exceeded", "event": "Error processing intake", "level": "error", "logger": "main", "timestamp": "2026-10-02T18:00:13.946798Z"}
+{"error": "Max retries exceeded", "event": "Error calling Gemini API", "level": "error", "logger": "agents", "timestamp": "2026-10-02T18:00:18.192336Z"}
+{"chat_id": 55, "error": "Max retries exceeded", "event": "Error processing intake", "level": "error", "logger": "main", "timestamp": "2026-10-02T18:00:18.192508Z"}
+{"error": "Max retries exceeded", "event": "Error calling Gemini API", "level": "error", "logger": "agents", "timestamp": "2026-10-02T18:00:35.779653Z"}
+{"chat_id": 52, "error": "Max retries exceeded", "event": "Error processing intake", "level": "error", "logger": "main", "timestamp": "2026-10-02T18:00:35.779881Z"}
+{"error": "Max retries exceeded", "event": "Error calling Gemini API", "level": "error", "logger": "agents", "timestamp": "2026-10-02T18:00:44.587433Z"}
+{"chat_id": 84, "error": "Max retries exceeded", "event": "Error processing intake", "level": "error", "logger": "main", "timestamp": "2026-10-02T18:00:44.587620Z"}
+{"error": "Max retries exceeded", "event": "Error calling Gemini API", "level": "error", "logger": "agents", "timestamp": "2026-10-02T18:00:45.193717Z"}
+{"chat_id": 81, "error": "Max retries exceeded", "event": "Error processing intake", "level": "error", "logger": "main", "timestamp": "2026-10-02T18:00:45.193889Z"}
+{"error": "Max retries exceeded", "event": "Error calling Gemini API", "level": "error", "logger": "agents", "timestamp": "2026-10-02T18:00:45.685048Z"}
+{"chat_id": 68, "error": "Max retries exceeded", "event": "Error processing intake", "level": "error", "logger": "main", "timestamp": "2026-10-02T18:00:45.685248Z"}
+{"error": "Max retries exceeded", "event": "Error calling Gemini API", "level": "error", "logger": "agents", "timestamp": "2026-10-02T18:00:46.120865Z"}
+{"chat_id": 90, "error": "Max retries exceeded", "event": "Error processing intake", "level": "error", "logger": "main", "timestamp": "2026-10-02T18:00:46.121108Z"}
+{"error": "Max retries exceeded", "event": "Error calling Gemini API", "level": "error", "logger": "agents", "timestamp": "2026-10-02T18:00:48.120072Z"}
+{"chat_id": 67, "error": "Max retries exceeded", "event": "Error processing intake", "level": "error", "logger": "main", "timestamp": "2026-10-02T18:00:48.120285Z"}
+{"error": "Max retries exceeded", "event": "Error calling Gemini API", "level": "error", "logger": "agents", "timestamp": "2026-10-02T18:00:51.721301Z"}
+{"chat_id": 80, "error": "Max retries exceeded", "event": "Error processing intake", "level": "error", "logger": "main", "timestamp": "2026-10-02T18:00:51.721482Z"}

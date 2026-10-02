@@ -40,7 +40,7 @@ def evaluate_receipt(receipt_text: str):
     print(f"\n[WhatsApp Message from User]: {receipt_text}")
     
     response = client.models.generate_content(
-        model='gemini-2.5-pro',
+        model='gemini-2.5-flash',
         contents=receipt_text,
         config=types.GenerateContentConfig(
             system_instruction=SYSTEM_PROMPT,

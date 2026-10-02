@@ -1,3 +1,4 @@
+import asyncio
 import os
 import sys
 
@@ -43,7 +44,7 @@ def run_tests():
         print(f"--- Running Test: {case['name']} ---")
         print(f"Input: {case['message']}")
         try:
-            result = process_expense_message(case["message"])
+            result = asyncio.run(process_expense_message(case["message"]))
             print(f"Vendor: {result.get('vendor')}")
             print(f"Amount: {result.get('amount')}")
             print(f"Category: {result.get('category')}")

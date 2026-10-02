@@ -1,1 +1,16 @@
 @import "tailwindcss";
+
+@theme {
+  --color-oxford: #0F172A;
+  --color-heritage: #1D4ED8;
+  --color-gilt: #D4AF37;
+  --color-surface: #F8FAFC;
+}
+
+body {
+  background-color: var(--color-surface);
+  color: var(--color-oxford);
+  /* Fallback to system fonts if Cabinet Grotesk is missing */
+  font-family: 'Cabinet Grotesk', system-ui, -apple-system, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}

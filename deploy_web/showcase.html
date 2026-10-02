@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Invisible Accountant - Pipeline Showcase</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #0f172a; color: #f8fafc; }
+        pre { font-family: 'JetBrains Mono', monospace; }
+    </style>
+</head>
+<body class="antialiased selection:bg-blue-500 selection:text-white">
+
+<main class="max-w-5xl mx-auto px-6 py-24 space-y-32">
+    
+    <!-- Slide 1: The Input -->
+    <section class="min-h-[80vh] flex flex-col justify-center">
+        <div class="text-blue-400 font-bold tracking-widest text-sm uppercase mb-4">01 // The Raw Reality</div>
+        <h1 class="text-4xl md:text-6xl font-extrabold mb-8 text-white leading-tight">Messy Human Context.</h1>
+        <div class="bg-slate-800/50 border border-slate-700 p-8 rounded-2xl max-w-2xl">
+            <div class="flex items-center space-x-4 mb-4">
+                <div class="w-10 h-10 bg-green-500 rounded-full flex items-center justify-center font-bold text-white">WA</div>
+                <div class="text-sm text-slate-400">Client WhatsApp</div>
+            </div>
+            <p class="text-xl md:text-2xl text-slate-200">"Bought a new Macbook Pro for £1200 from Apple Store."</p>
+        </div>
+    </section>
+
+    <!-- Slide 2: The AI Transformation -->
+    <section class="min-h-[80vh] flex flex-col justify-center">
+        <div class="text-blue-400 font-bold tracking-widest text-sm uppercase mb-4">02 // The Extraction Engine</div>
+        <h2 class="text-3xl md:text-5xl font-extrabold mb-8 text-white">Strict Logic Parsing.</h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <div class="bg-slate-900 border border-slate-800 p-6 rounded-xl shadow-2xl">
+                <div class="text-xs text-slate-500 mb-4 uppercase">Engine JSON Output</div>
+                <pre class="text-sm text-green-400 overflow-x-auto"><code>{
+  "vendor": "Apple Store",
+  "gross_amount": 1200.00,
+  "net_amount": 1000.00,
+  "vat_amount": 200.00,
+  "document_type": "TEXT_MESSAGE",
+  "category": "Fixed Assets - IT Equipment",
+  "tax_treatment": "Capitalise",
+  "audit_flag": "Requires VAT Invoice for reclaim."
+}</code></pre>
+            </div>
+            <div class="flex flex-col justify-center space-y-4">
+                <p class="text-slate-300">The engine extracts the exact vendor explicitly stated in the text.</p>
+                <p class="text-slate-300">It books to <strong>Fixed Assets</strong>, recognizing that "Capital Allowances" belongs on the year-end tax computation, not the daily ledger.</p>
+                <p class="text-slate-300">It correctly flags the accountant that a formal VAT invoice is required before any 20% VAT can be reclaimed.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Slide 3: Ledger Sync -->
+    <section class="min-h-[80vh] flex flex-col justify-center">
+        <div class="text-blue-400 font-bold tracking-widest text-sm uppercase mb-4">03 // The Universal Adapter</div>
+        <h2 class="text-3xl md:text-5xl font-extrabold mb-8 text-white">Xero API Compliance.</h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <div class="bg-slate-900 border border-slate-800 p-6 rounded-xl shadow-2xl">
+                <div class="text-xs text-slate-500 mb-4 uppercase">Xero Draft Bill Payload</div>
+                <pre class="text-sm text-blue-400 overflow-x-auto"><code>{
+  "Type": "ACCPAY",
+  "Contact": { "Name": "Apple Store" },
+  "LineAmountTypes": "Inclusive",
+  "Status": "DRAFT",
+  "LineItems": [
+    {
+      "Description": "MacBook Pro",
+      "Quantity": 1,
+      "UnitAmount": 1200.00,
+      "AccountCode": "720",
+      "TaxType": "INPUT2"
+    }
+  ]
+}</code></pre>
+            </div>
+            <div class="flex flex-col justify-center space-y-4">
+                <p class="text-slate-300">Injects directly into Xero as an unapproved <strong>DRAFT</strong>.</p>
+                <p class="text-slate-300">Strict API compliance: Uses <code>INPUT2</code> for 20% VAT on expenses (never hallucinating invalid codes).</p>
+                <p class="text-slate-300">Sets <code>LineAmountTypes: "Inclusive"</code> so Xero doesn't artificially inflate the £1200 gross amount into a £1440 error.</p>
+            </div>
+        </div>
+    </section>
+
+</main>
+
+</body>
+</html>

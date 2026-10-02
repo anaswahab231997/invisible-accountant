@@ -34,7 +34,7 @@ async def main():
     
     # 2. Generate the OTHER_VIA_SERVER headers
     print(f"\nGenerating headers for user: {dummy_whatsapp_number}")
-    fraud_headers = generate_whatsapp_fraud_headers(dummy_whatsapp_number)
+    fraud_headers = await generate_whatsapp_fraud_headers(dummy_whatsapp_number)
     
     # Also we need an Accept and Auth header
     fraud_headers["Accept"] = "application/vnd.hmrc.1.0+json"

@@ -17,12 +17,12 @@ However, over the next ten minutes, we will demonstrate that what appears to be 
 
 ---
 
-## Slide 2: The Hook - The MTD 2026 Mandate
+## Slide 2: The Hook - The Live MTD Mandate
 
 **[Visual: A stark countdown timer to April 2026, alongside the market size: 3.2 Million UK Sole Traders.]**
 
 **Presenter Script:**
-"The urgency of our proposition is driven by a massive, unavoidable government mandate. In April 2026, HMRC’s Making Tax Digital (MTD) mandate comes into full statutory effect for 3.2 million UK sole traders. 
+"The urgency of our proposition is driven by a massive, unavoidable government mandate. Five months ago, HMRC’s Making Tax Digital (MTD) mandate comes into full statutory effect for 3.2 million UK sole traders. 
 
 This legislation effectively outlaws 'shoebox accounting'. It enforces mandatory digital record-keeping and strict quarterly digital updates under statutory penalty. This is not a gradual market adoption curve; it is a forced-compliance event of unprecedented scale. Incumbents are demanding that sole traders learn complex double-entry software. We believe they shouldn't have to learn anything at all."
 

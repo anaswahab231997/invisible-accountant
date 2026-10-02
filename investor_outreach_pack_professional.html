@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Invisible Accountant: Angel Outreach Pack</title>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@500;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --oxford-blue: #111827;
+            --deep-slate: #1F2937;
+            --heritage-blue: #1A56DB;
+            --muted-slate: #4B5563;
+        }
+        body {
+            margin: 0; padding: 0; 
+            font-family: 'Inter', sans-serif; 
+            background: #FFFFFF; color: var(--oxford-blue);
+            width: 800px; /* Standard A4 width approx for nice padding */
+        }
+        .page {
+            width: 800px;
+            min-height: 1100px;
+            padding: 80px 80px;
+            box-sizing: border-box;
+            background-image: radial-gradient(circle at 50% 0%, rgba(26, 86, 219, 0.03) 0%, transparent 50%);
+        }
+        .header {
+            border-bottom: 2px solid var(--heritage-blue);
+            padding-bottom: 20px; margin-bottom: 40px;
+        }
+        .ref-tag {
+            font-family: 'JetBrains Mono', monospace; font-size: 0.75rem; 
+            color: var(--heritage-blue); text-transform: uppercase; letter-spacing: 0.1em; font-weight: 600;
+            margin-bottom: 12px; display: inline-block; background: rgba(26, 86, 219, 0.1); padding: 4px 10px; border-radius: 4px;
+        }
+        h1 { font-family: 'DM Sans', sans-serif; font-size: 2.2rem; color: var(--oxford-blue); margin: 0; letter-spacing: -0.02em;}
+        h2 { font-family: 'DM Sans', sans-serif; font-size: 1.3rem; color: var(--oxford-blue); margin-top: 40px; margin-bottom: 16px; font-weight: 700; display: flex; align-items: center;}
+        h2::before {
+            content: ''; display: inline-block; width: 4px; height: 18px; background: var(--heritage-blue); margin-right: 12px; border-radius: 2px;
+        }
+        p { font-size: 0.95rem; line-height: 1.7; color: var(--deep-slate); margin-bottom: 16px;}
+        
+        .email-block {
+            background: #F9FAFB; border: 1px solid #E5E7EB; border-left: 4px solid var(--heritage-blue);
+            border-radius: 0 8px 8px 0; padding: 30px; font-family: 'Inter', sans-serif;
+            margin-bottom: 40px; box-shadow: 0 4px 12px rgba(0,0,0,0.02);
+        }
+        .email-block p { margin-bottom: 14px; font-size: 0.92rem;}
+        .email-block p:last-child { margin-bottom: 0;}
+        
+        .grid-summary {
+            display: grid; grid-template-columns: 1fr; gap: 16px;
+        }
+        .summary-card {
+            background: #FFFFFF; border: 1px solid #E5E7EB; border-radius: 8px; padding: 20px;
+        }
+        .summary-title {
+            font-family: 'JetBrains Mono', monospace; font-size: 0.75rem; color: var(--muted-slate); text-transform: uppercase; font-weight: 600; margin-bottom: 8px;
+        }
+        .summary-text { font-size: 0.92rem; color: var(--deep-slate); line-height: 1.5; margin: 0;}
+        .highlight-green { color: #10B981; font-weight: 600; }
+        .highlight-blue { color: var(--heritage-blue); font-weight: 600; }
+    </style>
+</head>
+<body>
+    <div class="page">
+        <div class="header">
+            <div class="ref-tag">IA-OUTREACH-2026</div>
+            <h1>Angel Anchor Investment Pack</h1>
+            <p style="margin-top: 12px; color: var(--muted-slate); font-size: 0.9rem;">Internal routing document for syndicate lead & introducers.</p>
+        </div>
+        
+        <h2>The Forwardable Email</h2>
+        <p style="color: var(--muted-slate); font-size: 0.85rem; margin-top: -10px; margin-bottom: 20px;">Instructions: Copy and paste the text below to your Angel network. Attach the Pitch Deck PDF.</p>
+        
+        <div class="email-block">
+            <p><strong>Subject:</strong> Disrupting UK MTD (Pre-Seed allocation for an exceptional founder)</p>
+            <p>Hi [Angel's Name],</p>
+            <p>I’m reaching out because a brilliant technical founder in my network, Anas, is currently closing a £35k–£50k Angel Anchor tranche for an AI tax platform called <strong>Invisible Accountant</strong>, and it fits your investment thesis.</p>
+            <p>With HMRC's digital tax mandate (MTD) now live, and the final Phase 2 wave hitting 3.2 million sole traders in April 2027, the incumbents (Xero/Dext) are heavily over-serving and over-charging the market. Anas has built an autonomous, HMRC-compliant AI engine that lives entirely inside WhatsApp—allowing plumbers and freelancers to snap receipts and file taxes with zero app downloads, while preserving £1000s in tax relief.</p>
+            <p>He has completely retired the technical risk (the AI, HMRC API integration, and AES-GCM security are fully built). He is using this £50k SEIS-eligible micro-tranche specifically to finalize his UK Innovator Founder Visa and incorporate the UK entity, before opening the larger £350k institutional round.</p>
+            <p>I’ve attached the Anchor Deck. The unit economics (£12/mo D2C, £49+£9/mo B2B) and tech moat are incredibly impressive. Let me know if you’d like a 15-minute intro call with him this week.</p>
+            <p>Best,<br>[Your Name]</p>
+        </div>
+
+        <h2>Executive Briefing</h2>
+        
+        <div class="grid-summary">
+            <div class="summary-card">
+                <div class="summary-title">The Catalyst</div>
+                <p class="summary-text">HMRC's MTD mandate is now live. Phase 2 hits 3.2 million UK sole traders in April 2027 to file quarterly digital taxes (MTD). Legacy software like Xero requires corporate bookkeeping knowledge, causing massive churn.</p>
+            </div>
+            <div class="summary-card">
+                <div class="summary-title">The Moat</div>
+                <p class="summary-text">A WhatsApp-native tax engine. The AI (fine-tuned on HMRC's BIM37000 rules) categorizes expenses, seals digital links, and files directly to HMRC. Backed by AES-GCM hardware security and CREST-audited.</p>
+            </div>
+            <div class="summary-card">
+                <div class="summary-title">Unit Economics</div>
+                <p class="summary-text"><span class="highlight-blue">£12/month (D2C)</span> and <span class="highlight-blue">£49 base + £9/seat (B2B Wholesale)</span>. Meta WhatsApp API costs are &lt;£0.50/mo, delivering <span class="highlight-green">90%+ gross margins</span>.</p>
+            </div>
+            <div class="summary-card">
+                <div class="summary-title">The Ask</div>
+                <p class="summary-text">£35,000 – £50,000 SEIS-eligible Angel Anchor tranche (3.5% - 5.0% equity) at a £1.0M Valuation Cap. Funds are strictly allocated for UK Visa Endorsement, UK Incorporation, and early Practice Pilot Outreach.</p>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

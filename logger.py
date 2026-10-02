@@ -20,10 +20,12 @@ def setup_logger():
 
     # Configure the standard library logger
     handler = logging.StreamHandler(sys.stdout)
+    file_handler = logging.FileHandler("invisible_accountant.log", encoding="utf-8")
     root_logger = logging.getLogger()
     if root_logger.hasHandlers():
         root_logger.handlers.clear()
     root_logger.addHandler(handler)
+    root_logger.addHandler(file_handler)
     root_logger.setLevel(logging.INFO)
 
 

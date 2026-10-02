@@ -1,0 +1,86 @@
+{
+  "Scenario 1": {
+    "input": "Tesco receipt: \u00a310 standard items (20%), \u00a35 zero-rated food, and a \u00a33 personal magazine.",
+    "output": {
+      "transaction_type": "EXPENSE",
+      "reasoning_step_1_amount_and_vendor": "The user reported a Tesco receipt for \u00a310 (standard items), \u00a35 (zero-rated food), and \u00a33 (personal magazine). The total is \u00a318, from Tesco.",
+      "reasoning_step_2_nature_of_expense": "The expense consists of mixed items: standard-rated goods, zero-rated food, and a personal magazine. The personal magazine is clearly not business-related. The nature of the 'standard items' and 'zero-rated food' needs clarification regarding their business purpose.",
+      "reasoning_step_3_hmrc_rules": "HMRC's 'wholly and exclusively' rule means the \u00a33 personal magazine is not allowable. The remaining \u00a315 worth of items are ambiguous, as general groceries often have a duality of purpose. I need to confirm if these items were bought 'wholly and exclusively' for the trade.",
+      "reasoning_step_4_final_determination": "The \u00a33 for the personal magazine is non-allowable. The remaining \u00a315 (gross) is ambiguous. I'll flag the transaction and ask for clarification on the business use of the \u00a310 standard items and \u00a35 zero-rated food. The category will be 'Other business expenses' if confirmed.",
+      "vendor": "Tesco",
+      "net_amount": 13.33,
+      "vat_amount": 1.67,
+      "gross_amount": 15.0,
+      "vat_registration_number": "",
+      "document_type": "OTHER",
+      "cis_deduction": false,
+      "category": "Other business expenses",
+      "extraction_confidence": 0.85,
+      "is_ambiguous": true,
+      "auditor_question": "I've noted the Tesco receipt. I've removed the \u00a33 personal magazine as it's not a business expense. Could you clarify the business purpose of the remaining \u00a315 for standard items and food?"
+    }
+  },
+  "Scenario 2": {
+    "input": "Dinner for \u00a3100: \u00a350 for me (staff) and \u00a350 for my client.",
+    "output": {
+      "transaction_type": "EXPENSE",
+      "reasoning_step_1_amount_and_vendor": "The user spent \u00a3100 on dinner, split \u00a350 for themselves (staff) and \u00a350 for a client. No vendor name was provided.",
+      "reasoning_step_2_nature_of_expense": "The expense is for dinner, which includes both the sole trader's meal and a client's meal.",
+      "reasoning_step_3_hmrc_rules": "HMRC strictly prohibits tax relief for client entertainment. The \u00a350 for the client is not allowable. The \u00a350 for the sole trader (staff) could be allowable as subsistence, but requires clarification on the circumstances (e.g., business travel). This falls under 'Duality of Purpose' for the staff meal and 'Client Entertainment' for the client's meal.",
+      "reasoning_step_4_final_determination": "The client entertainment portion is not allowable for tax relief. The staff meal needs further clarification to determine its allowability. The transaction is ambiguous due to the nature of the expense and the lack of a vendor.",
+      "vendor": "",
+      "net_amount": 100.0,
+      "vat_amount": 0.0,
+      "gross_amount": 100.0,
+      "vat_registration_number": "",
+      "document_type": "OTHER",
+      "cis_deduction": false,
+      "category": "Advertising and business entertainment costs",
+      "extraction_confidence": 0.6,
+      "is_ambiguous": true,
+      "auditor_question": "I've noted the \u00a3100 dinner. HMRC doesn't allow tax relief for client entertainment, so the \u00a350 for your client isn't claimable. Could you tell me more about the reason for your \u00a350 dinner; was it subsistence during business travel?"
+    }
+  },
+  "Scenario 3": {
+    "input": "\u00a3150 Christmas party, but it was just me and the other company director, no other staff.",
+    "output": {
+      "transaction_type": "EXPENSE",
+      "reasoning_step_1_amount_and_vendor": "The amount is \u00a3150. The vendor for the Christmas party is not specified in the message.",
+      "reasoning_step_2_nature_of_expense": "The expense is for a Christmas party attended by the sole trader and one other company director, with no other staff present.",
+      "reasoning_step_3_hmrc_rules": "HMRC rules for sole traders are very strict regarding entertainment expenses. A Christmas party for only two individuals, without other staff, is highly unlikely to be considered 'wholly and exclusively' for the purposes of the trade and typically falls under non-allowable personal entertainment.",
+      "reasoning_step_4_final_determination": "Given the strict HMRC rules on entertainment for sole traders, this expense is deemed ambiguous and likely non-allowable. It will be categorised under entertainment but flagged for review as it cannot typically be offset for tax.",
+      "vendor": "",
+      "net_amount": 150.0,
+      "vat_amount": 0.0,
+      "gross_amount": 150.0,
+      "vat_registration_number": "",
+      "document_type": "OTHER",
+      "cis_deduction": false,
+      "category": "Advertising and business entertainment costs",
+      "extraction_confidence": 0.85,
+      "is_ambiguous": true,
+      "auditor_question": "I've noted the \u00a3150 for the Christmas party. Unfortunately, for sole traders, HMRC generally considers social events for just a few people, without other staff, as non-allowable entertainment. I'll record this, but we likely can't offset it against your business profits for tax."
+    }
+  },
+  "Scenario 4": {
+    "input": "Claiming 100 miles at 45p. Attached \u00a315 fuel receipt with 20% VAT.",
+    "output": {
+      "transaction_type": "EXPENSE",
+      "reasoning_step_1_amount_and_vendor": "User mentioned a \u00a315 fuel receipt with 20% VAT. The vendor for the fuel is not specified in the message.",
+      "reasoning_step_2_nature_of_expense": "This is a fuel expense for a vehicle, which is typically for business travel.",
+      "reasoning_step_3_hmrc_rules": "HMRC rules state that sole traders can claim either the approved mileage allowance (which covers fuel) or actual fuel costs for business journeys, but not both for the same travel. The user also mentioned claiming 100 miles, which creates a potential conflict with this separate fuel receipt.",
+      "reasoning_step_4_final_determination": "This transaction is ambiguous because claiming both a mileage allowance and actual fuel costs for what might be the same business travel is not permitted by HMRC. Clarification is needed to ensure correct tax treatment. The category is Car, van and travel expenses.",
+      "vendor": "",
+      "net_amount": 12.5,
+      "vat_amount": 2.5,
+      "gross_amount": 15.0,
+      "vat_registration_number": "",
+      "document_type": "OTHER",
+      "cis_deduction": false,
+      "category": "Car, van and travel expenses",
+      "extraction_confidence": 0.8,
+      "is_ambiguous": true,
+      "auditor_question": "You've mentioned a mileage claim and this \u00a315 fuel receipt. HMRC generally allows either mileage allowance or actual fuel costs for business travel, not both for the same journey. Could you clarify if this fuel is for separate business travel?"
+    }
+  }
+}

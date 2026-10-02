@@ -56,9 +56,9 @@ def mask_pii(text: str) -> str:
 
 # --- 3. Database Security (AES-256 Authenticated Encryption) ---
 # NCSC compliant AES-256-GCM encryption
-_master_key = os.getenv("DB_ENCRYPTION_KEY_B64")
+_master_key = os.getenv("ENCRYPTION_MASTER_KEY_B64")
 if not _master_key:
-    raise ValueError("DB_ENCRYPTION_KEY_B64 environment variable is missing.")
+    raise ValueError("ENCRYPTION_MASTER_KEY_B64 environment variable is missing.")
 crypto_engine = TokenEncryptionEngine(master_key_b64=_master_key)
 
 

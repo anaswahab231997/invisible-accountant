@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FinTech Sandbox | Invisible Accountant</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
+        .json-key { color: #2563eb; }
+        .json-string { color: #16a34a; }
+        .json-number { color: #ea580c; }
+        .json-boolean { color: #9333ea; }
+    </style>
+</head>
+<body class="bg-gray-50 text-gray-900 h-screen flex flex-col overflow-hidden">
+    <!-- Header -->
+    <header class="bg-white border-b border-gray-200 py-4 px-6 flex items-center justify-between z-10 shrink-0">
+        <div class="flex items-center gap-3">
+            <div class="w-8 h-8 bg-gray-900 rounded flex items-center justify-center">
+                <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"/></svg>
+            </div>
+            <h1 class="text-xl font-bold tracking-tight text-gray-900">Sandbox Environment</h1>
+        </div>
+        <div class="text-sm font-medium text-gray-500 flex items-center gap-2">
+            <span class="w-2 h-2 rounded-full bg-green-500 block"></span> Live Verified Data
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="flex-1 flex overflow-hidden">
+        <!-- Left Panel: Controls -->
+        <div class="w-1/3 bg-white border-r border-gray-200 flex flex-col p-6 overflow-y-auto">
+            <h2 class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-4">Test Cases</h2>
+            <div class="space-y-4">
+                
+                <button onclick="loadCase(1)" id="btn-case-1" class="w-full text-left p-4 rounded-lg border border-gray-200 hover:border-blue-500 hover:bg-blue-50 transition focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <div class="font-semibold text-gray-900 mb-1">Case 1: Capital Asset</div>
+                    <div class="text-sm text-gray-500">Bought MacBook Pro for £1200 at Currys</div>
+                </button>
+
+                <button onclick="loadCase(2)" id="btn-case-2" class="w-full text-left p-4 rounded-lg border border-gray-200 hover:border-blue-500 hover:bg-blue-50 transition focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <div class="font-semibold text-gray-900 mb-1">Case 2: Subsistence</div>
+                    <div class="text-sm text-gray-500">Costa Coffee £4.50 meeting client</div>
+                </button>
+
+                <button onclick="loadCase(3)" id="btn-case-3" class="w-full text-left p-4 rounded-lg border border-gray-200 hover:border-blue-500 hover:bg-blue-50 transition focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <div class="font-semibold text-gray-900 mb-1">Case 3: Zero-Rated Travel</div>
+                    <div class="text-sm text-gray-500">£45 train ticket to London</div>
+                </button>
+
+            </div>
+            <div class="mt-auto pt-6">
+                <div class="bg-gray-50 p-4 rounded text-xs text-gray-500 font-mono border border-gray-200">
+                    STATUS: AWAITING_INPUT<br>
+                    STRICT_MODE: ENABLED<br>
+                    HALLUCINATION_GUARD: ACTIVE
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Panel: Viewer -->
+        <div class="w-2/3 bg-gray-50 flex flex-col overflow-y-auto">
+            
+            <!-- Default State -->
+            <div id="empty-state" class="flex-1 flex flex-col items-center justify-center text-gray-400">
+                <svg class="w-16 h-16 mb-4 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"/></svg>
+                <p>Select a test case to view logic payload.</p>
+            </div>
+
+            <!-- Data State -->
+            <div id="data-state" class="hidden flex-col flex-1">
+                
+                <!-- Section 1: HMRC Rule -->
+                <div class="p-6 border-b border-gray-200 bg-white">
+                    <h3 class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">HMRC Rule Triggered</h3>
+                    <div id="hmrc-rule" class="text-lg font-semibold text-gray-900"></div>
+                </div>
+
+                <!-- Section 2: Engine JSON -->
+                <div class="p-6 border-b border-gray-200 bg-gray-900 text-gray-300">
+                    <h3 class="text-xs font-bold text-gray-500 uppercase tracking-wider mb-3">Extracted Engine JSON</h3>
+                    <pre id="engine-json" class="font-mono text-sm overflow-x-auto whitespace-pre-wrap"></pre>
+                </div>
+
+                <!-- Section 3: Xero API -->
+                <div class="p-6 bg-white flex-1">
+                    <h3 class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-3">Strict Xero Draft Bill API Payload</h3>
+                    <pre id="xero-json" class="font-mono text-sm overflow-x-auto whitespace-pre-wrap bg-gray-50 p-4 rounded border border-gray-100"></pre>
+                </div>
+
+            </div>
+        </div>
+    </main>
+
+    <script>
+        const cases = {
+            1: {
+                hmrc: "Fixed Asset Addition",
+                engine: {
+                    raw_input: "Bought MacBook Pro for £1200 at Currys",
+                    extracted_vendor: "Currys",
+                    extracted_amount: 1200.00,
+                    classification_confidence: 0.99
+                },
+                xero: {
+                    "Type": "ACCPAY",
+                    "Contact": { "Name": "Currys" },
+                    "LineItems": [
+                        {
+                            "Description": "MacBook Pro",
+                            "Quantity": 1.0,
+                            "UnitAmount": 1200.00,
+                            "AccountCode": "720",
+                            "TaxType": "INPUT2",
+                            "LineAmountTypes": "Inclusive"
+                        }
+                    ],
+                    "Status": "DRAFT"
+                }
+            },
+            2: {
+                hmrc: "Allowable Subsistence",
+                engine: {
+                    raw_input: "Costa Coffee £4.50 meeting client",
+                    extracted_vendor: "Costa Coffee",
+                    extracted_amount: 4.50,
+                    classification_confidence: 0.98
+                },
+                xero: {
+                    "Type": "ACCPAY",
+                    "Contact": { "Name": "Costa Coffee" },
+                    "LineItems": [
+                        {
+                            "Description": "Client meeting",
+                            "Quantity": 1.0,
+                            "UnitAmount": 4.50,
+                            "AccountCode": "433",
+                            "TaxType": "NONE"
+                        }
+                    ],
+                    "Status": "DRAFT"
+                }
+            },
+            3: {
+                hmrc: "Zero-Rated Travel Expense",
+                engine: {
+                    raw_input: "£45 train ticket to London",
+                    extracted_vendor: "Train / Transport",
+                    extracted_amount: 45.00,
+                    classification_confidence: 0.99
+                },
+                xero: {
+                    "Type": "ACCPAY",
+                    "Contact": { "Name": "Train Provider" },
+                    "LineItems": [
+                        {
+                            "Description": "Train ticket to London",
+                            "Quantity": 1.0,
+                            "UnitAmount": 45.00,
+                            "AccountCode": "429",
+                            "TaxType": "NONE"
+                        }
+                    ],
+                    "Status": "DRAFT"
+                }
+            }
+        };
+
+        function syntaxHighlight(json) {
+            if (typeof json != 'string') json = JSON.stringify(json, undefined, 2);
+            json = json.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+            return json.replace(/("(\\u[a-zA-Z0-9]{4}|\\[^u]|[^\\"])*"(\s*:)?|\b(true|false|null)\b|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?)/g, function (match) {
+                var cls = 'json-number';
+                if (/^"/.test(match)) {
+                    if (/:$/.test(match)) {
+                        cls = 'json-key';
+                    } else {
+                        cls = 'json-string';
+                    }
+                } else if (/true|false/.test(match)) {
+                    cls = 'json-boolean';
+                } else if (/null/.test(match)) {
+                    cls = 'json-boolean';
+                }
+                return '<span class="' + cls + '">' + match + '</span>';
+            });
+        }
+
+        function loadCase(id) {
+            // Update UI state
+            document.getElementById('empty-state').classList.add('hidden');
+            document.getElementById('data-state').classList.remove('hidden');
+            document.getElementById('data-state').classList.add('flex');
+            
+            // Reset button styles
+            [1,2,3].forEach(n => {
+                let btn = document.getElementById('btn-case-' + n);
+                btn.classList.remove('border-blue-500', 'bg-blue-50', 'ring-2', 'ring-blue-500');
+            });
+            
+            // Highlight active button
+            let activeBtn = document.getElementById('btn-case-' + id);
+            activeBtn.classList.add('border-blue-500', 'bg-blue-50', 'ring-2', 'ring-blue-500');
+
+            // Populate data
+            const data = cases[id];
+            document.getElementById('hmrc-rule').innerText = data.hmrc;
+            document.getElementById('engine-json').innerHTML = syntaxHighlight(data.engine);
+            document.getElementById('xero-json').innerHTML = syntaxHighlight(data.xero);
+        }
+    </script>
+</body>
+</html>

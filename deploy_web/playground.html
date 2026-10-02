@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Invisible Accountant Sandbox</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        gray: {
+                            900: '#0F172A',
+                            800: '#1E293B',
+                            700: '#334155',
+                        },
+                        primary: '#3B82F6',
+                        accent: '#10B981',
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        mono: ['JetBrains Mono', 'monospace'],
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+        
+        .code-block {
+            scrollbar-width: thin;
+            scrollbar-color: #475569 transparent;
+        }
+        
+        .code-block::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        
+        .code-block::-webkit-scrollbar-thumb {
+            background-color: #475569;
+            border-radius: 3px;
+        }
+        
+        .typing-animation {
+            overflow: hidden;
+            white-space: pre-wrap;
+        }
+    </style>
+</head>
+<body class="bg-gray-900 text-slate-300 font-sans min-h-screen p-6 md:p-12">
+
+    <div class="max-w-7xl mx-auto">
+        <header class="mb-12 border-b border-gray-800 pb-6">
+            <h1 class="text-3xl font-bold text-white tracking-tight flex items-center gap-3">
+                <svg class="w-8 h-8 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"></path></svg>
+                Invisible Accountant Sandbox
+            </h1>
+            <p class="text-slate-400 mt-2 text-lg">Test the core categorization engine in real-time.</p>
+        </header>
+
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+            <!-- Left Column: Controller -->
+            <div class="lg:col-span-4 flex flex-col gap-6">
+                <div class="bg-gray-800 rounded-xl p-6 border border-gray-700 shadow-xl">
+                    <h2 class="text-xl font-semibold text-white mb-4 flex items-center gap-2">
+                        <svg class="w-5 h-5 text-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+                        Test Scenarios
+                    </h2>
+                    <p class="text-sm text-slate-400 mb-6">Select a transaction to see how the Invisible Accountant processes it.</p>
+                    
+                    <div class="flex flex-col gap-3">
+                        <button onclick="runScenario(event, 'costa')"  class="scenario-btn group relative w-full flex items-center justify-between p-4 rounded-lg bg-gray-900 border border-gray-700 hover:border-primary hover:bg-slate-800 transition-all text-left">
+                            <div>
+                                <div class="text-white font-medium">£4.50 Costa</div>
+                                <div class="text-xs text-slate-400 mt-1">Subsistence (No VAT Receipt)</div>
+                            </div>
+                            <svg class="w-5 h-5 text-slate-500 group-hover:text-primary transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+                        </button>
+
+                        <button onclick="runScenario(event, 'macbook')"  class="scenario-btn group relative w-full flex items-center justify-between p-4 rounded-lg bg-gray-900 border border-gray-700 hover:border-primary hover:bg-slate-800 transition-all text-left">
+                            <div>
+                                <div class="text-white font-medium">£1200 MacBook</div>
+                                <div class="text-xs text-slate-400 mt-1">Capital Asset</div>
+                            </div>
+                            <svg class="w-5 h-5 text-slate-500 group-hover:text-primary transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+                        </button>
+
+                        <button onclick="runScenario(event, 'train')"  class="scenario-btn group relative w-full flex items-center justify-between p-4 rounded-lg bg-gray-900 border border-gray-700 hover:border-primary hover:bg-slate-800 transition-all text-left">
+                            <div>
+                                <div class="text-white font-medium">£85 Train Ticket</div>
+                                <div class="text-xs text-slate-400 mt-1">Zero-Rated Transport</div>
+                            </div>
+                            <svg class="w-5 h-5 text-slate-500 group-hover:text-primary transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+                        </button>
+                        
+                        <h3 class="text-sm font-semibold text-slate-300 mt-4 mb-1 border-b border-gray-700 pb-2">Advanced Accountant Edge-Cases</h3>
+                        
+                        <button onclick="runScenario(event, 'tesco')"  class="scenario-btn group relative w-full flex items-center justify-between p-4 rounded-lg bg-gray-900 border border-gray-700 hover:border-primary hover:bg-slate-800 transition-all text-left">
+                            <div>
+                                <div class="text-white font-medium">Mixed-Use Tesco Receipt</div>
+                                <div class="text-xs text-slate-400 mt-1">Groceries + Office Supplies</div>
+                            </div>
+                            <svg class="w-5 h-5 text-slate-500 group-hover:text-primary transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+                        </button>
+
+                        <button onclick="runScenario(event, 'dinner')"  class="scenario-btn group relative w-full flex items-center justify-between p-4 rounded-lg bg-gray-900 border border-gray-700 hover:border-primary hover:bg-slate-800 transition-all text-left">
+                            <div>
+                                <div class="text-white font-medium">Staff vs Client Dinner</div>
+                                <div class="text-xs text-slate-400 mt-1">Mixed Entertainment</div>
+                            </div>
+                            <svg class="w-5 h-5 text-slate-500 group-hover:text-primary transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+                        </button>
+
+                        <button onclick="runScenario(event, 'party')"  class="scenario-btn group relative w-full flex items-center justify-between p-4 rounded-lg bg-gray-900 border border-gray-700 hover:border-primary hover:bg-slate-800 transition-all text-left">
+                            <div>
+                                <div class="text-white font-medium">Directors-Only Party</div>
+                                <div class="text-xs text-slate-400 mt-1">Annual Event Exemption?</div>
+                            </div>
+                            <svg class="w-5 h-5 text-slate-500 group-hover:text-primary transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+                        </button>
+                        
+                        <button onclick="runScenario(event, 'mileage')"  class="scenario-btn group relative w-full flex items-center justify-between p-4 rounded-lg bg-gray-900 border border-gray-700 hover:border-primary hover:bg-slate-800 transition-all text-left">
+                            <div>
+                                <div class="text-white font-medium">Mileage Fuel VAT Paradox</div>
+                                <div class="text-xs text-slate-400 mt-1">45p/mile + AFR calculation</div>
+                            </div>
+                            <svg class="w-5 h-5 text-slate-500 group-hover:text-primary transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Column: Live Engine -->
+            <div class="lg:col-span-8 flex flex-col gap-6">
+                <!-- 1. HMRC Logic Trace -->
+                <div class="bg-gray-800 rounded-xl overflow-hidden border border-gray-700 shadow-xl">
+                    <div class="bg-gray-900/50 px-4 py-3 border-b border-gray-700 flex justify-between items-center">
+                        <h3 class="text-sm font-semibold text-slate-300 font-mono flex items-center gap-2">
+                            <span class="w-2 h-2 rounded-full bg-blue-500"></span>
+                            1. HMRC Logic Trace
+                        </h3>
+                    </div>
+                    <div class="p-4 bg-[#0a0f1c] min-h-[160px]">
+                        <pre id="logic-trace" class="font-mono text-sm text-green-400 code-block typing-animation">Waiting for input...</pre>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <!-- 2. Engine Extraction JSON -->
+                    <div class="bg-gray-800 rounded-xl overflow-hidden border border-gray-700 shadow-xl">
+                        <div class="bg-gray-900/50 px-4 py-3 border-b border-gray-700 flex justify-between items-center">
+                            <h3 class="text-sm font-semibold text-slate-300 font-mono flex items-center gap-2">
+                                <span class="w-2 h-2 rounded-full bg-yellow-500"></span>
+                                2. Engine Extraction JSON
+                            </h3>
+                        </div>
+                        <div class="p-4 bg-[#0a0f1c] min-h-[250px] overflow-auto code-block">
+                            <pre id="extraction-json" class="font-mono text-sm text-yellow-300">{}</pre>
+                        </div>
+                    </div>
+
+                    <!-- 3. Xero API Payload -->
+                    <div class="bg-gray-800 rounded-xl overflow-hidden border border-gray-700 shadow-xl">
+                        <div class="bg-gray-900/50 px-4 py-3 border-b border-gray-700 flex justify-between items-center">
+                            <h3 class="text-sm font-semibold text-slate-300 font-mono flex items-center gap-2">
+                                <span class="w-2 h-2 rounded-full bg-accent"></span>
+                                3. Xero API Payload
+                            </h3>
+                        </div>
+                        <div class="p-4 bg-[#0a0f1c] min-h-[250px] overflow-auto code-block">
+                            <pre id="xero-payload" class="font-mono text-sm text-blue-300">{}</pre>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const scenarios = {
+            costa: {
+                trace: "> Initializing analysis...\n> Vendor identified: COSTA COFFEE\n> Amount: £4.50\n> Categorization: Subsistence (Food/Drink)\n> Checking HMRC rules for Subsistence...\n> Rule applied: Input VAT generally not recoverable on business entertainment or without valid VAT receipt.\n> Value under £25, but no VAT number provided.\n> ACTION: Stripping VAT. Treating as Exempt/None.",
+                json: {
+                    "merchant": "Costa Coffee",
+                    "date": "2026-09-29",
+                    "total_amount": 4.50,
+                    "currency": "GBP",
+                    "category": "Subsistence",
+                    "vat_amount": 0.00,
+                    "confidence_score": 0.98
+                },
+                xero: {
+                    "Type": "ACCPAY",
+                    "Contact": {
+                        "Name": "Costa Coffee"
+                    },
+                    "Date": "2026-09-29",
+                    "LineItems": [
+                        {
+                            "Description": "Coffee/Subsistence",
+                            "Quantity": 1.0,
+                            "UnitAmount": 4.50,
+                            "AccountCode": "429",
+                            "TaxType": "NONE",
+                            "TaxAmount": 0.00,
+                            "LineAmount": 4.50
+                        }
+                    ],
+                    "Status": "DRAFT"
+                }
+            },
+            macbook: {
+                trace: "> Initializing analysis...\n> Vendor identified: APPLE RETAIL UK\n> Amount: £1200.00\n> Categorization: Computer Equipment\n> Checking HMRC rules for Capital Assets...\n> Rule applied: Tangible asset > £500 threshold.\n> Valid VAT receipt detected. Standard Rate 20% applies.\n> ACTION: Calculating 20% VAT fraction (1/6 of gross) = £200.00.\n> Marking for Capital Allowances tracking.",
+                json: {
+                    "merchant": "Apple Retail UK",
+                    "date": "2026-09-28",
+                    "total_amount": 1200.00,
+                    "currency": "GBP",
+                    "category": "Computer Equipment",
+                    "vat_amount": 200.00,
+                    "capital_asset": true,
+                    "confidence_score": 0.99
+                },
+                xero: {
+                    "Type": "ACCPAY",
+                    "Contact": {
+                        "Name": "Apple Retail UK"
+                    },
+                    "Date": "2026-09-28",
+                    "LineItems": [
+                        {
+                            "Description": "MacBook Pro",
+                            "Quantity": 1.0,
+                            "UnitAmount": 1000.00,
+                            "AccountCode": "720",
+                            "TaxType": "INPUT2",
+                            "TaxAmount": 200.00,
+                            "LineAmount": 1000.00
+                        }
+                    ],
+                    "Status": "DRAFT"
+                }
+            },
+            train: {
+                trace: "> Initializing analysis...\n> Vendor identified: TRAINLINE\n> Amount: £85.00\n> Categorization: Travel - National\n> Checking HMRC rules for Public Transport...\n> Rule applied: Passenger transport in UK is Zero-Rated for VAT.\n> ACTION: Applying Zero-Rate VAT rule. VAT amount = £0.00.",
+                json: {
+                    "merchant": "Trainline",
+                    "date": "2026-09-27",
+                    "total_amount": 85.00,
+                    "currency": "GBP",
+                    "category": "Travel",
+                    "vat_amount": 0.00,
+                    "zero_rated": true,
+                    "confidence_score": 0.99
+                },
+                xero: {
+                    "Type": "ACCPAY",
+                    "Contact": {
+                        "Name": "Trainline"
+                    },
+                    "Date": "2026-09-27",
+                    "LineItems": [
+                        {
+                            "Description": "Train Ticket",
+                            "Quantity": 1.0,
+                            "UnitAmount": 85.00,
+                            "AccountCode": "409",
+                            "TaxType": "ZERORATED",
+                            "TaxAmount": 0.00,
+                            "LineAmount": 85.00
+                        }
+                    ],
+                    "Status": "DRAFT"
+                }
+            },
+            tesco: {
+                trace: "> Initializing analysis...\n> Vendor identified: TESCO STORES\n> Amount: £45.20\n> Categorization: Mixed Use\n> Analyzing line items...\n> Groceries (£35.20): Zero-rated VAT.\n> Printer Paper & Pens (£10.00): Standard Rate 20%.\n> ACTION: Splitting transaction into multiple line items based on VAT rating.",
+                json: {
+                    "merchant": "Tesco Stores",
+                    "date": "2026-09-29",
+                    "total_amount": 45.20,
+                    "currency": "GBP",
+                    "category": "Mixed",
+                    "vat_amount": 1.67,
+                    "confidence_score": 0.95
+                },
+                xero: {
+                    "Type": "ACCPAY",
+                    "Contact": { "Name": "Tesco Stores" },
+                    "Date": "2026-09-29",
+                    "LineItems": [
+                        { "Description": "Groceries (Staff Amenities)", "Quantity": 1.0, "UnitAmount": 35.20, "AccountCode": "433", "TaxType": "ZERORATED", "TaxAmount": 0.00, "LineAmount": 35.20 },
+                        { "Description": "Office Supplies", "Quantity": 1.0, "UnitAmount": 8.33, "AccountCode": "425", "TaxType": "INPUT2", "TaxAmount": 1.67, "LineAmount": 8.33 }
+                    ],
+                    "Status": "DRAFT"
+                }
+            },
+            dinner: {
+                trace: "> Initializing analysis...\n> Vendor identified: HAWKSMOOR\n> Amount: £300.00\n> Context: Dinner for 2 staff, 2 clients\n> Categorization: Entertainment (Mixed)\n> Checking HMRC rules for Entertainment...\n> Rule applied: 50% relates to clients (Non-Allowable, No VAT recovery).\n> Rule applied: 50% relates to staff (Allowable Subsistence, VAT recoverable).\n> ACTION: Splitting £300 into £150 Staff Subsistence (incl. 20% VAT) and £150 Client Entertainment (No VAT).",
+                json: {
+                    "merchant": "Hawksmoor",
+                    "date": "2026-09-29",
+                    "total_amount": 300.00,
+                    "currency": "GBP",
+                    "category": "Mixed Entertainment",
+                    "vat_amount": 25.00,
+                    "confidence_score": 0.97
+                },
+                xero: {
+                    "Type": "ACCPAY",
+                    "Contact": { "Name": "Hawksmoor" },
+                    "Date": "2026-09-29",
+                    "LineItems": [
+                        { "Description": "Staff Dinner Portion (Allowable)", "Quantity": 1.0, "UnitAmount": 125.00, "AccountCode": "429", "TaxType": "INPUT2", "TaxAmount": 25.00, "LineAmount": 125.00 },
+                        { "Description": "Client Entertainment (Non-Allowable)", "Quantity": 1.0, "UnitAmount": 150.00, "AccountCode": "434", "TaxType": "NONE", "TaxAmount": 0.00, "LineAmount": 150.00 }
+                    ],
+                    "Status": "DRAFT"
+                }
+            },
+            party: {
+                trace: "> Initializing analysis...\n> Vendor identified: THE RITZ\n> Amount: £450.00\n> Context: Directors-Only Party (2 Directors)\n> Categorization: Staff Entertainment\n> Checking HMRC rules for Annual Events...\n> Rule applied: Event is for directors only. Not open to general staff.\n> Therefore, the £150 per head annual exemption DOES NOT apply.\n> ACTION: Classifying as Benefit in Kind (P11D). No Corporation Tax deduction or VAT recovery.",
+                json: {
+                    "merchant": "The Ritz",
+                    "date": "2026-09-29",
+                    "total_amount": 450.00,
+                    "currency": "GBP",
+                    "category": "Director Entertainment",
+                    "benefit_in_kind": true,
+                    "vat_amount": 0.00,
+                    "confidence_score": 0.98
+                },
+                xero: {
+                    "Type": "ACCPAY",
+                    "Contact": { "Name": "The Ritz" },
+                    "Date": "2026-09-29",
+                    "LineItems": [
+                        { "Description": "Directors Party (BiK/Non-Allowable)", "Quantity": 1.0, "UnitAmount": 450.00, "AccountCode": "434", "TaxType": "NONE", "TaxAmount": 0.00, "LineAmount": 450.00 }
+                    ],
+                    "Status": "DRAFT"
+                }
+            },
+            mileage: {
+                trace: "> Initializing analysis...\n> Expense: 100 miles claimed at 45p/mile = £45.00\n> Accompanying VAT Receipt for Fuel: £30.00 (Standard 20% VAT)\n> Checking HMRC rules for Mileage Fuel VAT (Advisory Fuel Rates)...\n> AFR for 2000cc Petrol is 16p/mile.\n> VAT claimable only on the fuel element: 100 miles * £0.16 = £16.00 (Gross).\n> VAT Fraction (1/6) of £16.00 = £2.67.\n> (Cannot exceed actual VAT receipt of £5.00).\n> ACTION: Splitting £45 claim into VAT-able fuel element (£13.33 + £2.67 VAT) and non-VAT balance (£29.00).",
+                json: {
+                    "expense_type": "Mileage Claim",
+                    "distance": "100 miles",
+                    "rate": "0.45",
+                    "total_claim": 45.00,
+                    "advisory_fuel_rate": 0.16,
+                    "vat_claimable": 2.67,
+                    "confidence_score": 0.99
+                },
+                xero: {
+                    "Type": "ACCPAY",
+                    "Contact": { "Name": "Employee Mileage" },
+                    "Date": "2026-09-29",
+                    "LineItems": [
+                        { "Description": "Mileage (Fuel Element for VAT)", "Quantity": 1.0, "UnitAmount": 13.33, "AccountCode": "411", "TaxType": "INPUT2", "TaxAmount": 2.67, "LineAmount": 13.33 },
+                        { "Description": "Mileage (Non-VAT Balance)", "Quantity": 1.0, "UnitAmount": 29.00, "AccountCode": "411", "TaxType": "NONE", "TaxAmount": 0.00, "LineAmount": 29.00 }
+                    ],
+                    "Status": "DRAFT"
+                }
+            }
+        };
+
+        function runScenario(event, type) {
+            // Update UI state
+            document.querySelectorAll('.scenario-btn').forEach(btn => {
+                btn.classList.remove('border-primary', 'bg-slate-800');
+                btn.classList.add('border-gray-700', 'bg-gray-900');
+            });
+            event.currentTarget.classList.remove('border-gray-700', 'bg-gray-900');
+            event.currentTarget.classList.add('border-primary', 'bg-slate-800');
+
+            const data = scenarios[type];
+            
+            // Logic Trace Simulation
+            const traceEl = document.getElementById('logic-trace');
+            traceEl.textContent = '';
+            
+            let i = 0;
+            const text = data.trace;
+            traceEl.classList.add('text-slate-400');
+            
+            function typeWriter() {
+                if (i < text.length) {
+                    traceEl.textContent += text.charAt(i);
+                    i++;
+                    setTimeout(typeWriter, 15);
+                } else {
+                    traceEl.classList.remove('text-slate-400');
+                    traceEl.classList.add('text-green-400');
+                }
+            }
+            typeWriter();
+
+            // JSON Update
+            document.getElementById('extraction-json').textContent = JSON.stringify(data.json, null, 2);
+            document.getElementById('xero-payload').textContent = JSON.stringify(data.xero, null, 2);
+        }
+    </script>
+</body>
+</html>

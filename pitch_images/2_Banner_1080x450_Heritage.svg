@@ -86,7 +86,7 @@
     <rect x="360" y="0" width="170" height="42" fill="#0F172A" stroke="#334155" stroke-width="1"/>
     <line x1="360" y1="0" x2="360" y2="42" stroke="#1D4ED8" stroke-width="2.5"/>
     <text x="374" y="17" font-family="'JetBrains Mono', monospace" font-size="8.5" letter-spacing="0.12em" fill="#94A3B8">B2B2C DISTRIBUTION</text>
-    <text x="374" y="32" font-family="'DM Sans', sans-serif" font-size="13" font-weight="700" fill="#93C5FD">£6/mo Wholesale</text>
+    <text x="374" y="32" font-family="'DM Sans', sans-serif" font-size="13" font-weight="700" fill="#93C5FD">££49 Base + £9/mo Wholesale</text>
   </g>
 
   <!-- ================= RIGHT COLUMN: THE SOVEREIGN LEDGER CREST ================= -->

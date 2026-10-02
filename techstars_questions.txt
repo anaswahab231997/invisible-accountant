@@ -1,0 +1,77 @@
+﻿Techstars Application Questions 
+(Updated: April 2 2024)
+Make a copy of this document to your personal drive. Do not request access to this document
+
+
+________________
+
+
+
+
+________________
+
+
+ Founder Profile
+About you
+1. First name *
+2. Last name *
+3. Contact email *
+4. Title * (Dropdown options: CEO, CTO, COO, CPO, Other)
+5. Current location *
+6. Linkedin URL *
+7. Twitter URL
+8. Phone number
+9. Working on your startup full-time? (Yes or No)
+Demographics 
+10. What is your birthdate * (MM/DD/YYYY)
+11. What is your gender identity * (Dropdown options: Prefer not to disclose, Man, Woman, Transgender, Non-Binary/gender-nonconforming, Prefer to self-describe)
+   1. If “Prefer to self-describe” is selected, then self-describe *
+12. For Non U.S. based founders only: Do you identify as a racial/ethnic minority within your home country? *  (Dropdown options: Prefer not to disclose, Yes, No, Prefer to self-describe)
+   1. If “Prefer to self-describe” is selected, then self-describe *
+	
+
+ Accelerator Application
+Startup Details
+1. Startup Name *
+2. Startup URL
+3. What year was your company founded? *
+4. What problem are you looking to solve? * (500 characters) Tell us what your target audience is struggling with and why they might be unsatisfied with the current solutions available to them.
+5. What is your company going to make to solve this problem? * (500 characters) Please describe your product and what it does or will do.
+6. Is your startup incorporated? * (Yes or No)
+   1. If yes, select where and the corporation type *
+7. Which industries are relevant to your company? * (Dropdown with several options and the option to select multiple ones)
+8. Are you based, or do you conduct any business activities in the following countries: Russia, North Korea, Iran, Syria, Cuba, Venezuela, or the Crimea, Donetsk, or Luhansk regions of Ukraine? *
+9. Product demo video URL (Test that the link works and is uploaded to Youtube. Mark the video as unlisted if you don't want other people finding it.)
+10. Team introduction video (~2 minutes) URL (With your core team, explain what you do and why you are a great fit for your business. Test that the link works and is uploaded to Youtube. Mark the video as unlisted if you don't want other people finding it.)
+11. Pitch deck URL (If you're sharing a Google file, please adjust settings to ‘make visible to anyone with the link’. If you're using any other tool such as DocSend, ensure password protection is off.)
+Startup Team
+12. Why is your team a winning team? * (1000 characters) Tell us what gives you/your team an unfair advantage in this market. It might be your intimate knowledge of your customer base, the skills your team brings to the table, or something else that gives your team an edge.
+13. Where are the majority (50% or more) of your team members/employees located? * (Dropdown options: United States, Canada, Europe, Latin America, Middle East/North Africa, Asia Pacific, Other)
+Startup Progress
+14. Please share any traction metrics you have (280 characters) (Examples: Beta users, LOI’s, active users, customer growth, etc.)
+15. Do you have revenue? * (Yes or No)
+   1. If yes, what was your revenue in each of the past six months? * (Please use USD. A forecasted number can be entered for a month in progress.)
+16. Have you received funding? * (Yes or No)
+   1. If yes, what are the sources and funding amounts? * (Please use USD: Friends & Family, Grant, Angel, Venture Capital, Other)
+Startup Strategy
+17. How do (or will you) make money? How much could you make? * (400 characters)
+18. Who is your target audience? * (400 characters)
+19. Who are your competitors or might become competitors? * (400 characters)
+20. What is your competitive advantage? * (400 characters)
+21. Why is this the right time for your startup? * (400 characters) What trends, changes in the market, new laws, policies, or technologies signal this is an opportune time for your startup?
+22. What is your customer acquisition strategy? * (400 characters) How will you get your first (or next) 10, 100, 1,000, or 10,000 customers?
+23. What are your next major milestones? * (400 characters) What are your next features, or what are you learning to let you know you're on the right path with your business?
+24. How did your hear about Techstars? * Select all that apply. (Dropdown options: A Techstars team member recommend I apply, Mentor/alumni in Techstars network recommended I apply, Techstars virtual event (AMA’s, Pitch Practice, Office Hours, etc.), Techstars event (Start Up Week, Start Up Weekend, demo day), Search engine (Google, Bing, etc.), Social Media, Blog or publication, Other)
+25. Checkbox: I agree to Techstars’ Terms of Service and Privacy Policy. * (If you have questions please reach out to privacy@techstars.com.)
+26. Checkbox: I’d like to receive startup insights, resources and event invitations from Techstars.
+
+
+	
+
+Team Members
+1. Add each of your co-founders by providing their name and email. We will send them an invite to complete their own founder profile which will then be tied to this accelerator application. No worries if you are still building out your team - this step is not required to complete your application, and you can always come back to it later.
+Program selection
+
+
+1. In this step, you will be able to review Techstars accelerator programs and select up to 2 accelerators that you are interested in applying to. You will select a Primary preference and an Alternate preference.
+   1. The program listed as the primary preference will review your application first, following the application close date. The alternate preference will be able to engage soon after.

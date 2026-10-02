@@ -6,6 +6,7 @@ import asyncpg
 from contextlib import asynccontextmanager
 from dotenv import load_dotenv
 from security import mask_pii
+from aes_gcm_security import TokenEncryptionEngine
 
 load_dotenv()
 
@@ -13,10 +14,12 @@ DATABASE_URL = os.getenv("DATABASE_URL")
 
 import asyncio
 db_pool = None
-_pool_lock = asyncio.Lock()
+_pool_lock = None
 
 async def init_pool():
-    global db_pool
+    global db_pool, _pool_lock
+    if _pool_lock is None:
+        _pool_lock = asyncio.Lock()
     if not DATABASE_URL:
         raise ValueError("DATABASE_URL environment variable is required")
     async with _pool_lock:
@@ -24,7 +27,9 @@ async def init_pool():
             db_pool = await asyncpg.create_pool(DATABASE_URL, min_size=1, max_size=25)
 
 async def close_pool():
-    global db_pool
+    global db_pool, _pool_lock
+    if _pool_lock is None:
+        return
     async with _pool_lock:
         if db_pool:
             await db_pool.close()
@@ -62,6 +67,7 @@ async def init_db():
                 amount FLOAT,
                 category TEXT,
                 status TEXT,
+                encrypted_financial_data TEXT,
                 is_demo BOOLEAN DEFAULT FALSE,
                 FOREIGN KEY(chat_id) REFERENCES chat_sessions(id)
             )
@@ -72,12 +78,29 @@ async def init_db():
             ALTER TABLE hmrc_ledger 
             ADD COLUMN IF NOT EXISTS retry_count INTEGER DEFAULT 0,
             ADD COLUMN IF NOT EXISTS next_retry_at TIMESTAMP,
-            ADD COLUMN IF NOT EXISTS client_ip TEXT;
+            ADD COLUMN IF NOT EXISTS client_ip TEXT,
+            ADD COLUMN IF NOT EXISTS encrypted_financial_data TEXT,
+            ADD COLUMN IF NOT EXISTS accountant_approved BOOLEAN DEFAULT FALSE,
+            ADD COLUMN IF NOT EXISTS updated_at TEXT;
         """)
         
         await conn.execute("""
+            CREATE TABLE IF NOT EXISTS intake_queue (
+                id SERIAL PRIMARY KEY,
+                chat_id INTEGER,
+                timestamp TEXT,
+                sender_id TEXT,
+                message TEXT,
+                media_urls TEXT,
+                turn_count INTEGER,
+                status TEXT DEFAULT 'PENDING'
+            )
+        """)
+
+        await conn.execute("""
             ALTER TABLE intake_queue
-            ADD COLUMN IF NOT EXISTS client_ip TEXT;
+            ADD COLUMN IF NOT EXISTS client_ip TEXT,
+            ADD COLUMN IF NOT EXISTS updated_at TEXT;
         """)
 
         await conn.execute("""
@@ -94,19 +117,6 @@ async def init_db():
                 whatsapp_id TEXT,
                 nonce_hash TEXT,
                 created_at TEXT
-            )
-        """)
-
-        await conn.execute("""
-            CREATE TABLE IF NOT EXISTS intake_queue (
-                id SERIAL PRIMARY KEY,
-                chat_id INTEGER,
-                timestamp TEXT,
-                sender_id TEXT,
-                message TEXT,
-                media_urls TEXT,
-                turn_count INTEGER,
-                status TEXT DEFAULT 'PENDING'
             )
         """)
 
@@ -147,7 +157,7 @@ async def get_recent_intakes_by_sender(sender_id: str, limit: int = 5):
         return [row["raw_message"] for row in reversed(rows)]
 
 async def stage_expense(chat_id: int, payload: dict):
-    payload_str = mask_pii(json.dumps(payload))
+    payload_str = json.dumps(payload)
     async with get_connection() as conn:
         await conn.execute(
             "UPDATE chat_sessions SET staging_payload = $1 WHERE id = $2",
@@ -166,6 +176,18 @@ async def get_unconfirmed_session(sender_id: str):
             sender_id
         )
         return dict(row) if row else None
+
+def safe_float(val):
+    if val is None:
+        return 0.0
+    if isinstance(val, (int, float)):
+        return float(val)
+    import re
+    cleaned = re.sub(r'[^\d\.-]', '', str(val))
+    try:
+        return float(cleaned)
+    except ValueError:
+        return 0.0
 
 async def confirm_and_queue_to_ledger(chat_id: int):
     timestamp = datetime.now().isoformat()
@@ -186,32 +208,67 @@ async def confirm_and_queue_to_ledger(chat_id: int):
         
         queue_status = "DEMO_SAVED" if is_demo else "PENDING"
         
+        financial_data = {
+            "vendor": payload.get("vendor"),
+            "net_amount": payload.get("net_amount"),
+            "vat_amount": payload.get("vat_amount"),
+            "gross_amount": payload.get("gross_amount"),
+            "document_type": payload.get("document_type"),
+            "vat_registration_number": payload.get("vat_registration_number"),
+            "cis_deduction": payload.get("cis_deduction"),
+            "line_items": payload.get("line_items", []),
+            "transaction_type": payload.get("transaction_type"),
+            "needs_accountant_review": payload.get("needs_accountant_review", False),
+            "transaction_date": payload.get("transaction_date")
+        }
+        
+        master_key = os.getenv("ENCRYPTION_MASTER_KEY_B64")
+        if master_key:
+            engine = TokenEncryptionEngine(master_key)
+            enc_dict = engine.encrypt_tokens(json.dumps(financial_data), associated_data=str(chat_id))
+            encrypted_financial_data = json.dumps(enc_dict)
+            plain_vendor = "ENCRYPTED"
+            plain_amount = 0.0
+        else:
+            encrypted_financial_data = None
+            plain_vendor = payload.get("vendor", "")
+            plain_amount = safe_float(payload.get("gross_amount") or payload.get("amount", 0.0))
+            
+        real_amount = safe_float(payload.get("gross_amount") or payload.get("amount", 0.0))
+        if not is_demo:
+            if (payload.get("transaction_type", "EXPENSE") != "INCOME" and real_amount > 500.0) or payload.get("needs_accountant_review", False):
+                if not payload.get("accountant_approved", False):
+                    queue_status = "CAPITAL_ALLOWANCE"
+        
         queue_id = await conn.fetchval(
             """
-            INSERT INTO hmrc_ledger (chat_id, timestamp, vendor, amount, category, status, is_demo)
-            VALUES ($1, $2, $3, $4, $5, $6, $7)
+            INSERT INTO hmrc_ledger (chat_id, timestamp, vendor, amount, category, status, encrypted_financial_data, is_demo)
+            VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
             RETURNING id
             """,
             chat_id,
             timestamp,
-            payload.get("vendor"),
-            float(payload.get("amount")),
+            plain_vendor,
+            plain_amount,
             payload.get("category"),
             queue_status,
+            encrypted_financial_data,
             is_demo
         )
         return queue_id
 
 async def sweep_orphaned_processing():
     async with get_connection() as conn:
-        await conn.execute("UPDATE hmrc_ledger SET status = 'PENDING' WHERE status = 'PROCESSING'")
+        time_limit = (datetime.now() - timedelta(minutes=10)).isoformat()
+        await conn.execute("UPDATE hmrc_ledger SET status = 'PENDING' WHERE status = 'PROCESSING' AND updated_at < $1", time_limit)
+        await conn.execute("UPDATE intake_queue SET status = 'PENDING' WHERE status = 'PROCESSING' AND updated_at < $1", time_limit)
 
 async def get_pending_hmrc_queue(limit: int = 100):
     async with get_connection() as conn:
         rows = await conn.fetch(
             '''
             UPDATE hmrc_ledger 
-            SET status = 'PROCESSING' 
+            SET status = 'PROCESSING', updated_at = $2
             WHERE id IN (
                 SELECT id 
                 FROM hmrc_ledger 
@@ -223,18 +280,19 @@ async def get_pending_hmrc_queue(limit: int = 100):
             )
             RETURNING *
             ''',
-            limit
+            limit, datetime.now().isoformat()
         )
         if not rows:
             return []
             
         result_items = []
         for r in rows:
-            sender_id = await conn.fetchval(
-                "SELECT sender_id FROM chat_sessions WHERE id = $1", r["chat_id"]
+            chat_row = await conn.fetchrow(
+                "SELECT sender_id, media_urls FROM chat_sessions WHERE id = $1", r["chat_id"]
             )
             item_dict = dict(r)
-            item_dict["sender_id"] = sender_id
+            item_dict["sender_id"] = chat_row["sender_id"] if chat_row else "unknown"
+            item_dict["media_urls"] = chat_row["media_urls"] if chat_row else None
             result_items.append(item_dict)
             
         return result_items
@@ -334,7 +392,7 @@ async def pop_intake_queue():
         row = await conn.fetchrow(
             """
             UPDATE intake_queue 
-            SET status = 'PROCESSING' 
+            SET status = 'PROCESSING', updated_at = $1 
             WHERE id = (
                 SELECT id 
                 FROM intake_queue 
@@ -344,7 +402,7 @@ async def pop_intake_queue():
                 FOR UPDATE SKIP LOCKED
             )
             RETURNING *
-            """
+            """, datetime.now().isoformat()
         )
         if row:
             d = dict(row)

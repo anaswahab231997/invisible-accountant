@@ -100,13 +100,14 @@ async def _call_gemini(
     media_urls: list = None,
     model: str = "gemini-2.5-flash",
     sender_id: str = None,
+    schema: any = None
 ):
     import asyncio
     from ws import manager
     attempts = 0
     while attempts < 10:
         try:
-            return await _do_call_gemini(system_instruction, user_input, media_urls, model)
+            return await _do_call_gemini(system_instruction, user_input, media_urls, model, schema)
         except Exception as e:
             attempts += 1
             if "429" in str(e) or "RESOURCE_EXHAUSTED" in str(e):
@@ -124,6 +125,7 @@ async def _do_call_gemini(
     user_input: str,
     media_urls: list = None,
     model: str = "gemini-2.5-flash",
+    schema: any = None
 ):
     contents = []
 
@@ -155,14 +157,14 @@ async def _do_call_gemini(
         config=types.GenerateContentConfig(
             system_instruction=system_instruction,
             response_mime_type="application/json",
-            response_schema=ExpenseCategorization,
+            response_schema=schema if schema else ExpenseCategorization,
         ),
     )
     return json.loads(response.text)
 
 
 async def process_expense_message(
-    raw_message: str, turn_count: int = 1, media_urls: list = None, previous_state: dict = None, sender_id: str = None
+    raw_message: str, turn_count: int = 1, media_urls: list = None, previous_state: dict = None, sender_id: str = None, dynamic_enums: dict = None
 ):
     system_instruction = """
     You are Emma, an Invisible Accountant AI for UK Sole Traders.
@@ -221,6 +223,47 @@ async def process_expense_message(
     Assess your extraction confidence (0.0 to 1.0). If confidence is below 0.92, set `is_ambiguous` to true.
     If the transaction violates HMRC rules (like client lunches) or lacks clarity, set `is_ambiguous` to true and ask a concise clarification question.
     """
+    
+    if dynamic_enums:
+        accts = dynamic_enums.get("accounts", [])
+        taxes = dynamic_enums.get("tax_rates", [])
+        acct_str = ", ".join([f"{a.get('Code')} ({a.get('Name')})" for a in accts if a.get('Code')])
+        tax_str = ", ".join([f"{t.get('TaxType')} ({t.get('Name')})" for t in taxes if t.get('TaxType')])
+        dynamic_instruction = f"\n\n--- DYNAMIC CLIENT LEDGER ---\nYou MUST ONLY select account_code from this list: [{acct_str}].\nYou MUST ONLY select tax_code from this list: [{tax_str}]."
+        system_instruction += dynamic_instruction
+
+    dynamic_schema = ExpenseCategorization
+    if dynamic_enums:
+        accts = dynamic_enums.get("accounts", [])
+        taxes = dynamic_enums.get("tax_rates", [])
+        if accts and taxes:
+            import enum
+            from pydantic import create_model
+            import re
+            
+            def safe_enum_name(s):
+                val = re.sub(r'[^a-zA-Z0-9_]', '_', str(s))
+                if val and val[0].isdigit():
+                    val = '_' + val
+                return val
+
+            acct_dict = {safe_enum_name(a.get('Code')): a.get('Code') for a in accts if a.get('Code')}
+            tax_dict = {safe_enum_name(t.get('TaxType')): t.get('TaxType') for t in taxes if t.get('TaxType')}
+            
+            if acct_dict and tax_dict:
+                try:
+                    DynamicAccountEnum = enum.Enum('DynamicAccountEnum', acct_dict)
+                    DynamicTaxEnum = enum.Enum('DynamicTaxEnum', tax_dict)
+                    
+                    dynamic_schema = create_model(
+                        'DynamicExpenseCategorization',
+                        __base__=ExpenseCategorization,
+                        account_code=(DynamicAccountEnum, ...),
+                        tax_code=(DynamicTaxEnum, ...)
+                    )
+                except Exception as e:
+                    import logging
+                    logging.getLogger(__name__).error(f"Failed to compile dynamic schema: {e}")
 
     try:
         # Phase 1: Fast & Cheap (Gemini 2.5 Flash)
@@ -230,7 +273,7 @@ async def process_expense_message(
             raw_message = f"PREVIOUS STATE:\n{json.dumps(previous_state, indent=2)}\n\nUSER'S LATEST MESSAGE:\n{raw_message}\n\nINSTRUCTION: The user is replying to your previous question. Merge this new information with the PREVIOUS STATE. If they answered your question, update the missing fields (e.g. amount, vendor, category). If everything is now complete, set is_ambiguous to false."
             
         result = await _call_gemini(
-            system_instruction, raw_message, media_urls, model="gemini-2.5-flash", sender_id=sender_id
+            system_instruction, raw_message, media_urls, model="gemini-2.5-flash", sender_id=sender_id, schema=dynamic_schema
         )
 
         # Confidence safeguard: reasonable care under Schedule 24 FA 2007
@@ -246,7 +289,7 @@ async def process_expense_message(
                 reason="Flash flagged as ambiguous",
             )
             pro_result = await _call_gemini(
-                system_instruction, raw_message, media_urls, model="gemini-2.5-flash", sender_id=sender_id
+                system_instruction, raw_message, media_urls, model="gemini-2.5-flash", sender_id=sender_id, schema=dynamic_schema
             )
 
             # If Pro ALSO thinks it's ambiguous, or definitively categorizes it, trust Pro.

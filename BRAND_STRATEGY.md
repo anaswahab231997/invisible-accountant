@@ -175,7 +175,7 @@ This production-ready SVG renders the "Invisible Ledger Aperture" symbol integra
 Slide 1 sets the courtroom tone for the pitch jury. Investors must immediately register:
 1. **Financial Authority:** This is not a bootstrapped toy; it has the architectural gravitas of a tier-1 fintech.
 2. **The Strategic Hook:** The slide must visibly declare the thesis: **"The B2C illusion masking a B2B2C enterprise powerhouse."**
-3. **Regulatory Clocks:** The imminent countdown to HMRC Making Tax Digital in April 2026 creates inescapable investment urgency.
+3. **Regulatory Clocks:** The imminent countdown to the final HMRC Making Tax Digital Phase 2 in April 2027 creates inescapable investment urgency.
 
 ### 4.2 Composition & Visual Hierarchy (7:5 Asymmetric Grid)
 * **Left Card (Col 7 / 60% Width):**
@@ -350,7 +350,7 @@ In sharp contrast, the right-hand panel showcases the world the UK sole trader a
 | **Cognitive Friction** | 18 clicks, 4 dropdowns, chart of accounts | **Zero clicks** (Conversational natural language) |
 | **Error / Penalty Risk** | High (accidental miscategorization) | **Zero** (Custom UK HMRC case-law AI engine) |
 | **Digital Link Audit** | Manual spreadsheet reconciliation | **Automated HMAC-SHA256 digital trail** |
-| **Cost to Sole Trader** | £19 to £34 / month | **£10 / month** (or included by accountant) |
+| **Cost to Sole Trader** | £19 to £34 / month | **£12 / month** (or included by accountant) |
 
 ---
 

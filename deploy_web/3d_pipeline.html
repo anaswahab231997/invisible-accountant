@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>3D Data Pipeline | Invisible Accountant</title>
+    <style>
+        body { margin: 0; overflow: hidden; background-color: #050505; color: #ffffff; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; }
+        canvas { display: block; }
+        #overlay {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            pointer-events: none;
+            z-index: 10;
+        }
+        h1 { font-size: 24px; letter-spacing: 2px; text-transform: uppercase; margin: 0 0 10px 0; font-weight: 300; }
+        p { font-size: 14px; color: #888; margin: 0; }
+        .node-label {
+            position: absolute;
+            color: #4ade80;
+            font-size: 12px;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.3s;
+            text-shadow: 0 0 5px #4ade80;
+        }
+        #scroll-hint {
+            position: absolute;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 12px;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            color: #aaa;
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse {
+            0% { opacity: 0.5; }
+            50% { opacity: 1; }
+            100% { opacity: 0.5; }
+        }
+    </style>
+</head>
+<body>
+    <div id="overlay">
+        <h1>Pipeline Topology</h1>
+        <p>Enterprise Data Flow Visualization</p>
+    </div>
+    <div id="scroll-hint">Scroll to traverse pipeline</div>
+
+    <!-- Scripts -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+
+    <script>
+        // Setup Scene
+        const scene = new THREE.Scene();
+        scene.fog = new THREE.FogExp2(0x050505, 0.05);
+
+        // Setup Camera
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        camera.position.set(0, 0, 5);
+
+        // Setup Renderer
+        const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+        document.body.appendChild(renderer.domElement);
+
+        // Nodes Data
+        const nodesData = [
+            { id: 'whatsapp', name: 'WhatsApp', pos: new THREE.Vector3(0, 0, 0), color: 0x25D366, geo: new THREE.SphereGeometry(0.5, 32, 32) },
+            { id: 'cloudflare', name: 'Cloudflare Edge', pos: new THREE.Vector3(0, 0, -10), color: 0xF38020, geo: new THREE.BoxGeometry(0.8, 0.8, 0.8) },
+            { id: 'gemini', name: 'Gemini Tax Engine', pos: new THREE.Vector3(0, 0, -20), color: 0x4285F4, geo: new THREE.OctahedronGeometry(0.6) },
+            { id: 'vault', name: 'AES-GCM Vault', pos: new THREE.Vector3(0, 0, -30), color: 0x9333ea, geo: new THREE.TorusGeometry(0.4, 0.2, 16, 100) },
+            { id: 'xero', name: 'Xero Draft Bill', pos: new THREE.Vector3(0, 0, -40), color: 0x13B5EA, geo: new THREE.CylinderGeometry(0.5, 0.5, 1, 32) }
+        ];
+
+        const nodes = [];
+        const labels = [];
+
+        // Lights
+        const ambientLight = new THREE.AmbientLight(0xffffff, 0.2);
+        scene.add(ambientLight);
+        
+        const pointLight = new THREE.PointLight(0xffffff, 1, 50);
+        pointLight.position.set(2, 2, 2);
+        scene.add(pointLight);
+
+        // Create Nodes & Lines
+        const lineMaterial = new THREE.LineBasicMaterial({ color: 0x333333, transparent: true, opacity: 0.5 });
+        const points = [];
+
+        nodesData.forEach((data, index) => {
+            // Material
+            const material = new THREE.MeshStandardMaterial({ 
+                color: data.color,
+                emissive: data.color,
+                emissiveIntensity: 0.5,
+                wireframe: true
+            });
+
+            // Mesh
+            const mesh = new THREE.Mesh(data.geo, material);
+            mesh.position.copy(data.pos);
+            scene.add(mesh);
+            nodes.push(mesh);
+            points.push(data.pos);
+
+            // Label
+            const label = document.createElement('div');
+            label.className = 'node-label';
+            label.textContent = data.name;
+            label.style.color = '#' + data.color.toString(16).padStart(6, '0');
+            document.body.appendChild(label);
+            labels.push({ el: label, pos: data.pos });
+
+            // Particles around node
+            const particleGeo = new THREE.BufferGeometry();
+            const particleCount = 50;
+            const posArray = new Float32Array(particleCount * 3);
+            for(let i=0; i<particleCount*3; i++) {
+                posArray[i] = (Math.random() - 0.5) * 3;
+            }
+            particleGeo.setAttribute('position', new THREE.BufferAttribute(posArray, 3));
+            const particleMat = new THREE.PointsMaterial({ size: 0.02, color: data.color, transparent: true, opacity: 0.6 });
+            const particles = new THREE.Points(particleGeo, particleMat);
+            particles.position.copy(data.pos);
+            scene.add(particles);
+            
+            gsap.to(particles.rotation, {
+                y: Math.PI * 2,
+                x: Math.PI * 2,
+                duration: 10 + Math.random() * 10,
+                repeat: -1,
+                ease: "none"
+            });
+        });
+
+        // Connection Line
+        const lineGeo = new THREE.BufferGeometry().setFromPoints(points);
+        const line = new THREE.Line(lineGeo, lineMaterial);
+        scene.add(line);
+
+        // Data Payload
+        const payloadGeo = new THREE.SphereGeometry(0.1, 16, 16);
+        const payloadMat = new THREE.MeshBasicMaterial({ color: 0xffffff });
+        const payload = new THREE.Mesh(payloadGeo, payloadMat);
+        scene.add(payload);
+
+        // Scroll Animation
+        let scrollProgress = 0;
+        
+        window.addEventListener('wheel', (e) => {
+            scrollProgress += e.deltaY * 0.001;
+            scrollProgress = Math.max(0, Math.min(scrollProgress, nodesData.length - 1));
+        });
+        
+        let touchStartY = 0;
+        window.addEventListener('touchstart', e => touchStartY = e.touches[0].clientY);
+        window.addEventListener('touchmove', e => {
+            const deltaY = touchStartY - e.touches[0].clientY;
+            scrollProgress += deltaY * 0.01;
+            scrollProgress = Math.max(0, Math.min(scrollProgress, nodesData.length - 1));
+            touchStartY = e.touches[0].clientY;
+        });
+
+        // Animation Loop
+        const clock = new THREE.Clock();
+
+        function animate() {
+            requestAnimationFrame(animate);
+            const time = clock.getElapsedTime();
+
+            // Rotate nodes
+            nodes.forEach((node, i) => {
+                node.rotation.x += 0.01;
+                node.rotation.y += 0.01;
+                
+                // Bobbing effect
+                node.position.y = nodesData[i].pos.y + Math.sin(time * 2 + i) * 0.2;
+            });
+
+            // Camera movement
+            const targetZ = -scrollProgress * 10 + 5;
+            camera.position.z += (targetZ - camera.position.z) * 0.05;
+            
+            // Move payload
+            const pipelineZ = camera.position.z - 5;
+            payload.position.set(0, Math.sin(time*5)*0.1, pipelineZ);
+            
+            // Update labels
+            labels.forEach((label, i) => {
+                const vector = label.pos.clone();
+                vector.y = nodes[i].position.y + 1; // offset
+                vector.project(camera);
+                
+                const x = (vector.x * .5 + .5) * window.innerWidth;
+                const y = (vector.y * -.5 + .5) * window.innerHeight;
+                
+                if (vector.z < 1 && vector.z > 0) {
+                    label.el.style.transform = `translate(-50%, -50%) translate(${x}px, ${y}px)`;
+                    
+                    // Fade in based on proximity
+                    const dist = Math.abs(camera.position.z - label.pos.z);
+                    const opacity = Math.max(0, 1 - (dist / 15));
+                    label.el.style.opacity = opacity;
+                } else {
+                    label.el.style.opacity = 0;
+                }
+            });
+
+            renderer.render(scene, camera);
+        }
+
+        animate();
+
+        // Resize handler
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+
+    </script>
+</body>
+</html>
