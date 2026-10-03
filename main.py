@@ -42,13 +42,20 @@ from db import (
     create_chat_session,
     store_identity_in_vault,
 )
+from dashboard import router as dashboard_router
+from dev_dashboard import router as dev_dashboard_router
 from logger import get_logger
 from worker import process_hmrc_queue, process_ttl_sweeper
 
 logger = get_logger(__name__)
 limiter = Limiter(key_func=get_remote_address)
 
-app = FastAPI(title="Invisible Accountant Webhook Prototype (V2 Enterprise)", docs_url=None, redoc_url=None, openapi_url=None)
+app = FastAPI(
+    title="Invisible Accountant",
+)
+app.include_router(dashboard_router)
+app.include_router(dev_dashboard_router)
+#title="Invisible Accountant Webhook Prototype (V2 Enterprise)", docs_url=None, redoc_url=None, openapi_url=None)
 app.state.limiter = limiter
 app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 

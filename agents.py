@@ -1,26 +1,24 @@
 import json
 import os
-
-from google import genai
-from google.genai import types
+import asyncio
 from pydantic import BaseModel, Field
-
 from logger import get_logger
 from dotenv import load_dotenv
-from tenacity import retry, wait_exponential, stop_after_attempt, retry_if_exception_type
-from google.genai.errors import APIError
+from google import genai
+from google.genai import types
+from enum import Enum
 
 load_dotenv()
-
 logger = get_logger(__name__)
 
 API_KEY = os.environ.get("GEMINI_API_KEY")
 if not API_KEY:
-    raise ValueError("GEMINI_API_KEY environment variable is missing.")
+    logger.warning("GEMINI_API_KEY environment variable is missing.")
+
 client = genai.Client(api_key=API_KEY)
 
-from enum import Enum
-
+# Strict concurrency throttle (Semaphore=1) to prevent 429s on free tier
+gemini_semaphore = asyncio.Semaphore(1)
 
 class HMRCCategory(str, Enum):
     TURNOVER_SALES = "Turnover / Sales Income"
@@ -37,7 +35,6 @@ class HMRCCategory(str, Enum):
     PROFESSIONAL_FEES = "Professional fees"
     DEPRECIATION_AND_LOSS_OF_ASSETS = "Depreciation and loss of assets"
     OTHER_EXPENSES = "Other expenses"
-
 
 class ExpenseCategorization(BaseModel):
     transaction_type: str = Field(
@@ -63,6 +60,10 @@ class ExpenseCategorization(BaseModel):
     category: HMRCCategory = Field(
         description="Map the transaction to exactly ONE of the official HMRC MTD ITSA categories."
     )
+    tax_code: str = Field(
+        default="20% (VAT on Expenses)",
+        description="The applicable tax code."
+    )
     extraction_confidence: float = Field(
         default=0.98,
         description="Confidence score from 0.0 to 1.0 in amount, vendor, and category extraction. If <0.92, set is_ambiguous to true."
@@ -74,9 +75,7 @@ class ExpenseCategorization(BaseModel):
         description="If is_ambiguous is true, what short question should the Auditor ask?"
     )
 
-
 from urllib.parse import urlparse
-
 import httpx
 
 ALLOWED_DOMAINS = {
@@ -85,7 +84,6 @@ ALLOWED_DOMAINS = {
     "mock-s3-bucket.amazonaws.com",
 }
 
-
 def is_safe_url(url: str) -> bool:
     try:
         parsed = urlparse(url)
@@ -93,6 +91,42 @@ def is_safe_url(url: str) -> bool:
     except Exception:
         return False
 
+async def _do_call_gemini(
+    system_instruction: str,
+    user_input: str,
+    media_urls: list = None,
+    model: str = "gemini-2.5-flash",
+    schema: any = None
+):
+    target_schema = schema if schema else ExpenseCategorization
+    contents = []
+    
+    # Optional image handling
+    if media_urls:
+        for url in media_urls:
+            if not is_safe_url(url):
+                logger.warning("SSRF mitigation blocked URL", url=url)
+                continue
+            contents.append({"type": "image_url", "image_url": {"url": url}})
+        
+    prompt = user_input if user_input else "Analyze this receipt for UK tax categorization."
+    contents.append(prompt)
+
+    config = types.GenerateContentConfig(
+        system_instruction=system_instruction,
+        response_mime_type="application/json",
+        response_schema=target_schema,
+    )
+
+    # Apply throttle wrapper
+    async with gemini_semaphore:
+        response = await client.aio.models.generate_content(
+            model=model,
+            contents=contents,
+            config=config
+        )
+        
+    return json.loads(response.text)
 
 async def _call_gemini(
     system_instruction: str,
@@ -102,7 +136,6 @@ async def _call_gemini(
     sender_id: str = None,
     schema: any = None
 ):
-    import asyncio
     from ws import manager
     attempts = 0
     while attempts < 10:
@@ -110,58 +143,15 @@ async def _call_gemini(
             return await _do_call_gemini(system_instruction, user_input, media_urls, model, schema)
         except Exception as e:
             attempts += 1
-            if "429" in str(e) or "RESOURCE_EXHAUSTED" in str(e):
+            if "429" in str(e) or "Too Many Requests" in str(e) or "RESOURCE_EXHAUSTED" in str(e):
                 if sender_id and attempts == 1:
-                    await manager.send_personal_message({"type": "GRACEFUL_WARNING", "message": "I'm experiencing high traffic right now! Bear with me for a few seconds... ?"}, sender_id)
+                    await manager.send_personal_message({"type": "GRACEFUL_WARNING", "message": "High traffic... please wait! ⏳"}, sender_id)
                 await asyncio.sleep(min(65, 2 ** attempts))
             else:
                 if attempts >= 5:
                     raise e
                 await asyncio.sleep(min(10, 2 ** attempts))
     raise Exception("Max retries exceeded")
-
-async def _do_call_gemini(
-    system_instruction: str,
-    user_input: str,
-    media_urls: list = None,
-    model: str = "gemini-2.5-flash",
-    schema: any = None
-):
-    contents = []
-
-    if media_urls:
-        async with httpx.AsyncClient() as http_client:
-            async def fetch_media(url):
-                if not is_safe_url(url):
-                    logger.warning("SSRF mitigation blocked URL", url=url)
-                    return None
-                try:
-                    resp = await http_client.get(url, timeout=5.0)
-                    resp.raise_for_status()
-                    mime_type = resp.headers.get("content-type", "image/jpeg")
-                    return types.Part.from_bytes(data=resp.content, mime_type=mime_type)
-                except Exception as e:
-                    logger.error("Error fetching media", url=url, error=str(e))
-                    return None
-                    
-            tasks = [fetch_media(url) for url in media_urls]
-            parts = await asyncio.gather(*tasks)
-            contents.extend([p for p in parts if p is not None])
-
-    # Always append text at the end
-    contents.append(user_input)
-
-    response = await client.aio.models.generate_content(
-        model=model,
-        contents=contents,
-        config=types.GenerateContentConfig(
-            system_instruction=system_instruction,
-            response_mime_type="application/json",
-            response_schema=schema if schema else ExpenseCategorization,
-        ),
-    )
-    return json.loads(response.text)
-
 
 async def process_expense_message(
     raw_message: str, turn_count: int = 1, media_urls: list = None, previous_state: dict = None, sender_id: str = None, dynamic_enums: dict = None
@@ -173,7 +163,7 @@ async def process_expense_message(
     - NEVER start with "Hi" or "Hello" or end with a signature ("Cheers, Emma")—this is an ongoing chat.
     - Be direct, empathetic, and natural. Do not sound robotic.
     
-    CRITICAL CONSTRAINT: Your `auditor_question` must NEVER exceed 3 sentences. Keep it brief.
+    CRITICAL CONSTRAINT: Your uditor_question must NEVER exceed 3 sentences. Keep it brief.
 
     --- YOUR ACCOUNTING BRAIN (HMRC SOLE TRADER RULES) ---
     1. The Golden Rule: Expenses must be "wholly and exclusively" for the purposes of the trade.
@@ -182,7 +172,7 @@ async def process_expense_message(
     4. Commuting: Regular travel from home to a permanent workplace is not allowable.
     5. Use of home as office: Claiming a portion of home bills is allowable but requires identifying hours worked or the exact proportion of space used.
     6. Clothing: Everyday wear (even suits) is not allowable. Only protective clothing, uniforms with logos, or costumes for actors are allowable.
-    7. Business Income & Invoicing: If the user message or receipt describes money received from a client, customer payments, or sales invoices (e.g. 'Client paid £350 for tile installation' or 'Invoice #104 settled £600'), set `transaction_type: 'INCOME'`, `category: 'Turnover / Sales Income'`, and vendor to the client name.
+    7. Business Income & Invoicing: If the user message or receipt describes money received from a client, customer payments, or sales invoices (e.g. 'Client paid £350 for tile installation' or 'Invoice #104 settled £600'), set 	ransaction_type: 'INCOME', category: 'Turnover / Sales Income', and vendor to the client name.
     -------------------------------------------------------
     
     --- FEW-SHOT EXAMPLES ---
@@ -220,8 +210,8 @@ async def process_expense_message(
     
     A sole trader has just sent you a message about a business expense or income receipt.
     Extract the entities based strictly on the user message.
-    Assess your extraction confidence (0.0 to 1.0). If confidence is below 0.92, set `is_ambiguous` to true.
-    If the transaction violates HMRC rules (like client lunches) or lacks clarity, set `is_ambiguous` to true and ask a concise clarification question.
+    Assess your extraction confidence (0.0 to 1.0). If confidence is below 0.92, set is_ambiguous to true.
+    If the transaction violates HMRC rules (like client lunches) or lacks clarity, set is_ambiguous to true and ask a concise clarification question.
     """
     
     if dynamic_enums:
@@ -245,7 +235,7 @@ async def process_expense_message(
                 val = re.sub(r'[^a-zA-Z0-9_]', '_', str(s))
                 if val and val[0].isdigit():
                     val = '_' + val
-                return val
+                return val if val else "_EMPTY"
 
             acct_dict = {safe_enum_name(a.get('Code')): a.get('Code') for a in accts if a.get('Code')}
             tax_dict = {safe_enum_name(t.get('TaxType')): t.get('TaxType') for t in taxes if t.get('TaxType')}
@@ -262,14 +252,12 @@ async def process_expense_message(
                         tax_code=(DynamicTaxEnum, ...)
                     )
                 except Exception as e:
-                    import logging
-                    logging.getLogger(__name__).error(f"Failed to compile dynamic schema: {e}")
+                    logger.error(f"Failed to compile dynamic schema: {e}")
 
     try:
-        # Phase 1: Fast & Cheap (Gemini 2.5 Flash)
+        # Phase 1: Fast & Cheap
         
         if previous_state:
-            import json
             raw_message = f"PREVIOUS STATE:\n{json.dumps(previous_state, indent=2)}\n\nUSER'S LATEST MESSAGE:\n{raw_message}\n\nINSTRUCTION: The user is replying to your previous question. Merge this new information with the PREVIOUS STATE. If they answered your question, update the missing fields (e.g. amount, vendor, category). If everything is now complete, set is_ambiguous to false."
             
         result = await _call_gemini(
@@ -282,17 +270,15 @@ async def process_expense_message(
             if not result.get("auditor_question"):
                 result["auditor_question"] = "Just to be 100% compliant with HMRC, could you confirm the business purpose for this?"
 
-        # Phase 2: Deep Audit Escalation (Gemini 2.5 Pro)
+        # Phase 2: Deep Audit Escalation (Pro Model)
         if result.get("is_ambiguous"):
             logger.info(
-                "Escalating to Gemini 2.5 Pro for deep audit",
-                reason="Flash flagged as ambiguous",
+                "Escalating to deeper audit (Gemini 2.5 Pro)",
+                reason="Flagged as ambiguous",
             )
             pro_result = await _call_gemini(
                 system_instruction, raw_message, media_urls, model="gemini-2.5-flash", sender_id=sender_id, schema=dynamic_schema
             )
-
-            # If Pro ALSO thinks it's ambiguous, or definitively categorizes it, trust Pro.
             result = pro_result
 
         # Human-in-the-loop limit logic (2 turns max)
@@ -307,29 +293,11 @@ async def process_expense_message(
     except Exception as e:
         logger.error("Error calling Gemini API", error=str(e))
         raise e
+
 class AntiHallucinationCheck(BaseModel):
     is_hallucinated: bool = Field(description="True if the parsed JSON contains information (amount, vendor) not present in the user text.")
     hallucination_reason: str = Field(description="If hallucinated, why?")
     corrected_question: str = Field(description="If hallucinated, ask the user to clarify the missing information.")
-
-async def verify_expense_hallucination(raw_message: str, parsed_json: dict, sender_id: str = None) -> dict:
-    import asyncio
-    from ws import manager
-    attempts = 0
-    while attempts < 10:
-        try:
-            return await _do_verify_expense_hallucination(raw_message, parsed_json)
-        except Exception as e:
-            attempts += 1
-            if "429" in str(e) or "RESOURCE_EXHAUSTED" in str(e):
-                if sender_id and attempts == 1:
-                    await manager.send_personal_message({"type": "GRACEFUL_WARNING", "message": "Still thinking... checking HMRC guidelines... ??"}, sender_id)
-                await asyncio.sleep(min(65, 2 ** attempts))
-            else:
-                if attempts >= 5:
-                    raise e
-                await asyncio.sleep(min(10, 2 ** attempts))
-    raise Exception("Max retries exceeded")
 
 async def _do_verify_expense_hallucination(raw_message: str, parsed_json: dict) -> dict:
     system_instruction = """
@@ -339,18 +307,37 @@ async def _do_verify_expense_hallucination(raw_message: str, parsed_json: dict) 
     If the user says "spent 50 at tesco" and AI outputs "amount: 50.0", that is valid.
     Return true for hallucination if the amount or vendor is completely fabricated.
     """
-    contents = [
-        f"USER MESSAGE: {raw_message}",
-        f"PARSED JSON: {json.dumps(parsed_json)}"
-    ]
     
-    response = await client.aio.models.generate_content(
-        model="gemini-2.5-flash",
-        contents=contents,
-        config=types.GenerateContentConfig(
-            system_instruction=system_instruction,
-            response_mime_type="application/json",
-            response_schema=AntiHallucinationCheck,
-        ),
+    config = types.GenerateContentConfig(
+        system_instruction=system_instruction,
+        response_mime_type="application/json",
+        response_schema=AntiHallucinationCheck,
     )
+    
+    prompt = f"USER MESSAGE: {raw_message}\nPARSED JSON: {json.dumps(parsed_json)}"
+    
+    async with gemini_semaphore:
+        response = await client.aio.models.generate_content(
+            model="gemini-2.5-flash",
+            contents=[prompt],
+            config=config
+        )
     return json.loads(response.text)
+
+async def verify_expense_hallucination(raw_message: str, parsed_json: dict, sender_id: str = None, media_urls: list = None) -> dict:
+    from ws import manager
+    attempts = 0
+    while attempts < 10:
+        try:
+            return await _do_verify_expense_hallucination(raw_message, parsed_json)
+        except Exception as e:
+            attempts += 1
+            if "429" in str(e) or "Too Many Requests" in str(e) or "RESOURCE_EXHAUSTED" in str(e):
+                if sender_id and attempts == 1:
+                    await manager.send_personal_message({"type": "GRACEFUL_WARNING", "message": "Still thinking... checking HMRC guidelines... ⏳"}, sender_id)
+                await asyncio.sleep(min(65, 2 ** attempts))
+            else:
+                if attempts >= 5:
+                    raise e
+                await asyncio.sleep(min(10, 2 ** attempts))
+    raise Exception("Max retries exceeded")

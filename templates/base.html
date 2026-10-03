@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Invisible Accountant - Review Queue</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/htmx.org@2.0.3"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        ukblue: '#1d4ed8',
+                        ukgray: '#f3f4f6',
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-gray-100 font-sans text-gray-900 antialiased selection:bg-ukblue selection:text-white">
+    <div class="min-h-screen flex flex-col">
+        <nav class="bg-white border-b border-gray-200 shadow-sm sticky top-0 z-50">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="flex justify-between h-16">
+                    <div class="flex items-center">
+                        <div class="flex-shrink-0 flex items-center space-x-2">
+                            <div class="w-8 h-8 bg-ukblue rounded-md flex items-center justify-center text-white font-bold text-lg">IA</div>
+                            <span class="font-bold text-xl tracking-tight text-gray-800">Invisible Accountant</span>
+                        </div>
+                        <div class="hidden sm:ml-8 sm:flex sm:space-x-8">
+                            <a href="/dashboard" class="border-ukblue text-gray-900 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">Review Queue</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </nav>
+
+        <main class="flex-1 w-full max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
+            {% block content %}{% endblock %}
+        </main>
+        
+        <footer class="bg-white border-t border-gray-200 mt-auto">
+            <div class="max-w-7xl mx-auto py-4 px-4 sm:px-6 lg:px-8 flex justify-between items-center">
+                <p class="text-sm text-gray-500">Built for UK Accountants with ❤️ from Kolkata.</p>
+                <div class="flex space-x-4 text-sm text-gray-400">
+                    <span>Xero Partner</span>
+                    <span>HMRC MTD Ready</span>
+                </div>
+            </div>
+        </footer>
+    </div>
+</body>
+</html>

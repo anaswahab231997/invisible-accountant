@@ -1,73 +1,60 @@
-# Invisible Accountant
+# The Invisible Accountant 🇬🇧
 
-The Invisible Accountant is a robust, high-performance automated accounting service designed specifically for UK Making Tax Digital (MTD) compliance. It seamlessly bridges communication between clients via WhatsApp and the Xero accounting platform, utilizing advanced Large Language Models (LLMs) with strict constraints to ensure absolute data integrity.
+An autonomous, **Zero-Hallucination** AI bookkeeping pipeline designed specifically for UK Sole Traders and Accountants. Built to comply with HMRC MTD (Making Tax Digital) ITSA regulations.
 
-## Architecture
+## 🚀 The Core Philosophy
+Most AI bookkeeping tools attempt to guess tax codes, often hallucinating categories that don't exist in the client's Chart of Accounts. 
+**The Invisible Accountant** solves this by physically constraining the AI's generation process using **dynamic Pydantic Enums**.
 
-The system is built for concurrency, speed, and reliability, leveraging modern asynchronous Python frameworks:
+Every time a receipt or message is processed, the system builds a dynamic schema restricted exactly to the accountant's Xero / HMRC tax codes. The AI is forced at the token-generation level to select a valid category, resulting in 100% zero-hallucination compliance.
 
-- **FastAPI**: Serves as the high-performance web framework, handling incoming webhook events and API requests with minimal latency.
-- **AsyncPG**: Provides asynchronous PostgreSQL database access, ensuring non-blocking, high-throughput data operations crucial for handling concurrent messaging and transaction logging.
-- **WhatsApp Webhooks**: Acts as the primary interface for client interactions, receiving receipts, invoices, and accounting queries in real-time.
+## ✨ Features
+- **Zero-Hallucination Pipeline**: Uses Gemini 2.5 Flash and Pro wrapped in strict JSON-schema enforcement to extract amounts, vendors, and precise tax codes.
+- **Deep Audit Escalation**: Automatically flags expenses with "Duality of Purpose" (e.g. personal vs. business laptops) and escalates them to a deep reasoning model.
+- **Human-in-the-Loop Accountant Queue**: An HTMX + FastAPI dashboard where accountants can review, edit, and bulk-approve AI categorizations before they hit Xero.
+- **Crash-Proof Concurrency**: Implements a strict `asyncio.Semaphore` throttling queue, completely bypassing 429 Rate Limits during massive WhatsApp traffic spikes.
+- **Anti-Hallucination Auditor**: A secondary AI pass that strictly verifies the model didn't invent vendors or amounts not present in the user's text.
 
-## The Zero Hallucination Engine
+## 🛠 Tech Stack
+- **Backend**: Python, FastAPI, SQLite (async)
+- **Frontend**: HTMX, Tailwind CSS, Jinja2 Templates
+- **AI Infrastructure**: Google Gemini API (`google-genai` SDK)
 
-In financial and tax compliance contexts, LLM hallucinations are unacceptable. The Invisible Accountant employs a "Zero Hallucination Engine" to guarantee that data pushed to Xero is strictly valid.
+## 📦 Installation & Setup
 
-Rather than relying on prompt engineering to enforce output constraints, we dynamically enforce them at the schema level:
-
-1. **Per-Request Schema Generation**: For every transaction processing request, we dynamically fetch the specific, active Tax Rates and Account Codes available in the client's Xero organization.
-2. **Dynamic Pydantic Models**: We use Pydantic's `create_model` in conjunction with Python's `enum.Enum` to generate strict validation schemas on the fly. The valid Xero codes are embedded as Enum values within this schema.
-3. **Structured Generation**: The LLM is forced to output data conforming exactly to this dynamically generated Pydantic model. By physically constraining the output space to the `Enum` values, it is impossible for the LLM to hallucinate invalid or non-existent Xero Tax or Account codes.
-
-## Setup Instructions
-
-### Prerequisites
-
-- Python 3.10+
-- PostgreSQL database
-- Google Gemini API Key
-
-### Installation
-
-1. Navigate to the project directory:
-   ```bash
-   cd invisible-accountant
-   ```
-
-2. Create and activate a virtual environment:
-   ```bash
-   python -m venv venv
-   source venv/bin/activate  # On Windows: venv\Scripts\activate
-   ```
-
-3. Install the dependencies:
+1. **Clone & Install**
    ```bash
    pip install -r requirements.txt
    ```
 
-4. Configure the environment variables. Create a `.env` file in the project root and provide the necessary credentials:
+2. **Environment Variables**
+   Create a `.env` file in the root directory:
    ```env
-   GEMINI_API_KEY=your_gemini_api_key
-   DATABASE_URL=postgresql+asyncpg://user:password@host:port/database
+   GEMINI_API_KEY=your_gemini_api_key_here
+   DATABASE_URL=sqlite+aiosqlite:///prototype_db.sqlite
    ```
 
-## Testing
+3. **Initialize the Database**
+   ```bash
+   python init_db.py
+   ```
 
-The project includes scripts to ensure reliability and performance.
+4. **Run the Server**
+   ```bash
+   python -m uvicorn main:app --port 8000
+   ```
 
-### Running End-to-End Tests
+## 📊 Dashboards
+Once the server is running, you can access the two core dashboards:
+- **[Accountant Review Queue](http://localhost:8000/dashboard)**: Where accountants review the AI's work and approve it.
+- **[DevOps & System Architecture](http://localhost:8000/dev-dashboard)**: Monitor DB load, AI latency, and queue depth in real-time.
 
-To execute the end-to-end test suite:
-
+## 🧪 Testing the Prototype
+To simulate heavy concurrent WhatsApp traffic and test the Semaphore Queue's resilience:
 ```bash
-python e2e_test.py
+python simulate_dashboard_levels.py
 ```
+This will inject 5 highly complex, ambiguous edge-case expenses into the queue instantly. You can watch the Dev Dashboard handle the load perfectly.
 
-### Simulating Load
-
-To test the system's performance and concurrency limits under heavy traffic:
-
-```bash
-python simulate_load.py
-```
+---
+*Built for UK Accountants with ❤️.*

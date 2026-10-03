@@ -688,3 +688,261 @@ AFC is enabled with max remote calls: 10.
 {"chat_id": 67, "error": "Max retries exceeded", "event": "Error processing intake", "level": "error", "logger": "main", "timestamp": "2026-10-02T18:00:48.120285Z"}
 {"error": "Max retries exceeded", "event": "Error calling Gemini API", "level": "error", "logger": "agents", "timestamp": "2026-10-02T18:00:51.721301Z"}
 {"chat_id": 80, "error": "Max retries exceeded", "event": "Error processing intake", "level": "error", "logger": "main", "timestamp": "2026-10-02T18:00:51.721482Z"}
+AFC is enabled with max remote calls: 10.
+{"reason": "Flash flagged as ambiguous", "event": "Escalating to Gemini 2.5 Pro for deep audit", "level": "info", "logger": "agents", "timestamp": "2026-10-03T06:43:08.851759Z"}
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+{"error": "Max retries exceeded", "event": "Error calling Gemini API", "level": "error", "logger": "agents", "timestamp": "2026-10-03T06:51:10.529303Z"}
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+{"error": "Max retries exceeded", "event": "Error calling Gemini API", "level": "error", "logger": "agents", "timestamp": "2026-10-03T06:57:42.980528Z"}
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+{"event": "HF_TOKEN environment variable is missing. HF Inference will fail.", "level": "warning", "logger": "agents", "timestamp": "2026-10-03T07:45:09.579909Z"}
+HTTP Request: POST https://router.huggingface.co/v1/chat/completions "HTTP/1.1 200 OK"
+HTTP Request: POST https://router.huggingface.co/v1/chat/completions "HTTP/1.1 200 OK"
+{"reason": "Flagged as ambiguous", "event": "Escalating to deeper audit", "level": "info", "logger": "agents", "timestamp": "2026-10-03T09:13:07.039540Z"}
+HTTP Request: POST https://router.huggingface.co/v1/chat/completions "HTTP/1.1 200 OK"
+HTTP Request: POST https://router.huggingface.co/v1/chat/completions "HTTP/1.1 200 OK"
+HTTP Request: POST https://router.huggingface.co/v1/chat/completions "HTTP/1.1 200 OK"
+{"reason": "Flagged as ambiguous", "event": "Escalating to deeper audit", "level": "info", "logger": "agents", "timestamp": "2026-10-03T09:14:53.173975Z"}
+HTTP Request: POST https://router.huggingface.co/v1/chat/completions "HTTP/1.1 200 OK"
+HTTP Request: POST https://router.huggingface.co/v1/chat/completions "HTTP/1.1 200 OK"
+{"reason": "Flagged as ambiguous", "event": "Escalating to deeper audit", "level": "info", "logger": "agents", "timestamp": "2026-10-03T09:15:12.941737Z"}
+HTTP Request: POST https://router.huggingface.co/v1/chat/completions "HTTP/1.1 200 OK"
+HTTP Request: POST https://router.huggingface.co/v1/chat/completions "HTTP/1.1 200 OK"
+HTTP Request: POST https://router.huggingface.co/v1/chat/completions "HTTP/1.1 200 OK"
+{"chat_id": 103, "error": "verify_expense_hallucination() got an unexpected keyword argument 'media_urls'", "event": "Error processing intake", "level": "error", "logger": "main", "timestamp": "2026-10-03T09:18:34.303491Z"}
+HTTP Request: POST https://router.huggingface.co/v1/chat/completions "HTTP/1.1 200 OK"
+{"chat_id": 104, "error": "verify_expense_hallucination() got an unexpected keyword argument 'media_urls'", "event": "Error processing intake", "level": "error", "logger": "main", "timestamp": "2026-10-03T09:18:34.509037Z"}
+HTTP Request: POST https://router.huggingface.co/v1/chat/completions "HTTP/1.1 200 OK"
+{"reason": "Flagged as ambiguous", "event": "Escalating to deeper audit", "level": "info", "logger": "agents", "timestamp": "2026-10-03T09:18:37.599375Z"}
+HTTP Request: POST https://router.huggingface.co/v1/chat/completions "HTTP/1.1 200 OK"
+{"reason": "Flagged as ambiguous", "event": "Escalating to deeper audit", "level": "info", "logger": "agents", "timestamp": "2026-10-03T09:18:38.255290Z"}
+HTTP Request: POST https://router.huggingface.co/v1/chat/completions "HTTP/1.1 200 OK"
+{"reason": "Flagged as ambiguous", "event": "Escalating to deeper audit", "level": "info", "logger": "agents", "timestamp": "2026-10-03T09:18:43.445257Z"}
+HTTP Request: POST https://router.huggingface.co/v1/chat/completions "HTTP/1.1 200 OK"
+{"chat_id": 105, "error": "verify_expense_hallucination() got an unexpected keyword argument 'media_urls'", "event": "Error processing intake", "level": "error", "logger": "main", "timestamp": "2026-10-03T09:18:47.023572Z"}
+HTTP Request: POST https://router.huggingface.co/v1/chat/completions "HTTP/1.1 200 OK"
+{"chat_id": 101, "error": "verify_expense_hallucination() got an unexpected keyword argument 'media_urls'", "event": "Error processing intake", "level": "error", "logger": "main", "timestamp": "2026-10-03T09:18:47.951859Z"}
+HTTP Request: POST https://router.huggingface.co/v1/chat/completions "HTTP/1.1 200 OK"
+{"chat_id": 102, "error": "verify_expense_hallucination() got an unexpected keyword argument 'media_urls'", "event": "Error processing intake", "level": "error", "logger": "main", "timestamp": "2026-10-03T09:18:52.022709Z"}
+HTTP Request: POST https://router.huggingface.co/v1/chat/completions "HTTP/1.1 200 OK"
+HTTP Request: POST https://router.huggingface.co/v1/chat/completions "HTTP/1.1 200 OK"
+HTTP Request: POST https://router.huggingface.co/v1/chat/completions "HTTP/1.1 200 OK"
+{"sender_id": "demo_user_3", "message": "I couldn't detect an expense amount. Could you clarify the amount?", "event": "Outbound WhatsApp message", "level": "info", "logger": "main", "timestamp": "2026-10-03T09:19:33.038394Z"}
+HTTP Request: POST https://router.huggingface.co/v1/chat/completions "HTTP/1.1 200 OK"
+{"sender_id": "demo_user_2", "message": "I couldn't detect an expense amount. Could you clarify the amount?", "event": "Outbound WhatsApp message", "level": "info", "logger": "main", "timestamp": "2026-10-03T09:19:33.402514Z"}
+HTTP Request: POST https://router.huggingface.co/v1/chat/completions "HTTP/1.1 200 OK"
+{"reason": "Flagged as ambiguous", "event": "Escalating to deeper audit", "level": "info", "logger": "agents", "timestamp": "2026-10-03T09:19:33.640161Z"}
+HTTP Request: POST https://router.huggingface.co/v1/chat/completions "HTTP/1.1 200 OK"
+{"reason": "Flagged as ambiguous", "event": "Escalating to deeper audit", "level": "info", "logger": "agents", "timestamp": "2026-10-03T09:19:33.906329Z"}
+HTTP Request: POST https://router.huggingface.co/v1/chat/completions "HTTP/1.1 200 OK"
+{"reason": "Flagged as ambiguous", "event": "Escalating to deeper audit", "level": "info", "logger": "agents", "timestamp": "2026-10-03T09:19:34.206434Z"}
+HTTP Request: POST https://router.huggingface.co/v1/chat/completions "HTTP/1.1 402 Payment Required"
+HTTP Request: POST https://router.huggingface.co/v1/chat/completions "HTTP/1.1 402 Payment Required"
+HTTP Request: POST https://router.huggingface.co/v1/chat/completions "HTTP/1.1 402 Payment Required"
+HTTP Request: POST https://router.huggingface.co/v1/chat/completions "HTTP/1.1 200 OK"
+HTTP Request: POST https://router.huggingface.co/v1/chat/completions "HTTP/1.1 200 OK"
+HTTP Request: POST https://router.huggingface.co/v1/chat/completions "HTTP/1.1 402 Payment Required"
+HTTP Request: POST https://router.huggingface.co/v1/chat/completions "HTTP/1.1 402 Payment Required"
+HTTP Request: POST https://router.huggingface.co/v1/chat/completions "HTTP/1.1 402 Payment Required"
+HTTP Request: POST https://router.huggingface.co/v1/chat/completions "HTTP/1.1 402 Payment Required"
+HTTP Request: POST https://router.huggingface.co/v1/chat/completions "HTTP/1.1 402 Payment Required"
+HTTP Request: POST https://router.huggingface.co/v1/chat/completions "HTTP/1.1 402 Payment Required"
+HTTP Request: POST https://router.huggingface.co/v1/chat/completions "HTTP/1.1 402 Payment Required"
+HTTP Request: POST https://router.huggingface.co/v1/chat/completions "HTTP/1.1 402 Payment Required"
+HTTP Request: POST https://router.huggingface.co/v1/chat/completions "HTTP/1.1 402 Payment Required"
+HTTP Request: POST https://router.huggingface.co/v1/chat/completions "HTTP/1.1 402 Payment Required"
+{"error": "Client error '402 Payment Required' for url 'https://router.huggingface.co/v1/chat/completions' (Request ID: Root=1-6ac0c8bf-060609634b5410d1787e7d45;87d3ba28-d210-4732-8bdd-ac39e4c46514)\nFor more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/402\n\nYou have depleted your monthly included credits. Purchase pre-paid credits to continue using Inference Providers. Alternatively, subscribe to PRO to get 20x more included usage.", "event": "Error calling Inference API", "level": "error", "logger": "agents", "timestamp": "2026-10-03T09:19:59.562646Z"}
+{"chat_id": 107, "error": "Client error '402 Payment Required' for url 'https://router.huggingface.co/v1/chat/completions' (Request ID: Root=1-6ac0c8bf-060609634b5410d1787e7d45;87d3ba28-d210-4732-8bdd-ac39e4c46514)\nFor more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/402\n\nYou have depleted your monthly included credits. Purchase pre-paid credits to continue using Inference Providers. Alternatively, subscribe to PRO to get 20x more included usage.", "event": "Error processing intake", "level": "error", "logger": "main", "timestamp": "2026-10-03T09:19:59.562755Z"}
+HTTP Request: POST https://router.huggingface.co/v1/chat/completions "HTTP/1.1 402 Payment Required"
+{"chat_id": 106, "error": "Client error '402 Payment Required' for url 'https://router.huggingface.co/v1/chat/completions' (Request ID: Root=1-6ac0c8c8-03b483b805ead2b116d2d3a0;97474263-7a44-4326-ac1a-b35b7a7c74f5)\nFor more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/402\n\nYou have depleted your monthly included credits. Purchase pre-paid credits to continue using Inference Providers. Alternatively, subscribe to PRO to get 20x more included usage.", "event": "Error processing intake", "level": "error", "logger": "main", "timestamp": "2026-10-03T09:20:08.539871Z"}
+HTTP Request: POST https://router.huggingface.co/v1/chat/completions "HTTP/1.1 402 Payment Required"
+{"chat_id": 110, "error": "Client error '402 Payment Required' for url 'https://router.huggingface.co/v1/chat/completions' (Request ID: Root=1-6ac0c8c8-1fc6c2a20f75db270d8ca186;25146c3f-6d2f-4bd5-aff0-7772a64f2648)\nFor more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/402\n\nYou have depleted your monthly included credits. Purchase pre-paid credits to continue using Inference Providers. Alternatively, subscribe to PRO to get 20x more included usage.", "event": "Error processing intake", "level": "error", "logger": "main", "timestamp": "2026-10-03T09:20:08.728385Z"}
+AFC is enabled with max remote calls: 10.
+{"reason": "Flagged as ambiguous", "event": "Escalating to deeper audit (Gemini 2.5 Pro)", "level": "info", "logger": "agents", "timestamp": "2026-10-03T09:33:08.039011Z"}
+AFC is enabled with max remote calls: 10.
+{"reason": "Flagged as ambiguous", "event": "Escalating to deeper audit (Gemini 2.5 Pro)", "level": "info", "logger": "agents", "timestamp": "2026-10-03T09:33:13.074804Z"}
+AFC is enabled with max remote calls: 10.
+{"reason": "Flagged as ambiguous", "event": "Escalating to deeper audit (Gemini 2.5 Pro)", "level": "info", "logger": "agents", "timestamp": "2026-10-03T09:33:17.562449Z"}
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+{"sender_id": "demo_user_2", "message": "I couldn't detect an expense amount. Could you clarify the amount?", "event": "Outbound WhatsApp message", "level": "info", "logger": "main", "timestamp": "2026-10-03T09:33:34.491260Z"}
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+{"error": "404 NOT_FOUND. {'error': {'code': 404, 'message': 'This model models/gemini-2.5-pro is no longer available to new users. Please update your code to use models/gemini-3.1-pro-preview for the latest features and improvements. We recommend you to use the Interactions API (https://ai.google.dev/gemini-api/docs/get-started).', 'status': 'NOT_FOUND'}}", "event": "Error calling Gemini API", "level": "error", "logger": "agents", "timestamp": "2026-10-03T09:33:58.728653Z"}
+{"chat_id": 111, "error": "404 NOT_FOUND. {'error': {'code': 404, 'message': 'This model models/gemini-2.5-pro is no longer available to new users. Please update your code to use models/gemini-3.1-pro-preview for the latest features and improvements. We recommend you to use the Interactions API (https://ai.google.dev/gemini-api/docs/get-started).', 'status': 'NOT_FOUND'}}", "event": "Error processing intake", "level": "error", "logger": "main", "timestamp": "2026-10-03T09:33:58.728795Z"}
+AFC is enabled with max remote calls: 10.
+{"error": "404 NOT_FOUND. {'error': {'code': 404, 'message': 'This model models/gemini-2.5-pro is no longer available to new users. Please update your code to use models/gemini-3.1-pro-preview for the latest features and improvements. We recommend you to use the Interactions API (https://ai.google.dev/gemini-api/docs/get-started).', 'status': 'NOT_FOUND'}}", "event": "Error calling Gemini API", "level": "error", "logger": "agents", "timestamp": "2026-10-03T09:33:59.154033Z"}
+{"chat_id": 115, "error": "404 NOT_FOUND. {'error': {'code': 404, 'message': 'This model models/gemini-2.5-pro is no longer available to new users. Please update your code to use models/gemini-3.1-pro-preview for the latest features and improvements. We recommend you to use the Interactions API (https://ai.google.dev/gemini-api/docs/get-started).', 'status': 'NOT_FOUND'}}", "event": "Error processing intake", "level": "error", "logger": "main", "timestamp": "2026-10-03T09:33:59.154182Z"}
+AFC is enabled with max remote calls: 10.
+{"error": "404 NOT_FOUND. {'error': {'code': 404, 'message': 'This model models/gemini-2.5-pro is no longer available to new users. Please update your code to use models/gemini-3.1-pro-preview for the latest features and improvements. We recommend you to use the Interactions API (https://ai.google.dev/gemini-api/docs/get-started).', 'status': 'NOT_FOUND'}}", "event": "Error calling Gemini API", "level": "error", "logger": "agents", "timestamp": "2026-10-03T09:33:59.610126Z"}
+{"chat_id": 112, "error": "404 NOT_FOUND. {'error': {'code': 404, 'message': 'This model models/gemini-2.5-pro is no longer available to new users. Please update your code to use models/gemini-3.1-pro-preview for the latest features and improvements. We recommend you to use the Interactions API (https://ai.google.dev/gemini-api/docs/get-started).', 'status': 'NOT_FOUND'}}", "event": "Error processing intake", "level": "error", "logger": "main", "timestamp": "2026-10-03T09:33:59.610567Z"}
+AFC is enabled with max remote calls: 10.
+{"sender_id": "demo_user_3", "message": "I couldn't detect an expense amount. Could you clarify the amount?", "event": "Outbound WhatsApp message", "level": "info", "logger": "main", "timestamp": "2026-10-03T09:34:08.330111Z"}
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+{"error": "404 NOT_FOUND. {'error': {'code': 404, 'message': 'models/gemini-3.1-flash-preview is not found for API version v1beta, or is not supported for generateContent. Call ModelService.ListModels to see the list of available models and their supported methods.', 'status': 'NOT_FOUND'}}", "event": "Error calling Gemini API", "level": "error", "logger": "agents", "timestamp": "2026-10-03T09:35:21.887669Z"}
+{"chat_id": 116, "error": "404 NOT_FOUND. {'error': {'code': 404, 'message': 'models/gemini-3.1-flash-preview is not found for API version v1beta, or is not supported for generateContent. Call ModelService.ListModels to see the list of available models and their supported methods.', 'status': 'NOT_FOUND'}}", "event": "Error processing intake", "level": "error", "logger": "main", "timestamp": "2026-10-03T09:35:21.887971Z"}
+AFC is enabled with max remote calls: 10.
+{"error": "404 NOT_FOUND. {'error': {'code': 404, 'message': 'models/gemini-3.1-flash-preview is not found for API version v1beta, or is not supported for generateContent. Call ModelService.ListModels to see the list of available models and their supported methods.', 'status': 'NOT_FOUND'}}", "event": "Error calling Gemini API", "level": "error", "logger": "agents", "timestamp": "2026-10-03T09:35:22.340459Z"}
+{"chat_id": 120, "error": "404 NOT_FOUND. {'error': {'code': 404, 'message': 'models/gemini-3.1-flash-preview is not found for API version v1beta, or is not supported for generateContent. Call ModelService.ListModels to see the list of available models and their supported methods.', 'status': 'NOT_FOUND'}}", "event": "Error processing intake", "level": "error", "logger": "main", "timestamp": "2026-10-03T09:35:22.340726Z"}
+AFC is enabled with max remote calls: 10.
+{"error": "404 NOT_FOUND. {'error': {'code': 404, 'message': 'models/gemini-3.1-flash-preview is not found for API version v1beta, or is not supported for generateContent. Call ModelService.ListModels to see the list of available models and their supported methods.', 'status': 'NOT_FOUND'}}", "event": "Error calling Gemini API", "level": "error", "logger": "agents", "timestamp": "2026-10-03T09:35:22.665614Z"}
+{"chat_id": 117, "error": "404 NOT_FOUND. {'error': {'code': 404, 'message': 'models/gemini-3.1-flash-preview is not found for API version v1beta, or is not supported for generateContent. Call ModelService.ListModels to see the list of available models and their supported methods.', 'status': 'NOT_FOUND'}}", "event": "Error processing intake", "level": "error", "logger": "main", "timestamp": "2026-10-03T09:35:22.665897Z"}
+AFC is enabled with max remote calls: 10.
+{"error": "404 NOT_FOUND. {'error': {'code': 404, 'message': 'models/gemini-3.1-flash-preview is not found for API version v1beta, or is not supported for generateContent. Call ModelService.ListModels to see the list of available models and their supported methods.', 'status': 'NOT_FOUND'}}", "event": "Error calling Gemini API", "level": "error", "logger": "agents", "timestamp": "2026-10-03T09:35:23.008615Z"}
+{"chat_id": 119, "error": "404 NOT_FOUND. {'error': {'code': 404, 'message': 'models/gemini-3.1-flash-preview is not found for API version v1beta, or is not supported for generateContent. Call ModelService.ListModels to see the list of available models and their supported methods.', 'status': 'NOT_FOUND'}}", "event": "Error processing intake", "level": "error", "logger": "main", "timestamp": "2026-10-03T09:35:23.008766Z"}
+AFC is enabled with max remote calls: 10.
+{"error": "404 NOT_FOUND. {'error': {'code': 404, 'message': 'models/gemini-3.1-flash-preview is not found for API version v1beta, or is not supported for generateContent. Call ModelService.ListModels to see the list of available models and their supported methods.', 'status': 'NOT_FOUND'}}", "event": "Error calling Gemini API", "level": "error", "logger": "agents", "timestamp": "2026-10-03T09:35:23.368653Z"}
+{"chat_id": 118, "error": "404 NOT_FOUND. {'error': {'code': 404, 'message': 'models/gemini-3.1-flash-preview is not found for API version v1beta, or is not supported for generateContent. Call ModelService.ListModels to see the list of available models and their supported methods.', 'status': 'NOT_FOUND'}}", "event": "Error processing intake", "level": "error", "logger": "main", "timestamp": "2026-10-03T09:35:23.368818Z"}
+AFC is enabled with max remote calls: 10.
+{"reason": "Flagged as ambiguous", "event": "Escalating to deeper audit (Gemini 2.5 Pro)", "level": "info", "logger": "agents", "timestamp": "2026-10-03T09:36:01.087742Z"}
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+{"reason": "Flagged as ambiguous", "event": "Escalating to deeper audit (Gemini 2.5 Pro)", "level": "info", "logger": "agents", "timestamp": "2026-10-03T09:36:12.423760Z"}
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+{"reason": "Flagged as ambiguous", "event": "Escalating to deeper audit (Gemini 2.5 Pro)", "level": "info", "logger": "agents", "timestamp": "2026-10-03T09:36:19.854682Z"}
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+{"sender_id": "demo_user_2", "message": "I couldn't detect an expense amount. Could you clarify the amount?", "event": "Outbound WhatsApp message", "level": "info", "logger": "main", "timestamp": "2026-10-03T09:36:31.487260Z"}
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+{"sender_id": "demo_user_3", "message": "I couldn't detect an expense amount. Could you clarify the amount?", "event": "Outbound WhatsApp message", "level": "info", "logger": "main", "timestamp": "2026-10-03T09:37:08.659681Z"}
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+{"sender_id": "demo_user_0", "message": "Could you please specify where the laptop was bought from?", "event": "Outbound WhatsApp message", "level": "info", "logger": "main", "timestamp": "2026-10-03T09:37:21.576247Z"}
+AFC is enabled with max remote calls: 10.
+{"sender_id": "demo_user_1", "message": "Got the \u00a350 for the taxi and tip to London. Can you tell me the business purpose of this trip?", "event": "Outbound WhatsApp message", "level": "info", "logger": "main", "timestamp": "2026-10-03T09:37:23.450981Z"}
+{"sender_id": "demo_user_4", "message": "I've noted the \nHalf the \u00a3200 at Marks & Spencer. Unfortunately, HMRC doesn't allow claims for everyday clothing like suits, even if bought specifically for work, as they have a 'duality of purpose'. I'll keep this recorded but we can't offset it against tax.", "event": "Outbound WhatsApp message", "level": "info", "logger": "main", "timestamp": "2026-10-03T09:37:24.890195Z"}
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
+AFC is enabled with max remote calls: 10.
