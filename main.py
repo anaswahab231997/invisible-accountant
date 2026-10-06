@@ -53,6 +53,18 @@ limiter = Limiter(key_func=get_remote_address)
 app = FastAPI(
     title="Invisible Accountant",
 )
+
+
+@app.middleware("http")
+async def add_security_headers(request: Request, call_next):
+    response = await call_next(request)
+    response.headers["Strict-Transport-Security"] = "max-age=31536000; includeSubDomains"
+    response.headers["X-Frame-Options"] = "SAMEORIGIN"
+    response.headers["X-Content-Type-Options"] = "nosniff"
+    response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
+    response.headers["Cross-Origin-Opener-Policy"] = "same-origin"
+    return response
+
 app.include_router(dashboard_router)
 app.include_router(dev_dashboard_router)
 app.mount("/assets", StaticFiles(directory="assets"), name="assets")
