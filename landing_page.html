@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Invisible Accountant | Stress-Free UK Taxes</title>
+    <meta name="description" content="AI-powered WhatsApp assistant for UK MTD compliance. Simply snap your receipts and let our AI categorize, organize, and calculate your taxes.">
     <link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -245,14 +246,14 @@
 
             <div id="waitlist" class="bg-cardbg p-8 rounded-2xl shadow-soft border border-gray-100 max-w-xl min-h-[300px]">
                 <div id="quiz-step-1" class="quiz-step">
-                    <h3 class="font-heading font-bold text-xl mb-2 text-charcoal">MTD Readiness Assessment</h3>
+                    <h2 class="font-heading font-bold text-xl mb-2 text-charcoal">MTD Readiness Assessment</h2>
                     <p class="text-slate mb-6 text-sm">To qualify for the beta vault, please confirm your estimated annual revenue.</p>
                     <button class="quiz-btn" onclick="setRevenue('under50'); nextQuizStep(2)">Under £50,000 <i data-lucide="chevron-right" class="w-4 h-4 text-gray-400"></i></button>
                     <button class="quiz-btn" onclick="setRevenue('over50'); nextQuizStep(2)">£50,000 - £85,000 <i data-lucide="chevron-right" class="w-4 h-4 text-gray-400"></i></button>
                     <button class="quiz-btn" onclick="setRevenue('over85'); nextQuizStep(2)">Over £85,000 <i data-lucide="chevron-right" class="w-4 h-4 text-gray-400"></i></button>
                 </div>
                 <div id="quiz-step-2" class="quiz-step hidden">
-                    <h3 class="font-heading font-bold text-xl mb-2 text-charcoal">Current Workflow</h3>
+                    <h2 class="font-heading font-bold text-xl mb-2 text-charcoal">Current Workflow</h2>
                     <p class="text-slate mb-6 text-sm">How do you currently track your business expenses?</p>
                     <button class="quiz-btn" onclick="nextQuizStep(3)">Paper & Shoeboxes <i data-lucide="chevron-right" class="w-4 h-4 text-gray-400"></i></button>
                     <button class="quiz-btn" onclick="nextQuizStep(3)">Excel Spreadsheets <i data-lucide="chevron-right" class="w-4 h-4 text-gray-400"></i></button>
@@ -262,7 +263,7 @@
                     <div class="flex items-center gap-2 text-emerald-700 bg-mint px-3 py-1 rounded-full text-sm font-bold w-max mb-4">
                         <i data-lucide="check-circle-2" class="w-4 h-4"></i> Qualified for Beta
                     </div>
-                    <h3 id="quiz-result-title" class="font-heading font-bold text-xl mb-2 text-charcoal">You are required to comply with MTD.</h3>
+                    <h2 id="quiz-result-title" class="font-heading font-bold text-xl mb-2 text-charcoal">You are required to comply with MTD.</h2>
                     <p id="quiz-result-desc" class="text-slate mb-6 text-sm leading-relaxed">Based on your profile, you will face quarterly mandatory updates by April 2026. Secure your spot in the Invisible Accountant Beta vault now.</p>
                     <div class="flex items-center justify-between mb-4 bg-gray-50 rounded-lg p-3 border border-gray-200">
                         <span class="text-slate font-medium text-sm">Queue Position</span>
