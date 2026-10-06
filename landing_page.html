@@ -6,6 +6,8 @@
     <title>Invisible Accountant | Stress-Free UK Taxes</title>
     <link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
     <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/lucide@latest"></script>
     <script src="https://unpkg.com/@studio-freight/lenis@1.0.39/dist/lenis.min.js"></script>
@@ -137,7 +139,7 @@
         }
         
         /* Modern iOS WhatsApp styling */
-        .chat-bg { background-color: #EFEAE2; background-image: url('https://w0.peakpx.com/wallpaper/818/148/HD-wallpaper-whatsapp-background-cool-dark-green-light-pattern-patterns-texture-textures.jpg'); background-size: cover; background-blend-mode: screen; }
+        .chat-bg { background-color: #EFEAE2; }
         .msg-ai { background: #FFFFFF; color: #1F2937; border-radius: 18px; border-bottom-left-radius: 4px; box-shadow: 0 1px 2px rgba(0,0,0,0.05); }
         .msg-user { background: #D9FDD3; color: #1F2937; border-radius: 18px; border-bottom-right-radius: 4px; box-shadow: 0 1px 2px rgba(0,0,0,0.05); }
         
@@ -222,7 +224,7 @@
 
     <nav class="max-w-7xl mx-auto px-6 md:px-12 py-6 flex justify-between items-center">
         <a href="/" class="block">
-            <img src="assets/invisible_accountant_logo.svg" alt="Invisible Accountant" class="h-16 sm:h-20 md:h-24 lg:h-28 w-auto max-w-full">
+            <img src="assets/invisible_accountant_logo.svg" alt="Invisible Accountant" width="300" height="112" class="h-16 sm:h-20 md:h-24 lg:h-28 w-auto max-w-full">
         </a>
     </nav>
 
@@ -278,7 +280,7 @@
             <div class="absolute inset-0 bg-gradient-to-tr from-ukblue/5 to-wapp/10 rounded-full blur-3xl -z-10 transform scale-110"></div>
             
             <!-- Premium iPhone 15 Frame -->
-            <div class="phone-wrapper phone-hardware-buttons transform scale-[0.85] sm:scale-100 origin-top mb-0 sm:mb-0" onclick="expandPhone(event)">
+            <div class="phone-wrapper phone-hardware-buttons transform scale-[0.85] sm:scale-100 origin-top mb-0 sm:mb-0" role="button" tabindex="0" aria-label="Interact with WhatsApp demo" onclick="expandPhone(event)" onkeydown="if(event.key === 'Enter' || event.key === ' ') { event.preventDefault(); expandPhone(event); }">
                 <div class="phone">
                     <div class="glass-glare"></div>
                     
@@ -316,8 +318,8 @@
                                 </div>
                             </div>
                             <div class="flex gap-4 text-[#007AFF]">
-                                <i data-lucide="video" class="w-[22px] h-[22px]"></i>
-                                <i data-lucide="phone" class="w-5 h-5"></i>
+                                <button aria-label="Video call"><i data-lucide="video" class="w-[22px] h-[22px]"></i></button>
+                                <button aria-label="Audio call"><i data-lucide="phone" class="w-5 h-5"></i></button>
                             </div>
                         </div>
                     </div>
@@ -334,9 +336,9 @@
 
                     <!-- Modern iOS WhatsApp Footer (flex-shrink-0 keeps it firmly at the bottom) -->
                     <div class="bg-[#F6F6F6] px-3 py-2 flex gap-2 items-center z-20 flex-shrink-0 border-t border-gray-200 footer-container transition-all">
-                        <button class="text-[#007AFF] p-1"><i data-lucide="plus" class="w-6 h-6"></i></button>
-                        <input type="text" id="demoInput" placeholder="Message" class="flex-1 bg-white text-charcoal rounded-full px-4 py-[6px] border border-gray-300 text-base outline-none shadow-sm focus:border-gray-400 transition-all" onkeypress="if(event.key==='Enter') submitDemo()">
-                        <button onclick="submitDemo()" class="text-[#007AFF] p-1"><i data-lucide="mic" class="w-6 h-6"></i></button>
+                        <button class="text-[#007AFF] p-1" aria-label="Add attachment"><i data-lucide="plus" class="w-6 h-6"></i></button>
+                        <input type="text" id="demoInput" aria-label="Message text" placeholder="Message" class="flex-1 bg-white text-charcoal rounded-full px-4 py-[6px] border border-gray-300 text-base outline-none shadow-sm focus:border-gray-400 transition-all" onkeypress="if(event.key==='Enter') submitDemo()">
+                        <button onclick="submitDemo()" aria-label="Send voice message or submit" class="text-[#007AFF] p-1"><i data-lucide="mic" class="w-6 h-6"></i></button>
                     </div>
                 </div>
             </div>
@@ -667,14 +669,20 @@
                 document.getElementById('card-context').classList.replace('opacity-0', 'opacity-100');
                 document.getElementById('card-context').classList.replace('translate-y-4', 'translate-y-0');
                 
-                document.getElementById('card-vault').classList.replace('opacity-0', 'opacity-100');
-                document.getElementById('card-vault').classList.replace('translate-y-4', 'translate-y-0');
+                let vault = document.getElementById('card-vault');
+                if (vault) {
+                    vault.classList.replace('opacity-0', 'opacity-100');
+                    vault.classList.replace('translate-y-4', 'translate-y-0');
+                }
             } else {
                 document.getElementById('card-context').classList.replace('opacity-100', 'opacity-0');
                 document.getElementById('card-context').classList.replace('translate-y-0', 'translate-y-4');
                 
-                document.getElementById('card-vault').classList.replace('opacity-100', 'opacity-0');
-                document.getElementById('card-vault').classList.replace('translate-y-0', 'translate-y-4');
+                let vault = document.getElementById('card-vault');
+                if (vault) {
+                    vault.classList.replace('opacity-100', 'opacity-0');
+                    vault.classList.replace('translate-y-0', 'translate-y-4');
+                }
             }
         });
 

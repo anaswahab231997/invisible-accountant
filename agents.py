@@ -7,6 +7,7 @@ from dotenv import load_dotenv
 from google import genai
 from google.genai import types
 from enum import Enum
+from typing import Optional
 
 load_dotenv()
 logger = get_logger(__name__)
@@ -16,9 +17,6 @@ if not API_KEY:
     logger.warning("GEMINI_API_KEY environment variable is missing.")
 
 client = genai.Client(api_key=API_KEY)
-
-# Strict concurrency throttle (Semaphore=1) to prevent 429s on free tier
-gemini_semaphore = asyncio.Semaphore(1)
 
 class HMRCCategory(str, Enum):
     TURNOVER_SALES = "Turnover / Sales Income"
@@ -35,6 +33,7 @@ class HMRCCategory(str, Enum):
     PROFESSIONAL_FEES = "Professional fees"
     DEPRECIATION_AND_LOSS_OF_ASSETS = "Depreciation and loss of assets"
     OTHER_EXPENSES = "Other expenses"
+    NON_ALLOWABLE = "Non-allowable"
 
 class ExpenseCategorization(BaseModel):
     transaction_type: str = Field(
@@ -57,12 +56,26 @@ class ExpenseCategorization(BaseModel):
         description="The name of the shop, client, or business entity associated with the transaction."
     )
     amount: float = Field(description="The monetary amount (as a float).")
+    vat_amount: Optional[float] = Field(
+        default=None,
+        description="The VAT amount if explicitly mentioned or deducible. Otherwise null."
+    )
+    has_valid_vat_receipt: bool = Field(
+        description="True if the user explicitly confirms they have a VAT receipt or invoice."
+    )
     category: HMRCCategory = Field(
         description="Map the transaction to exactly ONE of the official HMRC MTD ITSA categories."
     )
     tax_code: str = Field(
         default="20% (VAT on Expenses)",
-        description="The applicable tax code."
+        description="The applicable tax code. MUST be 'No VAT' or 'Zero Rated' if has_valid_vat_receipt is false."
+    )
+    business_proportion_percentage: int = Field(
+        default=100,
+        description="Percentage of the expense that is for business use (0-100). Defaults to 100 if wholly and exclusively for business."
+    )
+    allowable_business_amount: float = Field(
+        description="The calculated allowable amount (amount * business_proportion_percentage / 100)."
     )
     extraction_confidence: float = Field(
         default=0.98,
@@ -118,14 +131,11 @@ async def _do_call_gemini(
         response_schema=target_schema,
     )
 
-    # Apply throttle wrapper
-    async with gemini_semaphore:
-        response = await client.aio.models.generate_content(
-            model=model,
-            contents=contents,
-            config=config
-        )
-        
+    response = await client.aio.models.generate_content(
+        model=model,
+        contents=contents,
+        config=config
+    )
     return json.loads(response.text)
 
 async def _call_gemini(
@@ -163,16 +173,17 @@ async def process_expense_message(
     - NEVER start with "Hi" or "Hello" or end with a signature ("Cheers, Emma")—this is an ongoing chat.
     - Be direct, empathetic, and natural. Do not sound robotic.
     
-    CRITICAL CONSTRAINT: Your uditor_question must NEVER exceed 3 sentences. Keep it brief.
+    CRITICAL CONSTRAINT: Your auditor_question must NEVER exceed 3 sentences. Keep it brief.
 
     --- YOUR ACCOUNTING BRAIN (HMRC SOLE TRADER RULES) ---
     1. The Golden Rule: Expenses must be "wholly and exclusively" for the purposes of the trade.
-    2. Duality of Purpose: If an expense has both personal and business use (like a mobile phone, broadband, or vehicle), it must be apportioned. Identify personal vs business split.
-    3. Client Entertainment: Taking clients out for lunch/dinner or buying event tickets is STRICTLY NOT ALLOWABLE for tax relief for UK sole traders, even if business was discussed. It must be flagged.
+    2. Duality of Purpose: If an expense has both personal and business use (like a mobile phone, broadband, or vehicle), it must be apportioned. Identify personal vs business split and set business_proportion_percentage (0-100). Calculate allowable_business_amount as amount * (business_proportion_percentage / 100).
+    3. Client Entertainment: Taking clients out for lunch/dinner or buying event tickets is STRICTLY NOT ALLOWABLE for tax relief for UK sole traders, even if business was discussed. It must be flagged. Category MUST be NON_ALLOWABLE and business_proportion_percentage set to 0.
     4. Commuting: Regular travel from home to a permanent workplace is not allowable.
     5. Use of home as office: Claiming a portion of home bills is allowable but requires identifying hours worked or the exact proportion of space used.
     6. Clothing: Everyday wear (even suits) is not allowable. Only protective clothing, uniforms with logos, or costumes for actors are allowable.
-    7. Business Income & Invoicing: If the user message or receipt describes money received from a client, customer payments, or sales invoices (e.g. 'Client paid £350 for tile installation' or 'Invoice #104 settled £600'), set 	ransaction_type: 'INCOME', category: 'Turnover / Sales Income', and vendor to the client name.
+    7. Business Income & Invoicing: If the user message or receipt describes money received from a client, customer payments, or sales invoices (e.g. 'Client paid £350 for tile installation' or 'Invoice #104 settled £600'), set transaction_type: 'INCOME', category: 'Turnover / Sales Income', and vendor to the client name.
+    8. VAT Rule: If the user does not have a valid VAT receipt (has_valid_vat_receipt=false), the tax_code MUST be 'No VAT' or 'Zero Rated'. Never guess tax_code without proof.
     -------------------------------------------------------
     
     --- FEW-SHOT EXAMPLES ---
@@ -181,6 +192,11 @@ async def process_expense_message(
     Analysis: Clothing is everyday wear. Not allowable.
     transaction_type: "EXPENSE"
     is_ambiguous: true
+    business_proportion_percentage: 0
+    allowable_business_amount: 0.0
+    category: "Non-allowable"
+    has_valid_vat_receipt: false
+    tax_code: "No VAT"
     auditor_question: "I've noted the £200 at Marks & Spencer. Unfortunately, HMRC doesn't allow claims for everyday clothing like suits, even if bought specifically for work, as they have a 'duality of purpose'. I'll keep this recorded but we can't offset it against tax."
 
     Example 2:
@@ -191,10 +207,14 @@ async def process_expense_message(
     auditor_question: "Got the £50 O2 bill. Do you use this phone for personal calls too? If so, roughly what percentage is for business?"
     
     Example 3:
-    User: "£100 for timber from B&Q."
+    User: "£100 for timber from B&Q. Got the VAT receipt."
     Analysis: Wholly for trade. Construction industry costs / Cost of goods sold.
     transaction_type: "EXPENSE"
     is_ambiguous: false
+    business_proportion_percentage: 100
+    allowable_business_amount: 100.0
+    has_valid_vat_receipt: true
+    tax_code: "20% (VAT on Expenses)"
     auditor_question: ""
 
     Example 4:
@@ -292,6 +312,13 @@ async def process_expense_message(
 
     except Exception as e:
         logger.error("Error calling Gemini API", error=str(e))
+        if sender_id:
+            try:
+                from db import get_connection
+                async with get_connection() as conn:
+                    await conn.execute("UPDATE chat_sessions SET staging_payload = 'FAILED_API_LIMIT' WHERE sender_id = $1", sender_id)
+            except Exception as db_e:
+                logger.error("Failed to write fallback status to DB", error=str(db_e))
         raise e
 
 class AntiHallucinationCheck(BaseModel):
@@ -315,13 +342,11 @@ async def _do_verify_expense_hallucination(raw_message: str, parsed_json: dict) 
     )
     
     prompt = f"USER MESSAGE: {raw_message}\nPARSED JSON: {json.dumps(parsed_json)}"
-    
-    async with gemini_semaphore:
-        response = await client.aio.models.generate_content(
-            model="gemini-2.5-flash",
-            contents=[prompt],
-            config=config
-        )
+    response = await client.aio.models.generate_content(
+        model="gemini-2.5-flash",
+        contents=[prompt],
+        config=config
+    )
     return json.loads(response.text)
 
 async def verify_expense_hallucination(raw_message: str, parsed_json: dict, sender_id: str = None, media_urls: list = None) -> dict:

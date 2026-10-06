@@ -55,6 +55,7 @@ app = FastAPI(
 )
 app.include_router(dashboard_router)
 app.include_router(dev_dashboard_router)
+app.mount("/assets", StaticFiles(directory="assets"), name="assets")
 #title="Invisible Accountant Webhook Prototype (V2 Enterprise)", docs_url=None, redoc_url=None, openapi_url=None)
 app.state.limiter = limiter
 app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
@@ -291,20 +292,23 @@ async def intake_worker():
             await asyncio.sleep(1)
 
 
-async def run_sweeper_loop():
-    from db import sweep_orphaned_processing
+import db
+
+async def sweep_loop():
     while True:
         try:
-            await sweep_orphaned_processing()
+            await db.sweep_orphaned_processing()
         except Exception as e:
             logger.error("Error in sweep_orphaned_processing loop", error=str(e))
         await asyncio.sleep(300)
+
+db.sweep_loop = sweep_loop
 
 @app.on_event("startup")
 async def startup_event():
     await init_db()
     
-    sweeper_loop_task = asyncio.create_task(run_sweeper_loop())
+    sweeper_loop_task = asyncio.create_task(db.sweep_loop())
     _background_tasks.add(sweeper_loop_task)
     
     # Spawn 5 dedicated AI workers for the persistent Waiting Room
@@ -421,6 +425,7 @@ async def receive_twilio(
 async def receive_whatsapp(
     payload: WhatsAppPayload,
     request: Request,
+    background_tasks: BackgroundTasks,
     x_hub_signature_256: str = Header(None),
 ):
     # Our real security guard: WhatsApp's HMAC signature
@@ -441,20 +446,20 @@ async def receive_whatsapp(
         )
         llm_message = "\n---\n".join(history)
 
-    # Place the message into the durable database queue
-    from db import push_intake_queue
-    await push_intake_queue(
+    # Process the message in the background
+    background_tasks.add_task(
+        process_intake_task,
         chat_id,
         payload.sender_id,
         llm_message,
-        payload.media_urls or [],
-        payload.turn_count
+        payload.turn_count,
+        payload.media_urls or []
     )
 
     return {
         "status": "success",
         "chat_id": chat_id,
-        "message": "Payload received and queued in the waiting room.",
+        "message": "Payload received and processing in the background.",
     }
 
 

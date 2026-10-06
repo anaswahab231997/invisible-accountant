@@ -24,6 +24,8 @@ async def view_dashboard(request: Request):
         items = []
         for r in rows:
             payload = r['payload']
+            is_failed_api = (payload == 'FAILED_API_LIMIT')
+            
             import json
             if isinstance(payload, str):
                 try:
@@ -63,7 +65,11 @@ async def view_dashboard(request: Request):
                 "tax_code": tax_code,
                 "raw_message": r.get('raw_message') or 'No original message available.',
                 "media_urls": r.get('media_urls', ''),
-                "reasoning": reasoning or 'No AI reasoning provided.'
+                "reasoning": reasoning or 'No AI reasoning provided.',
+                "flagged": payload.get('is_ambiguous', False),
+                "allowable_business_amount": payload.get('allowable_business_amount', payload.get('amount', payload.get('gross_amount', 0.0))),
+                "business_proportion_percentage": payload.get('business_proportion_percentage', 100),
+                "is_failed_api": is_failed_api
             })
             
     
@@ -113,3 +119,13 @@ async def bulk_approve(request: Request):
 
     # Return refreshed table
     return await view_dashboard(request)
+
+@router.get("/dashboard/edit/{item_id}", response_class=HTMLResponse)
+async def edit_item(request: Request, item_id: int):
+    return HTMLResponse(f"""
+    <tr class="bg-indigo-50" id="row-{item_id}">
+        <td colspan="7" class="px-4 py-3 text-sm text-center">
+            Inline editing is mocked for this prototype. <button hx-get="/dashboard" hx-target="body" class="text-indigo-600 underline">Cancel</button>
+        </td>
+    </tr>
+    """)
