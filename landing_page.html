@@ -364,54 +364,54 @@
     </main>
 
     <section id="inference-wrapper" class="bg-calmstone border-y border-gray-200 lg:h-[250vh] relative">
-        <div class="lg:sticky lg:top-0 lg:h-screen flex flex-col justify-center lg:overflow-hidden py-12">
+        <div class="lg:sticky lg:top-0 lg:h-screen flex flex-col justify-start pt-24 pb-8">
             <div class="max-w-7xl mx-auto px-6 md:px-12 w-full">
                 
-                <div class="text-center mb-10 md:mb-20">
+                <div class="text-center mb-8 md:mb-12">
                     <h2 class="font-heading font-bold text-3xl md:text-4xl text-deepslate mb-4">How we keep you compliant</h2>
                     <p class="text-base md:text-lg text-gray-600 font-body max-w-2xl mx-auto hidden sm:block">Scroll to see how our system seamlessly understands your uploaded receipts and files them accurately.</p>
                 </div>
                 
-                <div class="bg-white rounded-[2rem] p-6 md:p-12 shadow-soft max-w-6xl mx-auto reveal relative overflow-hidden grid grid-cols-1 lg:grid-cols-12 gap-10 items-center">
+                <div class="bg-white rounded-[2rem] p-6 md:p-8 shadow-soft max-w-5xl mx-auto reveal relative overflow-hidden grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
                     
                     <!-- Left: The Receipt -->
                     <div class="lg:col-span-5 flex flex-col items-center">
-                        <div class="text-xs font-bold text-gray-500 mb-6 uppercase tracking-wider flex items-center justify-center gap-2">
+                        <div class="text-xs font-bold text-gray-500 mb-4 uppercase tracking-wider flex items-center justify-center gap-2">
                             <i data-lucide="image" class="w-4 h-4"></i> Raw Receipt Upload
                         </div>
 
                         <div class="w-full max-w-sm relative z-10">
-                            <div class="receipt-paper mx-auto p-4 sm:p-6 my-2 relative">
+                            <div class="receipt-paper mx-auto p-4 sm:p-5 my-2 relative max-w-full overflow-hidden">
                                 <!-- Glowing Scanner Bar -->
                                 <div id="scanner-bar" class="absolute left-0 right-0 h-[2px] bg-hmrcblue shadow-[0_0_15px_4px_rgba(29,112,184,0.6)] z-20 transition-all duration-75" style="top: -10%;"></div>
                                 
-                                <div class="text-center border-b border-gray-300 pb-4 mb-4 mt-2">
-                                    <h4 id="receipt-vendor" class="font-bold text-2xl text-deepslate tracking-widest uppercase transition-colors duration-300">COSTA COFFEE</h4>
-                                    <p class="text-xs text-gray-500 mt-1 uppercase">123 High Street, London</p>
-                                    <p class="text-xs text-gray-500 mt-1 uppercase">Date: 12 Nov 2026 09:14</p>
+                                <div class="text-center border-b border-gray-300 pb-3 mb-3 mt-2">
+                                    <h4 id="receipt-vendor" class="font-bold text-xl sm:text-2xl text-deepslate tracking-widest uppercase transition-colors duration-300 break-words">COSTA COFFEE</h4>
+                                    <p class="text-[10px] sm:text-xs text-gray-500 mt-1 uppercase">123 High Street, London</p>
+                                    <p class="text-[10px] sm:text-xs text-gray-500 mt-1 uppercase">Date: 12 Nov 2026 09:14</p>
                                 </div>
                                 
-                                <div class="space-y-3 mb-6 text-sm text-gray-700 font-medium px-2">
-                                    <div class="flex justify-between">
-                                        <span>Client Pastries</span>
-                                        <span>£15.50</span>
+                                <div class="space-y-2 mb-4 text-xs sm:text-sm text-gray-700 font-medium px-1 sm:px-2">
+                                    <div class="flex justify-between gap-2">
+                                        <span class="truncate">Client Pastries</span>
+                                        <span class="shrink-0">£15.50</span>
                                     </div>
-                                    <div class="flex justify-between">
-                                        <span>Flat White x 2</span>
-                                        <span>£7.60</span>
+                                    <div class="flex justify-between gap-2">
+                                        <span class="truncate">Flat White x 2</span>
+                                        <span class="shrink-0">£7.60</span>
                                     </div>
-                                    <div class="flex justify-between">
-                                        <span>Meeting Room Hire</span>
-                                        <span>£21.90</span>
+                                    <div class="flex justify-between gap-2">
+                                        <span class="truncate">Meeting Room Hire</span>
+                                        <span class="shrink-0">£21.90</span>
                                     </div>
                                 </div>
                                 
-                                <div class="border-t-2 border-gray-400 pt-4 pb-2 px-2 flex justify-between font-bold text-xl text-deepslate mb-2">
+                                <div class="border-t-2 border-gray-400 pt-3 pb-2 px-1 sm:px-2 flex justify-between font-bold text-lg sm:text-xl text-deepslate mb-2">
                                     <span>TOTAL</span>
                                     <span id="receipt-total" class="transition-colors duration-300">£45.00</span>
                                 </div>
                                 
-                                <div class="text-center text-[10px] text-gray-400 mt-6 tracking-widest">
+                                <div class="text-center text-[9px] sm:text-[10px] text-gray-400 mt-4 tracking-widest px-2">
                                     THANK YOU FOR YOUR CUSTOM
                                 </div>
                             </div>
@@ -419,33 +419,33 @@
                     </div>
 
                     <!-- Right: The Cards -->
-                    <div class="lg:col-span-7 flex flex-col gap-4 md:gap-6 relative z-10 w-full max-w-lg mx-auto">
+                    <div class="lg:col-span-7 flex flex-col gap-3 md:gap-4 relative z-10 w-full max-w-lg mx-auto">
                         
                         <!-- Vendor Card -->
-                        <div id="card-vendor" class="opacity-0 transform translate-x-8 transition-all duration-700 bg-white p-5 md:p-6 rounded-2xl border-l-[6px] border-hmrcblue shadow-soft flex items-center justify-between">
-                            <div>
-                                <div class="text-xs text-gray-500 font-semibold uppercase mb-1">Vendor Identified</div>
-                                <div class="text-xl md:text-2xl font-bold text-deepslate">Costa Coffee</div>
+                        <div id="card-vendor" class="opacity-0 transform translate-x-8 transition-all duration-700 bg-white p-4 md:p-5 rounded-2xl border-l-[6px] border-hmrcblue shadow-soft flex items-center justify-between gap-2">
+                            <div class="min-w-0">
+                                <div class="text-[10px] sm:text-xs text-gray-500 font-semibold uppercase mb-1">Vendor Identified</div>
+                                <div class="text-lg sm:text-xl md:text-2xl font-bold text-deepslate truncate">Costa Coffee</div>
                             </div>
-                            <i data-lucide="check-circle-2" class="w-8 h-8 text-hmrcblue/20"></i>
+                            <i data-lucide="check-circle-2" class="w-6 h-6 sm:w-8 sm:h-8 text-hmrcblue/20 shrink-0"></i>
                         </div>
                         
                         <!-- Tax Category Card -->
-                        <div id="card-context" class="opacity-0 transform translate-x-8 transition-all duration-700 bg-white p-5 md:p-6 rounded-2xl border-l-[6px] border-warmcaution shadow-soft flex items-center justify-between">
-                            <div>
-                                <div class="text-xs text-gray-500 font-semibold uppercase mb-1">Tax Category</div>
-                                <div class="text-lg md:text-xl font-bold text-deepslate">Business Ent.</div>
+                        <div id="card-context" class="opacity-0 transform translate-x-8 transition-all duration-700 bg-white p-4 md:p-5 rounded-2xl border-l-[6px] border-warmcaution shadow-soft flex items-center justify-between gap-2">
+                            <div class="min-w-0">
+                                <div class="text-[10px] sm:text-xs text-gray-500 font-semibold uppercase mb-1">Tax Category</div>
+                                <div class="text-base sm:text-lg md:text-xl font-bold text-deepslate truncate">Business Ent.</div>
                             </div>
-                            <div class="text-xs bg-orange-50 text-warmcaution px-2.5 py-1.5 rounded-md font-medium">Non-allowable</div>
+                            <div class="text-[10px] sm:text-xs bg-orange-50 text-warmcaution px-2 py-1 sm:px-2.5 sm:py-1.5 rounded-md font-medium shrink-0 whitespace-nowrap">Non-allowable</div>
                         </div>
 
                         <!-- Amount Card -->
-                        <div id="card-amount" class="opacity-0 transform translate-x-8 transition-all duration-700 bg-white p-5 md:p-6 rounded-2xl border-l-[6px] border-sagesuccess shadow-soft flex items-center justify-between">
-                            <div>
-                                <div class="text-xs text-gray-500 font-semibold uppercase mb-1">Total Amount</div>
-                                <div class="text-2xl md:text-3xl font-heading font-bold text-sagesuccess">£45.00</div>
+                        <div id="card-amount" class="opacity-0 transform translate-x-8 transition-all duration-700 bg-white p-4 md:p-5 rounded-2xl border-l-[6px] border-sagesuccess shadow-soft flex items-center justify-between gap-2">
+                            <div class="min-w-0">
+                                <div class="text-[10px] sm:text-xs text-gray-500 font-semibold uppercase mb-1">Total Amount</div>
+                                <div class="text-xl sm:text-2xl md:text-3xl font-heading font-bold text-sagesuccess truncate">£45.00</div>
                             </div>
-                            <div class="text-xs bg-green-50 text-sagesuccess px-2.5 py-1.5 rounded-md font-medium">Ready for Ledger</div>
+                            <div class="text-[10px] sm:text-xs bg-green-50 text-sagesuccess px-2 py-1 sm:px-2.5 sm:py-1.5 rounded-md font-medium shrink-0 whitespace-nowrap">Ready for Ledger</div>
                         </div>
                         
                     </div>
