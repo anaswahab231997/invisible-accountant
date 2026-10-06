@@ -102,7 +102,11 @@ import boto3
 from botocore.exceptions import ClientError
 
 @app.get("/generate_presigned_url")
-async def get_presigned_url(content_type: str = "image/jpeg"):
+async def get_presigned_url(request: Request, content_type: str = "image/jpeg"):
+    import secrets
+    api_key = request.headers.get("X-API-Key")
+    if not api_key or not os.environ.get("API_KEY") or not secrets.compare_digest(api_key, os.environ.get("API_KEY")):
+        raise HTTPException(status_code=403, detail="Could not validate credentials")
     upload_id = str(uuid.uuid4())
     s3_client = boto3.client('s3')
     bucket_name = os.environ.get("AWS_S3_BUCKET_NAME", "invisible-accountant-uploads")
@@ -367,9 +371,7 @@ async def receive_twilio(
         
         # Validate HMAC signature
         if not validator.validate(url, form_data, signature):
-            # We can raise an error here in production, but let's allow it for local testing if needed
-            # raise HTTPException(status_code=403, detail="Invalid Twilio signature")
-            pass
+            raise HTTPException(status_code=403, detail="Invalid Twilio signature")
             
         sender_id = From.replace("whatsapp:", "")
         masked_message = mask_pii(Body)
@@ -657,7 +659,7 @@ async def approve_review_item(item_id: int):
             raise HTTPException(status_code=404, detail="Item not found or not in NEEDS_REVIEW status.")
         return {"status": "success", "message": "Item approved and queued for processing"}
 
-@app.get("/admin/dashboard", response_class=HTMLResponse)
+@app.get("/admin/dashboard", response_class=HTMLResponse, dependencies=[Depends(verify_api_key)])
 async def admin_dashboard():
     from db import get_connection
     from aes_gcm_security import TokenEncryptionEngine
