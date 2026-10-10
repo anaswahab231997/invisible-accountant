@@ -573,14 +573,18 @@ async def auth(whatsapp_id: str, response: Response):
     nonce_hash = hashlib.sha256(nonce.encode()).hexdigest()
     
     state_uuid = await create_oauth_state(whatsapp_id, nonce_hash)
-    url = f"{base_url}/connect/authorize?response_type=code&client_id={client_id}&scope=offline_access accounting.invoices accounting.attachments accounting.contacts app.connections&state={state_uuid}&redirect_uri={redirect_uri}"
+    url = f"{base_url}/connect/authorize?response_type=code&client_id={client_id}&scope=offline_access%20accounting.invoices%20accounting.attachments%20accounting.contacts%20app.connections&state={state_uuid}&redirect_uri={redirect_uri}"
     
     res = RedirectResponse(url)
     res.set_cookie(key="oauth_nonce", value=nonce, httponly=True, secure=True, samesite="lax")
     return res
 
 @app.get("/callback")
-async def callback(request: Request, code: str, state: str):
+async def callback(request: Request, state: str, code: str | None = None, error: str | None = None, error_description: str | None = None):
+    if error:
+        return HTMLResponse(f"<h1>OAuth Error</h1><p>{error}: {error_description}</p>")
+    if not code:
+        raise HTTPException(status_code=400, detail="Missing auth code")
     state_data = await consume_oauth_state(state)
     if not state_data:
         raise HTTPException(status_code=400, detail="Invalid or expired OAuth state")
