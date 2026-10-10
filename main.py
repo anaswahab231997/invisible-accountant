@@ -1,4 +1,4 @@
-import asyncio
+﻿import asyncio
 import json
 import os
 import uuid
@@ -163,7 +163,7 @@ async def process_intake_task(
                             await asyncio.to_thread(client.messages.create, body=err_msg, from_=os.environ.get('TWILIO_WHATSAPP_NUMBER', 'whatsapp:+17372508034'), to=to_formatted)
                         return
                 await confirm_and_queue_to_ledger(unconfirmed["id"])
-                success_msg = "✅ All set! I've officially locked this into your tax ledger and it's queued for HMRC."
+                success_msg = "âœ… All set! I've officially locked this into your tax ledger and it's queued for HMRC."
                 logger.info("Outbound WhatsApp message", sender_id=sender_id, message=success_msg)
                 from ws import manager
                 await manager.send_personal_message({"type": "INTAKE_UPDATE", "chat_id": chat_id, "result": {"status": "CONFIRMED"}}, sender_id)
@@ -235,7 +235,7 @@ async def process_intake_task(
                     await asyncio.to_thread(client.messages.create, body=result["auditor_question"], from_=from_number, to=to_formatted)
             else:
                 amount_val = result.get('gross_amount') or result.get('net_amount') or 0.0
-                amount_formatted = f"£{amount_val:.2f}"
+                amount_formatted = f"Â£{amount_val:.2f}"
                 vendor = result.get('vendor', 'Unknown Vendor')
                 category = result.get('line_items', [{}])[0].get('description', 'expense') if result.get('line_items') else 'expense'
                 layman_msg = f"I've noted down {amount_formatted} spent at {vendor} for {category}. Does this look right? Reply 'proceed' to lock this into your tax ledger, or just tell me what to change."
@@ -666,7 +666,7 @@ async def serve_landing_page():
 async def approve_review_item(item_id: int):
     from db import get_connection
     async with get_connection() as conn:
-        result = await conn.execute("UPDATE hmrc_ledger SET status = 'PENDING', accountant_approved = TRUE WHERE id = $1 AND status = 'NEEDS_REVIEW'", item_id)
+        result = await conn.execute("UPDATE hmrc_ledger SET status = 'PENDING', accountant_approved = TRUE WHERE id = $1 AND status IN ('NEEDS_REVIEW', 'CAPITAL_ALLOWANCE')", item_id)
         if result == "UPDATE 0":
             raise HTTPException(status_code=404, detail="Item not found or not in pending review status.")
         return {"status": "success", "message": "Item approved and queued for processing"}
