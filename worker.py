@@ -128,55 +128,33 @@ universal_adapter = UniversalAdapter()
 async def submit_to_hmrc(item):
     try:
         from accounting_client import AccountingClient
-        client = AccountingClient(workspace_id=item["sender_id"])
-    except Exception as e:
-        logger.error("Auth expired or failed", error=str(e), queue_id=item["id"])
-        from db import get_connection
-        async with get_connection() as conn:
-            await conn.execute("UPDATE hmrc_ledger SET status = 'AUTH_EXPIRED' WHERE id = ", item["id"])
-        return
-    fin_data = {}
-    if item.get("encrypted_financial_data"):
-        import json
-        enc_dict = json.loads(item["encrypted_financial_data"])
-        decrypted_json = token_engine.decrypt_tokens(enc_dict, associated_data=str(item["chat_id"]))
-        fin_data = json.loads(decrypted_json)
-        amount = float(fin_data.get("gross_amount") or fin_data.get("amount", 0.0))
-    else:
-        amount = float(item["amount"])
-
-    accountant_approved = item.get("accountant_approved", False)
-    if not accountant_approved and ((amount > 500.0 and fin_data.get("transaction_type", "EXPENSE") != "INCOME") or fin_data.get("needs_accountant_review")):
-        from db import get_connection
-        async with get_connection() as conn:
-            await conn.execute("UPDATE hmrc_ledger SET status = 'CAPITAL_ALLOWANCE' WHERE id = $1", item["id"])
-        return
-
-    record = UnifiedFinancialRecord(
-        amount=amount,
-        category=item.get("category", "Other business expenses"),
-        timestamp=item["timestamp"],
-        target_system=TargetSystem.XERO,
-        sender_id=item.get("sender_id", "unknown_whatsapp_user"),
-        extra_data={"id": item["id"], "media_urls": item.get("media_urls"), **fin_data}
-    )
-    
-    if DRY_RUN:
-        logger.info("\033[93mDRY RUN ACTIVE: Dumping payload instead of submitting\033[0m")
-        with open("dry_run_payloads.json", "a") as f:
-            f.write(record.json() + "\n")
-        await mark_hmrc_submitted(item["id"])
-        logger.info("\033[92mPROCESSING -> SUBMITTED (DRY RUN)\033[0m", queue_id=item["id"])
-        return
-    
-    try:
-        from accounting_client import AccountingClient
         client = AccountingClient(workspace_id=item.get("sender_id", ""), provider="XERO")
         
-        # Enforce math verification as per plan (Trust but Verify)
-        net = fin_data.get("net_amount", amount)
-        tax = fin_data.get("vat_amount", 0.0)
-        gross = fin_data.get("gross_amount", amount)
+        fin_data = {}
+        if item.get("encrypted_financial_data"):
+            import json
+            enc_dict = json.loads(item["encrypted_financial_data"])
+            decrypted_json = token_engine.decrypt_tokens(enc_dict, associated_data=str(item["chat_id"]))
+            fin_data = json.loads(decrypted_json)
+            amount = float(fin_data.get("gross_amount") or fin_data.get("amount", 0.0))
+        else:
+            amount = float(item["amount"])
+        
+        accountant_approved = item.get("accountant_approved", False)
+        if not accountant_approved and ((amount > 500.0 and fin_data.get("transaction_type", "EXPENSE") != "INCOME") or fin_data.get("needs_accountant_review")):
+            from db import get_connection
+            async with get_connection() as conn:
+                await conn.execute("UPDATE hmrc_ledger SET status = 'CAPITAL_ALLOWANCE' WHERE id = ", item["id"])
+            return
+            
+        def safe_float(val, default=0.0):
+            if val is None: return float(default)
+            try: return float(val)
+            except: return float(default)
+        
+        net = safe_float(fin_data.get("net_amount", amount), amount)
+        tax = safe_float(fin_data.get("vat_amount", 0.0), 0.0)
+        gross = safe_float(fin_data.get("gross_amount", amount), amount)
         
         if abs((net + tax) - gross) > 0.01:
             raise Exception("Math Validation Failed: Net + Tax != Gross")
@@ -195,7 +173,6 @@ async def submit_to_hmrc(item):
         resp = await client.create_draft_bill(bill_payload)
         invoice_id = resp.get("Invoices", [{}])[0].get("InvoiceID")
         
-        # If there are receipt attachments, upload them
         media_urls = item.get("media_urls") or []
         if invoice_id and media_urls:
             import httpx
@@ -210,66 +187,42 @@ async def submit_to_hmrc(item):
                     except Exception as upload_err:
                         logger.error("Failed to upload attachment to Xero", error=str(upload_err))
 
-        await mark_hmrc_submitted(item["id"])
-        logger.info("[92mPROCESSING -> SUBMITTED[0m", queue_id=item["id"])
-    except Exception as e:
-        # Sanitize PII from the payload before logging
-        def sanitize_pii(data):
-            if isinstance(data, dict):
-                return {k: sanitize_pii(v) for k, v in data.items() if k.lower() not in ['nino', 'utr', 'password', 'name', 'address', 'vrn']}
-            elif isinstance(data, list):
-                return [sanitize_pii(v) for v in data]
-            return data
-            
-        safe_payload = sanitize_pii(e.payload)
-        logger.error("HMRC API Error", queue_id=item["id"], status=e.status_code, payload=safe_payload)
+        from db import get_connection
+        async with get_connection() as conn:
+            await conn.execute("UPDATE hmrc_ledger SET status = 'SUBMITTED' WHERE id = ", item["id"])
+        logger.info("PROCESSING -> SUBMITTED", queue_id=item["id"])
         
-        if e.status_code in (401, 429, 500, 502, 503, 504):
+    except Exception as e:
+        status_code = getattr(e, 'status_code', 500)
+        logger.error("HMRC API Error", queue_id=item["id"], status=status_code, error=str(e))
+        
+        if status_code in (401, 403, 429, 500, 502, 503, 504):
             logger.info("Transient/Auth error, applying exponential backoff", queue_id=item["id"])
             from db import get_connection
             async with get_connection() as conn:
-                if e.status_code == 401:
-                    logger.warning("401 Unauthorized - wiping token for re-auth", whatsapp_id=item["sender_id"])
-                    await conn.execute("DELETE FROM hmrc_identity_vault WHERE whatsapp_id = $1", item["sender_id"])
-                    await conn.execute("UPDATE hmrc_ledger SET status = 'AUTH_EXPIRED' WHERE id = $1", item["id"])
-                    logger.info("\033[91mPROCESSING -> AUTH_EXPIRED\033[0m", queue_id=item["id"])
-                    await send_failure_sms(item["sender_id"])
-                    return  # Do not raise to prevent tripping circuit breaker
+                if status_code in (401, 403):
+                    logger.warning("401/403 Unauthorized - wiping token for re-auth", whatsapp_id=item["sender_id"])
+                    await conn.execute("DELETE FROM accounting_connections WHERE workspace_id = ", item["sender_id"])
+                    await conn.execute("UPDATE hmrc_ledger SET status = 'AUTH_EXPIRED' WHERE id = ", item["id"])
+                    return
                 else:
                     row = await conn.fetchrow("""
                         UPDATE hmrc_ledger 
                         SET status = CASE WHEN retry_count >= 5 THEN 'FAILED' ELSE 'PENDING' END,
                             retry_count = retry_count + 1,
                             next_retry_at = NOW() + (INTERVAL '1 minute' * pow(2, retry_count))
-                        WHERE id = $1
+                        WHERE id = 
                         RETURNING status
                     """, item["id"])
-                    if row:
-                        logger.info(f"\033[93mPROCESSING -> {row['status']}\033[0m", queue_id=item["id"])
-                        if row["status"] == 'FAILED': await send_failure_sms(item.get("sender_id"))
+                    if row and row["status"] == 'FAILED':
+                        pass
                     raise e
         else:
-            from db import mark_hmrc_failed
-            await mark_hmrc_failed(item["id"])
-            logger.info("\033[91mPROCESSING -> FAILED\033[0m", queue_id=item["id"])
-            await send_failure_sms(item.get("sender_id"))
+            from db import get_connection
+            async with get_connection() as conn:
+                await conn.execute("UPDATE hmrc_ledger SET status = 'FAILED' WHERE id = ", item["id"])
+            logger.info("[91mPROCESSING -> FAILED[0m", queue_id=item["id"])
             raise e
-    except Exception as e:
-        logger.error("Unexpected error in worker", queue_id=item["id"], error=str(e))
-        from db import get_connection
-        async with get_connection() as conn:
-            row = await conn.fetchrow("""
-                UPDATE hmrc_ledger 
-                SET status = CASE WHEN retry_count >= 5 THEN 'FAILED' ELSE 'PENDING' END,
-                    retry_count = retry_count + 1,
-                    next_retry_at = NOW() + (INTERVAL '1 minute' * pow(2, retry_count))
-                WHERE id = $1
-                RETURNING status
-            """, item["id"])
-            if row:
-                logger.info(f"\033[91mPROCESSING -> {row['status']}\033[0m", queue_id=item["id"])
-        raise e
-
 
 async def process_hmrc_queue(semaphore):
     while True:
