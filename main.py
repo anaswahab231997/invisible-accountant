@@ -578,7 +578,7 @@ async def auth(whatsapp_id: str, response: Response):
     nonce_hash = hashlib.sha256(nonce.encode()).hexdigest()
     
     state_uuid = await create_oauth_state(whatsapp_id, nonce_hash)
-    url = f"{base_url}/connect/authorize?response_type=code&client_id={client_id}&scope=accounting.transactions offline_access&state={state_uuid}&redirect_uri={redirect_uri}"
+    url = f"{base_url}/connect/authorize?response_type=code&client_id={client_id}&scope=offline_access accounting.invoices accounting.attachments accounting.contacts app.connections&state={state_uuid}&redirect_uri={redirect_uri}"
     
     res = RedirectResponse(url)
     res.set_cookie(key="oauth_nonce", value=nonce, httponly=True, secure=True, samesite="lax")
