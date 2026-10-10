@@ -1,14 +1,15 @@
-from fastapi import APIRouter, Request
+from fastapi import APIRouter, Request, Depends
 from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
 from pydantic import BaseModel
 import asyncpg
 from db import get_connection
+from main import verify_api_key
 
 router = APIRouter()
 templates = Jinja2Templates(directory="templates")
 
-@router.get("/dashboard", response_class=HTMLResponse)
+@router.get("/dashboard", response_class=HTMLResponse, dependencies=[Depends(verify_api_key)])
 async def view_dashboard(request: Request):
     async with get_connection() as conn:
         # Fetch staged expenses that haven't been queued to Xero yet
@@ -86,7 +87,7 @@ async def approve_item(request: Request, item_id: int):
     try:
         queue_id = await confirm_and_queue_to_ledger(item_id)
         async with get_connection() as conn:
-            await conn.execute("UPDATE hmrc_ledger SET status = 'APPROVED' WHERE id = $1", queue_id)
+            await conn.execute("UPDATE hmrc_ledger SET status = 'PENDING', accountant_approved = TRUE WHERE id = $1", queue_id)
     except Exception as e:
         logging.error(f"Failed to approve {item_id}: {e}")
         
@@ -113,7 +114,7 @@ async def bulk_approve(request: Request):
         for r in rows:
             try:
                 queue_id = await confirm_and_queue_to_ledger(r["id"])
-                await conn.execute("UPDATE hmrc_ledger SET status = 'APPROVED' WHERE id = $1", queue_id)
+                await conn.execute("UPDATE hmrc_ledger SET status = 'PENDING', accountant_approved = TRUE WHERE id = $1", queue_id)
             except Exception as e:
                 logging.error(f"Failed to bulk-approve {r['id']}: {e}")
 
