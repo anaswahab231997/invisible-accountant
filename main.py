@@ -546,7 +546,7 @@ async def api_simulate_whatsapp(
         chat_id,
         payload.sender_id,
         llm_message,
-        payload.media_urls or [],
+        media_urls_str,
         payload.turn_count
     )
 

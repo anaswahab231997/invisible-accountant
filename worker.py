@@ -127,12 +127,13 @@ universal_adapter = UniversalAdapter()
 
 async def submit_to_hmrc(item):
     try:
-        identity = await oauth_manager.get_user_identity(item["sender_id"])
+        from accounting_client import AccountingClient
+        client = AccountingClient(workspace_id=item["sender_id"])
     except Exception as e:
         logger.error("Auth expired or failed", error=str(e), queue_id=item["id"])
         from db import get_connection
         async with get_connection() as conn:
-            await conn.execute("UPDATE hmrc_ledger SET status = 'AUTH_EXPIRED' WHERE id = $1", item["id"])
+            await conn.execute("UPDATE hmrc_ledger SET status = 'AUTH_EXPIRED' WHERE id = ", item["id"])
         return
     fin_data = {}
     if item.get("encrypted_financial_data"):
@@ -203,7 +204,9 @@ async def submit_to_hmrc(item):
                     try:
                         img_resp = await dl_client.get(m_url)
                         if img_resp.status_code == 200:
-                            await client.upload_attachment(invoice_id, f"receipt_{idx}.jpg", img_resp.content, "image/jpeg")
+                            mime_type = "application/pdf" if ".pdf" in m_url.lower() else "image/jpeg"
+                            ext = "pdf" if mime_type == "application/pdf" else "jpg"
+                            await client.upload_attachment(invoice_id, f"receipt_{idx}.{ext}", img_resp.content, mime_type)
                     except Exception as upload_err:
                         logger.error("Failed to upload attachment to Xero", error=str(upload_err))
 
