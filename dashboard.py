@@ -4,7 +4,7 @@ from fastapi.templating import Jinja2Templates
 from pydantic import BaseModel
 import asyncpg
 from db import get_connection
-from main import verify_api_key
+from security import verify_api_key
 
 router = APIRouter()
 templates = Jinja2Templates(directory="templates")

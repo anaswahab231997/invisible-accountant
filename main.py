@@ -18,7 +18,7 @@ from fastapi import (Response,
     Security,
 )
 from fastapi.responses import FileResponse, RedirectResponse, HTMLResponse
-from fastapi.security.api_key import APIKeyHeader
+
 from fastapi.staticfiles import StaticFiles
 from prometheus_fastapi_instrumentator import Instrumentator
 from pydantic import BaseModel, Field, HttpUrl
@@ -272,18 +272,14 @@ async def process_intake_task(
                 logger.error("Failed to send Twilio error fallback", error=str(twilio_err))
 
 
-from security import mask_pii, verify_whatsapp_signature, encrypt_token
+from security import mask_pii, verify_whatsapp_signature, encrypt_token, verify_api_key
 
 WEBHOOK_SECRET = os.environ.get("WEBHOOK_SECRET")
-API_KEY = os.environ.get("API_KEY")
 
 if not WEBHOOK_SECRET:
     raise ValueError("WEBHOOK_SECRET environment variable is missing.")
 
-if not API_KEY:
-    raise ValueError("API_KEY environment variable is missing.")
 
-api_key_header = APIKeyHeader(name="X-API-Key")
 
 # We are using a persistent DB queue instead of an in-memory queue.
 async def intake_worker():
@@ -479,11 +475,6 @@ async def receive_whatsapp(
     }
 
 
-import secrets
-async def verify_api_key(api_key_header: str = Security(api_key_header)):
-    if not API_KEY or not secrets.compare_digest(api_key_header, API_KEY):
-        raise HTTPException(status_code=403, detail="Could not validate credentials")
-    return api_key_header
 
 
 @app.get("/queue", dependencies=[Depends(verify_api_key)])

@@ -88,3 +88,16 @@ def generate_hmrc_fraud_headers(
         "Gov-Vendor-License-IDs": "InvisibleAccountant=12345",
         "Gov-Client-Timezone": timezone,
     }
+
+from fastapi.security.api_key import APIKeyHeader
+from fastapi import Security
+import secrets
+
+API_KEY = os.environ.get("API_KEY")
+
+api_key_header = APIKeyHeader(name="X-API-Key")
+
+async def verify_api_key(api_key_header_val: str = Security(api_key_header)):
+    if not API_KEY or not secrets.compare_digest(api_key_header_val, API_KEY):
+        raise HTTPException(status_code=403, detail="Could not validate credentials")
+    return api_key_header_val
