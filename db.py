@@ -333,34 +333,21 @@ async def get_all_hmrc_queue(limit: int = 100, offset: int = 0):
             limit, offset
         )
         return [dict(row) for row in rows]
-a s y n c   d e f   s t o r e _ a c c o u n t i n g _ c o n n e c t i o n ( w o r k s p a c e _ i d :   s t r ,   p r o v i d e r :   s t r ,   p r o v i d e r _ t e n a n t _ i d :   s t r ,   a c c e s s _ t o k e n :   s t r ,   r e f r e s h _ t o k e n :   s t r ,   e x p i r e s _ i n _ s e c o n d s :   i n t ) : 
- 
-         t i m e s t a m p   =   ( d a t e t i m e . n o w ( )   +   t i m e d e l t a ( s e c o n d s = e x p i r e s _ i n _ s e c o n d s ) ) . i s o f o r m a t ( ) 
- 
-         a s y n c   w i t h   g e t _ c o n n e c t i o n ( )   a s   c o n n : 
- 
-                 a w a i t   c o n n . e x e c u t e ( 
- 
-                         " 
- 
-                         I N S E R T   I N T O   a c c o u n t i n g _ c o n n e c t i o n s   ( w o r k s p a c e _ i d ,   p r o v i d e r ,   p r o v i d e r _ t e n a n t _ i d ,   a c c e s s _ t o k e n ,   r e f r e s h _ t o k e n ,   e x p i r e s _ a t ) 
- 
-                         V A L U E S   ( $ 1 ,   $ 2 ,   $ 3 ,   $ 4 ,   $ 5 ,   $ 6 ) 
- 
-                         O N   C O N F L I C T   ( i d )   D O   U P D A T E   S E T   
- 
-                                 a c c e s s _ t o k e n   =   E X C L U D E D . a c c e s s _ t o k e n , 
- 
-                                 r e f r e s h _ t o k e n   =   E X C L U D E D . r e f r e s h _ t o k e n , 
- 
-                                 e x p i r e s _ a t   =   E X C L U D E D . e x p i r e s _ a t , 
- 
-                                 u p d a t e d _ a t   =   N O W ( ) 
- 
-                         " , 
- 
-                         w o r k s p a c e _ i d ,   p r o v i d e r ,   p r o v i d e r _ t e n a n t _ i d ,   a c c e s s _ t o k e n ,   r e f r e s h _ t o k e n ,   t i m e s t a m p 
- 
-                 ) 
- 
- 
+
+async def store_accounting_connection(workspace_id: str, provider: str, provider_tenant_id: str, access_token: str, refresh_token: str, expires_in_seconds: int):
+    from datetime import datetime, timedelta
+    
+    expires_at = (datetime.now() + timedelta(seconds=expires_in_seconds)).isoformat()
+    async with get_connection() as conn:
+        await conn.execute(
+            """
+            INSERT INTO accounting_connections (workspace_id, provider, provider_tenant_id, access_token, refresh_token, expires_at)
+            VALUES (, , , , , )
+            ON CONFLICT (workspace_id, provider) DO UPDATE SET 
+                access_token = EXCLUDED.access_token,
+                refresh_token = EXCLUDED.refresh_token,
+                expires_at = EXCLUDED.expires_at,
+                updated_at = NOW()
+            """,
+            workspace_id, provider, provider_tenant_id, access_token, refresh_token, expires_at
+        )
