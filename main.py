@@ -297,7 +297,10 @@ async def intake_worker():
                 await process_intake_task(
                     task["chat_id"], task["sender_id"], task["message"], task["turn_count"], media
                 )
-            finally:
+                await mark_intake_done(task["id"])
+            except Exception as e:
+                logger.error(f"Intake task {task['id']} failed: {e}")
+                # Removing it so it doesn't infinite loop on poison pills.
                 await mark_intake_done(task["id"])
         except asyncio.CancelledError:
             break
@@ -665,7 +668,7 @@ async def approve_review_item(item_id: int):
     async with get_connection() as conn:
         result = await conn.execute("UPDATE hmrc_ledger SET status = 'PENDING', accountant_approved = TRUE WHERE id = $1 AND status = 'NEEDS_REVIEW'", item_id)
         if result == "UPDATE 0":
-            raise HTTPException(status_code=404, detail="Item not found or not in NEEDS_REVIEW status.")
+            raise HTTPException(status_code=404, detail="Item not found or not in pending review status.")
         return {"status": "success", "message": "Item approved and queued for processing"}
 
 @app.get("/admin/dashboard", response_class=HTMLResponse, dependencies=[Depends(verify_api_key)])
