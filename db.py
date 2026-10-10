@@ -43,95 +43,8 @@ async def get_connection():
         yield conn
 
 async def init_db():
-    async with get_connection() as conn:
-        await conn.execute("""
-            CREATE TABLE IF NOT EXISTS chat_sessions (
-                id SERIAL PRIMARY KEY,
-                timestamp TEXT,
-                sender_id TEXT,
-                raw_message TEXT,
-                media_urls TEXT,
-                turn_count INTEGER DEFAULT 1,
-                ttl_timestamp TEXT,
-                staging_payload TEXT,
-                is_demo BOOLEAN DEFAULT FALSE
-            )
-        """)
-
-        await conn.execute("""
-            CREATE TABLE IF NOT EXISTS hmrc_ledger (
-                id SERIAL PRIMARY KEY,
-                chat_id INTEGER,
-                timestamp TEXT,
-                vendor TEXT,
-                amount FLOAT,
-                category TEXT,
-                status TEXT,
-                encrypted_financial_data TEXT,
-                is_demo BOOLEAN DEFAULT FALSE,
-                FOREIGN KEY(chat_id) REFERENCES chat_sessions(id)
-            )
-        """)
-        
-        # Retrofit exponential backoff and compliance columns securely
-        await conn.execute("""
-            ALTER TABLE hmrc_ledger 
-            ADD COLUMN IF NOT EXISTS retry_count INTEGER DEFAULT 0,
-            ADD COLUMN IF NOT EXISTS next_retry_at TIMESTAMP,
-            ADD COLUMN IF NOT EXISTS client_ip TEXT,
-            ADD COLUMN IF NOT EXISTS encrypted_financial_data TEXT,
-            ADD COLUMN IF NOT EXISTS accountant_approved BOOLEAN DEFAULT FALSE,
-            ADD COLUMN IF NOT EXISTS updated_at TEXT;
-        """)
-        
-        await conn.execute("""
-            CREATE TABLE IF NOT EXISTS intake_queue (
-                id SERIAL PRIMARY KEY,
-                chat_id INTEGER,
-                timestamp TEXT,
-                sender_id TEXT,
-                message TEXT,
-                media_urls TEXT,
-                turn_count INTEGER,
-                status TEXT DEFAULT 'PENDING'
-            )
-        """)
-
-        await conn.execute("""
-            ALTER TABLE intake_queue
-            ADD COLUMN IF NOT EXISTS client_ip TEXT,
-            ADD COLUMN IF NOT EXISTS updated_at TEXT;
-        """)
-
-        await conn.execute("""
-            CREATE TABLE IF NOT EXISTS hmrc_identity_vault (
-                whatsapp_id TEXT PRIMARY KEY,
-                encrypted_blob BYTEA,
-                updated_at TEXT
-            )
-        """)
-        
-        await conn.execute("""
-            CREATE TABLE IF NOT EXISTS oauth_states (
-                state_uuid TEXT PRIMARY KEY,
-                whatsapp_id TEXT,
-                nonce_hash TEXT,
-                created_at TEXT
-            )
-        """)
-
-        await conn.execute(
-            "CREATE INDEX IF NOT EXISTS idx_chat_sessions_sender_id ON chat_sessions(sender_id)"
-        )
-        await conn.execute(
-            "CREATE INDEX IF NOT EXISTS idx_chat_sessions_ttl ON chat_sessions(ttl_timestamp)"
-        )
-        await conn.execute(
-            "CREATE INDEX IF NOT EXISTS idx_hmrc_ledger_status ON hmrc_ledger(status)"
-        )
-        await conn.execute(
-            "CREATE INDEX IF NOT EXISTS idx_hmrc_identity_vault_updated ON hmrc_identity_vault(updated_at)"
-        )
+    # Database schema is now managed by Alembic migrations.
+    pass
 
 async def create_chat_session(sender_id: str, message: str, media_urls: list[str], turn_count: int) -> int:
     timestamp = datetime.now().isoformat()
@@ -420,3 +333,34 @@ async def get_all_hmrc_queue(limit: int = 100, offset: int = 0):
             limit, offset
         )
         return [dict(row) for row in rows]
+a s y n c   d e f   s t o r e _ a c c o u n t i n g _ c o n n e c t i o n ( w o r k s p a c e _ i d :   s t r ,   p r o v i d e r :   s t r ,   p r o v i d e r _ t e n a n t _ i d :   s t r ,   a c c e s s _ t o k e n :   s t r ,   r e f r e s h _ t o k e n :   s t r ,   e x p i r e s _ i n _ s e c o n d s :   i n t ) : 
+ 
+         t i m e s t a m p   =   ( d a t e t i m e . n o w ( )   +   t i m e d e l t a ( s e c o n d s = e x p i r e s _ i n _ s e c o n d s ) ) . i s o f o r m a t ( ) 
+ 
+         a s y n c   w i t h   g e t _ c o n n e c t i o n ( )   a s   c o n n : 
+ 
+                 a w a i t   c o n n . e x e c u t e ( 
+ 
+                         " 
+ 
+                         I N S E R T   I N T O   a c c o u n t i n g _ c o n n e c t i o n s   ( w o r k s p a c e _ i d ,   p r o v i d e r ,   p r o v i d e r _ t e n a n t _ i d ,   a c c e s s _ t o k e n ,   r e f r e s h _ t o k e n ,   e x p i r e s _ a t ) 
+ 
+                         V A L U E S   ( $ 1 ,   $ 2 ,   $ 3 ,   $ 4 ,   $ 5 ,   $ 6 ) 
+ 
+                         O N   C O N F L I C T   ( i d )   D O   U P D A T E   S E T   
+ 
+                                 a c c e s s _ t o k e n   =   E X C L U D E D . a c c e s s _ t o k e n , 
+ 
+                                 r e f r e s h _ t o k e n   =   E X C L U D E D . r e f r e s h _ t o k e n , 
+ 
+                                 e x p i r e s _ a t   =   E X C L U D E D . e x p i r e s _ a t , 
+ 
+                                 u p d a t e d _ a t   =   N O W ( ) 
+ 
+                         " , 
+ 
+                         w o r k s p a c e _ i d ,   p r o v i d e r ,   p r o v i d e r _ t e n a n t _ i d ,   a c c e s s _ t o k e n ,   r e f r e s h _ t o k e n ,   t i m e s t a m p 
+ 
+                 ) 
+ 
+ 

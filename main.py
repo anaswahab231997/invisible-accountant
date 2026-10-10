@@ -48,7 +48,9 @@ from logger import get_logger
 from worker import process_hmrc_queue, process_ttl_sweeper
 
 logger = get_logger(__name__)
-limiter = Limiter(key_func=get_remote_address)
+def get_real_ip(request: Request) -> str:
+    return request.headers.get("CF-Connecting-IP", request.client.host if request.client else "127.0.0.1")
+limiter = Limiter(key_func=get_real_ip)
 
 app = FastAPI(
     title="Invisible Accountant",
@@ -635,12 +637,28 @@ async def callback(request: Request, code: str, state: str):
             if not connections:
                 raise HTTPException(status_code=400, detail="No Xero tenants connected")
             token_data["xero_tenant_id"] = connections[0]["tenantId"]
-    # Store the actual tokens securely in the vault
-    encrypted_dict = encrypt_token(
-        json.dumps(token_data), 
-        associated_data=f"hmrc_identity_{whatsapp_id}"
+    # Store the tokens in the new accounting_connections table
+    from db import store_accounting_connection
+    from aes_gcm_security import TokenEncryptionEngine
+    master_key = os.getenv("ENCRYPTION_MASTER_KEY_B64")
+    if master_key:
+        engine = TokenEncryptionEngine(master_key)
+        enc_access = engine.encrypt_tokens(token_data["access_token"], associated_data=whatsapp_id)
+        enc_refresh = engine.encrypt_tokens(token_data["refresh_token"], associated_data=whatsapp_id)
+        access_token_store = json.dumps(enc_access)
+        refresh_token_store = json.dumps(enc_refresh)
+    else:
+        access_token_store = token_data["access_token"]
+        refresh_token_store = token_data["refresh_token"]
+
+    await store_accounting_connection(
+        workspace_id=whatsapp_id,
+        provider="XERO",
+        provider_tenant_id=token_data.get("xero_tenant_id", ""),
+        access_token=access_token_store,
+        refresh_token=refresh_token_store,
+        expires_in_seconds=token_data.get("expires_in", 1800)
     )
-    await store_identity_in_vault(whatsapp_id, json.dumps(encrypted_dict).encode("utf-8"))
     
     return HTMLResponse("<h1>Success! Your identity has been securely vaulted. You can return to WhatsApp.</h1>")
 

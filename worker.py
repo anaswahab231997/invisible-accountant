@@ -85,6 +85,7 @@ class OAuthManager:
         return identity
 
     async def refresh_user_token(self, whatsapp_id: str, identity: dict):
+        from security import generate_hmrc_fraud_headers
         async with httpx.AsyncClient() as client:
             resp = await client.post(
                 f"{self.base_url}/connect/token",
@@ -93,7 +94,8 @@ class OAuthManager:
                     "client_secret": self.client_secret,
                     "grant_type": "refresh_token",
                     "refresh_token": identity.get("refresh_token")
-                }
+                },
+                headers=generate_hmrc_fraud_headers()
             )
             
             if resp.status_code != 200:
@@ -167,10 +169,47 @@ async def submit_to_hmrc(item):
         return
     
     try:
-        await universal_adapter.dispatch(record, identity)
+        from accounting_client import AccountingClient
+        client = AccountingClient(workspace_id=item.get("sender_id", ""), provider="XERO")
+        
+        # Enforce math verification as per plan (Trust but Verify)
+        net = fin_data.get("net_amount", amount)
+        tax = fin_data.get("vat_amount", 0.0)
+        gross = fin_data.get("gross_amount", amount)
+        
+        if abs((net + tax) - gross) > 0.01:
+            raise Exception("Math Validation Failed: Net + Tax != Gross")
+
+        bill_payload = {
+            "Type": "ACCPAY",
+            "Status": "DRAFT",
+            "Contact": {"Name": fin_data.get("vendor", "Unknown Supplier")},
+            "LineItems": [{
+                "Description": item.get("category", "General Expense"),
+                "Quantity": 1,
+                "UnitAmount": net,
+                "TaxAmount": tax
+            }]
+        }
+        resp = await client.create_draft_bill(bill_payload)
+        invoice_id = resp.get("Invoices", [{}])[0].get("InvoiceID")
+        
+        # If there are receipt attachments, upload them
+        media_urls = item.get("media_urls") or []
+        if invoice_id and media_urls:
+            import httpx
+            async with httpx.AsyncClient() as dl_client:
+                for idx, m_url in enumerate(media_urls):
+                    try:
+                        img_resp = await dl_client.get(m_url)
+                        if img_resp.status_code == 200:
+                            await client.upload_attachment(invoice_id, f"receipt_{idx}.jpg", img_resp.content, "image/jpeg")
+                    except Exception as upload_err:
+                        logger.error("Failed to upload attachment to Xero", error=str(upload_err))
+
         await mark_hmrc_submitted(item["id"])
-        logger.info("\033[92mPROCESSING -> SUBMITTED\033[0m", queue_id=item["id"])
-    except HMRCApiError as e:
+        logger.info("[92mPROCESSING -> SUBMITTED[0m", queue_id=item["id"])
+    except Exception as e:
         # Sanitize PII from the payload before logging
         def sanitize_pii(data):
             if isinstance(data, dict):
