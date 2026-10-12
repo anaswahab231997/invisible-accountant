@@ -280,19 +280,50 @@ async def update_ledger_external_bill_id(queue_id: int, external_bill_id: str):
             external_bill_id, datetime.now().isoformat(), queue_id
         )
 
-async def mark_hmrc_submitted(queue_id: int, external_bill_id: str | None = None):
+async def update_ledger_attachment_status(
+    queue_id: int, 
+    status: str, 
+    sha256: str | None = None, 
+    xero_attachment_id: str | None = None, 
+    error: str | None = None
+):
     async with get_connection() as conn:
         now_ts = datetime.now().isoformat()
-        if external_bill_id:
-            await conn.execute(
-                "UPDATE hmrc_ledger SET status = 'SUBMITTED', external_bill_id = COALESCE(external_bill_id, $2), updated_at = $3 WHERE id = $1",
-                queue_id, external_bill_id, now_ts
-            )
-        else:
-            await conn.execute(
-                "UPDATE hmrc_ledger SET status = 'SUBMITTED', updated_at = $2 WHERE id = $1",
-                queue_id, now_ts
-            )
+        await conn.execute(
+            """
+            UPDATE hmrc_ledger 
+            SET attachment_status = $1,
+                attachment_sha256 = COALESCE($2, attachment_sha256),
+                xero_attachment_id = COALESCE($3, xero_attachment_id),
+                attachment_error = $4,
+                updated_at = $5
+            WHERE id = $6
+            """,
+            status, sha256, xero_attachment_id, error, now_ts, queue_id
+        )
+
+async def mark_hmrc_submitted(
+    queue_id: int, 
+    external_bill_id: str | None = None,
+    attachment_status: str | None = None,
+    attachment_sha256: str | None = None,
+    xero_attachment_id: str | None = None
+):
+    async with get_connection() as conn:
+        now_ts = datetime.now().isoformat()
+        await conn.execute(
+            """
+            UPDATE hmrc_ledger 
+            SET status = 'SUBMITTED', 
+                external_bill_id = COALESCE(external_bill_id, $2),
+                attachment_status = COALESCE($3, attachment_status),
+                attachment_sha256 = COALESCE($4, attachment_sha256),
+                xero_attachment_id = COALESCE($5, xero_attachment_id),
+                updated_at = $6 
+            WHERE id = $1
+            """,
+            queue_id, external_bill_id, attachment_status, attachment_sha256, xero_attachment_id, now_ts
+        )
 
 async def mark_hmrc_failed(queue_id):
     async with get_connection() as conn:

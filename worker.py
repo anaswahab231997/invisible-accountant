@@ -15,6 +15,7 @@ from db import (
     get_pending_hmrc_queue,
     mark_hmrc_submitted,
     update_ledger_external_bill_id,
+    update_ledger_attachment_status,
     get_identity_from_vault,
     store_identity_in_vault
 )
@@ -366,7 +367,7 @@ async def submit_to_hmrc(item):
             logger.info("Phase 1 Skipped: external_bill_id already exists. Reusing existing bill (Idempotent replay)", queue_id=item["id"], external_bill_id=invoice_id)
             item["external_bill_id"] = invoice_id
 
-        # Step 4: Proceed to attachment upload using external_bill_id
+        # Step 4: Proceed to attachment upload using external_bill_id (Failure-Isolated Two-Phase Commit)
         media_urls = item.get("media_urls") or []
         if isinstance(media_urls, str):
             try:
@@ -374,22 +375,64 @@ async def submit_to_hmrc(item):
                 media_urls = json.loads(media_urls)
             except Exception:
                 media_urls = [media_urls] if media_urls.startswith("http") else []
+        
+        attachment_status = "NO_ATTACHMENT"
+        last_sha256 = None
+        last_att_id = None
+        attachment_error = None
+
         if invoice_id and media_urls:
             import httpx
-            async with httpx.AsyncClient() as dl_client:
+            async with httpx.AsyncClient(timeout=30.0) as dl_client:
                 for idx, m_url in enumerate(media_urls):
                     try:
                         img_resp = await dl_client.get(m_url)
                         if img_resp.status_code == 200:
-                            mime_type = "application/pdf" if ".pdf" in m_url.lower() else "image/jpeg"
-                            ext = "pdf" if mime_type == "application/pdf" else "jpg"
-                            await client.upload_attachment(invoice_id, f"receipt_{idx}.{ext}", img_resp.content, mime_type)
+                            filename = f"receipt_{item['id']}_{idx}"
+                            att_result = await client.upload_attachment(
+                                invoice_id=invoice_id, 
+                                filename=filename, 
+                                file_bytes=img_resp.content
+                            )
+                            attachment_status = "ATTACHED"
+                            last_sha256 = att_result.get("sha256")
+                            last_att_id = att_result.get("attachment_id")
+                            logger.info("Receipt attachment uploaded & cryptographically sealed", 
+                                        queue_id=item["id"], 
+                                        sha256=last_sha256, 
+                                        attachment_id=last_att_id)
+                        else:
+                            attachment_status = "ATTACHMENT_FAILED"
+                            attachment_error = f"HTTP {img_resp.status_code} downloading receipt from media URL"
+                            logger.error("Failed to download receipt attachment", 
+                                         queue_id=item["id"], 
+                                         status_code=img_resp.status_code)
                     except Exception as upload_err:
-                        logger.error("Failed to upload attachment to Xero", error=str(upload_err))
+                        attachment_status = "ATTACHMENT_FAILED"
+                        attachment_error = str(upload_err)
+                        logger.error("Failed to upload attachment to Xero (Failure Isolation: Draft bill retained)", 
+                                     queue_id=item["id"], 
+                                     error=str(upload_err))
+            
+            await update_ledger_attachment_status(
+                item["id"], 
+                status=attachment_status, 
+                sha256=last_sha256, 
+                xero_attachment_id=last_att_id, 
+                error=attachment_error
+            )
+        else:
+            await update_ledger_attachment_status(item["id"], status="NO_ATTACHMENT")
 
-        # Step 5: Mark the item as SUBMITTED
-        await mark_hmrc_submitted(item["id"], external_bill_id=invoice_id)
-        logger.info("PROCESSING -> SUBMITTED", queue_id=item["id"], external_bill_id=invoice_id)
+        # Step 5: Mark the item as SUBMITTED with attachment audit trail
+        await mark_hmrc_submitted(
+            item["id"], 
+            external_bill_id=invoice_id,
+            attachment_status=attachment_status,
+            attachment_sha256=last_sha256,
+            xero_attachment_id=last_att_id
+        )
+        logger.info("PROCESSING -> SUBMITTED", queue_id=item["id"], external_bill_id=invoice_id, attachment_status=attachment_status)
         
     except Exception as e:
         status_code = getattr(e, 'status_code', 500)
