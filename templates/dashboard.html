@@ -1,134 +1,228 @@
 {% extends "base.html" %}
 
 {% block content %}
-<div class="mb-4 flex flex-col md:flex-row md:justify-between md:items-end gap-4">
+<div class="mb-6 flex flex-col md:flex-row md:justify-between md:items-end gap-4">
     <div>
-        <h1 class="text-xl font-semibold text-gray-900 tracking-tight">Review Queue</h1>
-        <p class="text-xs text-gray-500 mt-1">Review and approve extracted transactions before pushing to Xero.</p>
+        <h1 class="text-2xl font-bold text-gray-900 tracking-tight">Accountant Triage &amp; Review Gateway</h1>
+        <p class="text-xs text-gray-500 mt-1">HMRC Capital Allowances (CAA 2001), 90-Day Deduplication &amp; Multi-Currency Normalization before pushing to Xero.</p>
     </div>
     <div class="flex items-center space-x-2">
-        <button hx-get="/dashboard" hx-target="body" class="bg-white border border-gray-300 text-gray-700 px-3 py-1.5 rounded text-xs font-medium hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-ukblue shadow-sm transition-colors">
+        <button hx-get="/dashboard?tab={{ current_tab }}" hx-target="body" class="bg-white border border-gray-300 text-gray-700 px-3 py-1.5 rounded text-xs font-medium hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-ukblue shadow-sm transition-colors flex items-center">
+            <svg class="w-3.5 h-3.5 mr-1 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
             Refresh
         </button>
-        <button hx-post="/dashboard/bulk-approve" hx-target="body" class="bg-indigo-600 text-white px-3 py-1.5 rounded text-xs font-medium hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-indigo-600 shadow-sm transition-colors">
-            Bulk Approve
+        <button hx-post="/dashboard/bulk-approve" hx-target="body" class="bg-indigo-600 text-white px-3 py-1.5 rounded text-xs font-medium hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-indigo-600 shadow-sm transition-colors flex items-center">
+            <svg class="w-3.5 h-3.5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+            Bulk Approve Safe Items
         </button>
     </div>
 </div>
 
-<div class="bg-white shadow-sm rounded border border-gray-200 overflow-x-auto">
+<!-- Tabs Navigation -->
+<div class="border-b border-gray-200 mb-6">
+    <nav class="-mb-px flex space-x-6 overflow-x-auto text-xs">
+        <a href="/dashboard?tab=all" class="{% if current_tab == 'all' %}border-indigo-600 text-indigo-600 font-semibold border-b-2{% else %}border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 border-b-2{% endif %} pb-3 px-1 flex items-center whitespace-nowrap transition-colors">
+            All Records
+            <span class="ml-2 py-0.5 px-2 rounded-full text-[10px] font-bold {% if current_tab == 'all' %}bg-indigo-100 text-indigo-800{% else %}bg-gray-100 text-gray-600{% endif %}">
+                {{ tabs_summary.all }}
+            </span>
+        </a>
+        <a href="/dashboard?tab=capital_allowances" class="{% if current_tab == 'capital_allowances' %}border-amber-600 text-amber-700 font-semibold border-b-2{% else %}border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 border-b-2{% endif %} pb-3 px-1 flex items-center whitespace-nowrap transition-colors">
+            Capital Allowances (>£500)
+            <span class="ml-2 py-0.5 px-2 rounded-full text-[10px] font-bold {% if tabs_summary.capital_allowances > 0 %}bg-amber-100 text-amber-800 border border-amber-300{% else %}bg-gray-100 text-gray-600{% endif %}">
+                {{ tabs_summary.capital_allowances }}
+            </span>
+        </a>
+        <a href="/dashboard?tab=duplicates" class="{% if current_tab == 'duplicates' %}border-rose-600 text-rose-700 font-semibold border-b-2{% else %}border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 border-b-2{% endif %} pb-3 px-1 flex items-center whitespace-nowrap transition-colors">
+            Duplicate Suspected
+            <span class="ml-2 py-0.5 px-2 rounded-full text-[10px] font-bold {% if tabs_summary.duplicates > 0 %}bg-rose-100 text-rose-800 border border-rose-300{% else %}bg-gray-100 text-gray-600{% endif %}">
+                {{ tabs_summary.duplicates }}
+            </span>
+        </a>
+        <a href="/dashboard?tab=pending" class="{% if current_tab == 'pending' %}border-blue-600 text-blue-700 font-semibold border-b-2{% else %}border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 border-b-2{% endif %} pb-3 px-1 flex items-center whitespace-nowrap transition-colors">
+            Queued to Xero
+            <span class="ml-2 py-0.5 px-2 rounded-full text-[10px] font-bold bg-gray-100 text-gray-600">
+                {{ tabs_summary.pending }}
+            </span>
+        </a>
+        <a href="/dashboard?tab=submitted" class="{% if current_tab == 'submitted' %}border-emerald-600 text-emerald-700 font-semibold border-b-2{% else %}border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 border-b-2{% endif %} pb-3 px-1 flex items-center whitespace-nowrap transition-colors">
+            Pushed to Xero
+            <span class="ml-2 py-0.5 px-2 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-700">
+                {{ tabs_summary.submitted }}
+            </span>
+        </a>
+    </nav>
+</div>
+
+<div class="bg-white shadow-sm rounded-lg border border-gray-200 overflow-x-auto">
     <table class="w-full text-left border-collapse min-w-max">
         <thead>
             <tr class="bg-gray-50 border-b border-gray-200 text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                <th class="px-4 py-2 w-10"></th>
-                <th class="px-4 py-2">Status</th>
-                <th class="px-4 py-2">Client</th>
-                <th class="px-4 py-2">Date</th>
-                <th class="px-4 py-2 w-1/4">Vendor &amp; Description</th>
-                <th class="px-4 py-2">Account</th>
-                <th class="px-4 py-2">Tax</th>
-                <th class="px-4 py-2 text-right">Amount</th>
-                <th class="px-4 py-2 text-right">Actions</th>
+                <th class="px-4 py-3 w-10"></th>
+                <th class="px-4 py-3">Status / Gate</th>
+                <th class="px-4 py-3">Client</th>
+                <th class="px-4 py-3">Date</th>
+                <th class="px-4 py-3 w-1/4">Vendor &amp; Description</th>
+                <th class="px-4 py-3">Nominal Code</th>
+                <th class="px-4 py-3">Tax Type</th>
+                <th class="px-4 py-3 text-right">Amount</th>
+                <th class="px-4 py-3 text-right">Accountant Actions</th>
             </tr>
         </thead>
         <tbody class="divide-y divide-gray-200 text-sm text-gray-800" id="queue-table">
             {% for item in items %}
-            <tr id="row-{{ item.id }}" class="hover:bg-blue-50/50 transition-colors group">
-                <td class="px-4 py-2 text-center text-gray-400">
-                    <button onclick="document.getElementById('details-{{ item.id }}').classList.toggle('hidden')" class="hover:text-indigo-600 transition-colors focus:outline-none" title="View Audit Log">
+            <tr id="row-{{ item.item_type }}-{{ item.id }}" class="hover:bg-blue-50/40 transition-colors group">
+                <td class="px-4 py-3 text-center text-gray-400">
+                    <button onclick="document.getElementById('details-{{ item.item_type }}-{{ item.id }}').classList.toggle('hidden')" class="hover:text-indigo-600 transition-colors focus:outline-none" title="View Audit Log &amp; Reasoning">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 transform transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
                         </svg>
                     </button>
                 </td>
-                <td class="px-4 py-2">
-                    {% if item.flagged %}
-                    <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-amber-100 text-amber-800 border border-amber-200 uppercase tracking-wide">Review</span>
+                <td class="px-4 py-3">
+                    {% if item.status == 'CAPITAL_ALLOWANCE' %}
+                    <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-amber-100 text-amber-900 border border-amber-300 uppercase tracking-wide">
+                        <svg class="w-3 h-3 mr-1 text-amber-600" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"></path></svg>
+                        Capital Asset (>£500)
+                    </span>
+                    {% elif item.status == 'DUPLICATE_SUSPECTED' %}
+                    <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-rose-100 text-rose-800 border border-rose-300 uppercase tracking-wide">
+                        <svg class="w-3 h-3 mr-1 text-rose-600" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0118 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"></path></svg>
+                        Duplicate Suspected
+                    </span>
+                    {% elif item.status == 'SUBMITTED' %}
+                    <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-300 uppercase tracking-wide">
+                        <svg class="w-3 h-3 mr-1 text-emerald-600" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path></svg>
+                        Pushed to Xero
+                    </span>
+                    {% elif item.status == 'PENDING' %}
+                    <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-blue-100 text-blue-800 border border-blue-200 uppercase tracking-wide">
+                        Queued to Xero
+                    </span>
+                    {% elif item.flagged %}
+                    <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-yellow-100 text-yellow-800 border border-yellow-200 uppercase tracking-wide">
+                        Needs Review
+                    </span>
                     {% else %}
-                    <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-blue-100 text-blue-800 border border-blue-200 uppercase tracking-wide">Pending</span>
+                    <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-gray-100 text-gray-700 border border-gray-200 uppercase tracking-wide">
+                        {{ item.status_label }}
+                    </span>
                     {% endif %}
                 </td>
-                <td class="px-4 py-2 font-medium text-gray-900 whitespace-nowrap">
+                <td class="px-4 py-3 font-medium text-gray-900 whitespace-nowrap">
                     {{ item.sender_id }}
                 </td>
-                <td class="px-4 py-2 text-gray-500 whitespace-nowrap text-xs">
+                <td class="px-4 py-3 text-gray-500 whitespace-nowrap text-xs">
                     {{ item.created_at }}
                 </td>
-                <td class="px-4 py-2">
+                <td class="px-4 py-3">
                     {% if item.is_failed_api %}
-                        <span class="text-rose-600 font-bold text-xs uppercase tracking-wide flex items-center"><svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>API Quota Exhausted</span>
-                        <div class="text-[10px] text-gray-500 mt-1">Pending background retry tomorrow.</div>
+                        <span class="text-rose-600 font-bold text-xs uppercase tracking-wide flex items-center">
+                            <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                            API Limit Exhausted
+                        </span>
+                        <div class="text-[10px] text-gray-500 mt-1">Pending background retry.</div>
                     {% else %}
-                        <div class="font-medium text-gray-900">{{ item.vendor }}</div>
+                        <div class="font-medium text-gray-900 flex items-center space-x-1.5">
+                            <span>{{ item.vendor }}</span>
+                            {% if item.currency and item.currency != 'GBP' %}
+                            <span class="inline-flex items-center px-1.5 py-0.2 rounded text-[9px] font-mono font-bold bg-purple-100 text-purple-800 border border-purple-200">
+                                {{ item.currency }} FX Norm
+                            </span>
+                            {% endif %}
+                        </div>
                         <div class="text-xs text-gray-500 truncate max-w-xs" title="{{ item.memo }}">{{ item.memo }}</div>
+                        {% if item.external_bill_id %}
+                        <div class="text-[10px] text-gray-400 font-mono mt-0.5">Xero ID: {{ item.external_bill_id }}</div>
+                        {% endif %}
                     {% endif %}
                 </td>
-                <td class="px-4 py-2 whitespace-nowrap">
+                <td class="px-4 py-3 whitespace-nowrap">
                     {% if not item.is_failed_api %}
-                    <span class="inline-flex items-center px-1.5 py-0.5 rounded-sm text-xs font-mono bg-gray-100 text-gray-700 border border-gray-200">
+                    <span class="inline-flex items-center px-1.5 py-0.5 rounded text-xs font-mono font-semibold {% if item.account_code in ('710', '720', '764', '760') %}bg-amber-100 text-amber-800 border border-amber-300{% else %}bg-gray-100 text-gray-700 border border-gray-200{% endif %}">
                         {{ item.account_code }}
                     </span>
                     {% endif %}
                 </td>
-                <td class="px-4 py-2 whitespace-nowrap">
+                <td class="px-4 py-3 whitespace-nowrap">
                     {% if not item.is_failed_api %}
-                    <span class="inline-flex items-center px-1.5 py-0.5 rounded-sm text-xs font-mono bg-gray-100 text-gray-700 border border-gray-200">
+                    <span class="inline-flex items-center px-1.5 py-0.5 rounded text-xs font-mono font-semibold {% if item.tax_code in ('INPUT2', 'INPUT') %}bg-blue-50 text-blue-700 border border-blue-200{% else %}bg-gray-100 text-gray-600 border border-gray-200{% endif %}">
                         {{ item.tax_code }}
                     </span>
                     {% endif %}
                 </td>
-                <td class="px-4 py-2 text-right font-mono font-medium text-gray-900 whitespace-nowrap">
+                <td class="px-4 py-3 text-right font-mono font-semibold text-gray-900 whitespace-nowrap">
                     {% if not item.is_failed_api %}
-                    £{{ "%.2f"|format(item.allowable_business_amount) }}
+                    £{{ "%.2f"|format(item.amount) }}
                     {% if item.business_proportion_percentage < 100 %}
                     <br/><span class="text-xs text-gray-400 font-sans font-normal">{{ item.business_proportion_percentage }}% of £{{ "%.2f"|format(item.amount) }}</span>
                     {% endif %}
                     {% endif %}
                 </td>
-                <td class="px-4 py-2 text-right whitespace-nowrap">
+                <td class="px-4 py-3 text-right whitespace-nowrap">
                     {% if not item.is_failed_api %}
-                    <div class="flex justify-end items-center space-x-2">
-                        <button hx-get="/dashboard/edit/{{ item.id }}" hx-target="#row-{{ item.id }}" hx-swap="outerHTML" class="text-gray-500 hover:text-indigo-600 font-medium text-xs border border-transparent hover:border-gray-300 hover:bg-white rounded px-2 py-1 transition-all shadow-sm">
+                    <div class="flex justify-end items-center space-x-1.5">
+                        {% if item.status == 'SUBMITTED' %}
+                        <span class="inline-flex items-center text-xs font-semibold text-emerald-600 px-2 py-1">
+                            <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                            Synced
+                        </span>
+                        {% elif item.status in ('CAPITAL_ALLOWANCE', 'DUPLICATE_SUSPECTED', 'NEEDS_REVIEW') or item.flagged %}
+                        <button hx-get="/dashboard/edit/{{ item.item_type }}/{{ item.id }}" hx-target="#row-{{ item.item_type }}-{{ item.id }}" hx-swap="outerHTML" class="bg-amber-500 hover:bg-amber-600 text-white font-medium text-xs rounded px-2.5 py-1 transition-all shadow-sm flex items-center">
+                            <svg class="w-3.5 h-3.5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
+                            Triage
+                        </button>
+                        <button hx-post="/dashboard/reject/{{ item.item_type }}/{{ item.id }}" hx-target="#row-{{ item.item_type }}-{{ item.id }}" hx-swap="outerHTML" class="text-gray-400 hover:text-rose-600 text-xs px-1.5 py-1 transition-colors" title="Reject / Dismiss">
+                            ✕
+                        </button>
+                        {% else %}
+                        <button hx-get="/dashboard/edit/{{ item.item_type }}/{{ item.id }}" hx-target="#row-{{ item.item_type }}-{{ item.id }}" hx-swap="outerHTML" class="text-gray-600 hover:text-indigo-600 font-medium text-xs border border-gray-200 hover:bg-white rounded px-2 py-1 transition-all shadow-sm">
                             Edit
                         </button>
-                        <button hx-post="/dashboard/approve/{{ item.id }}" hx-target="#row-{{ item.id }}" hx-swap="outerHTML" class="btn-approve bg-emerald-600 hover:bg-emerald-700 text-white font-medium text-xs rounded px-2 py-1 transition-all shadow-sm flex items-center">
-                            <span class="htmx-indicator mr-1 hidden">
-                                <svg class="animate-spin h-3 w-3 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
-                            </span>
-                            Approve
+                        <button hx-post="/dashboard/triage/{{ item.item_type }}/{{ item.id }}" hx-target="#row-{{ item.item_type }}-{{ item.id }}" hx-swap="outerHTML" class="bg-emerald-600 hover:bg-emerald-700 text-white font-medium text-xs rounded px-2.5 py-1 transition-all shadow-sm flex items-center">
+                            Release
                         </button>
+                        {% endif %}
                     </div>
                     {% endif %}
                 </td>
             </tr>
             <!-- Audit Log / Expanded Row -->
-            <tr id="details-{{ item.id }}" class="hidden bg-gray-50 border-t border-gray-100">
-                <td colspan="9" class="px-4 py-4">
-                    <div class="pl-8 border-l-2 border-indigo-200">
-                        <h4 class="text-xs font-bold text-gray-800 uppercase tracking-wider mb-3">Audit Log & AI Reasoning</h4>
+            <tr id="details-{{ item.item_type }}-{{ item.id }}" class="hidden bg-gray-50 border-t border-gray-100">
+                <td colspan="9" class="px-6 py-4">
+                    <div class="pl-4 border-l-2 border-indigo-300">
+                        <div class="flex items-center justify-between mb-3">
+                            <h4 class="text-xs font-bold text-gray-800 uppercase tracking-wider flex items-center">
+                                <svg class="w-4 h-4 mr-1.5 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                                Statutory Audit Trail &amp; AI Extraction Memo
+                            </h4>
+                            <span class="text-[11px] text-gray-400 font-mono">Row Type: {{ item.item_type }} #{{ item.id }}</span>
+                        </div>
                         
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <!-- Original Source -->
                             <div class="bg-white rounded border border-gray-200 shadow-sm overflow-hidden">
-                                <div class="bg-gray-100 px-3 py-1.5 border-b border-gray-200 text-xs font-semibold text-gray-600 flex items-center">
-                                    <svg class="h-3 w-3 mr-1.5 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
-                                    </svg>
-                                    Original Raw Message
+                                <div class="bg-gray-100 px-3 py-1.5 border-b border-gray-200 text-xs font-semibold text-gray-600 flex items-center justify-between">
+                                    <span class="flex items-center">
+                                        <svg class="h-3.5 w-3.5 mr-1.5 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                                        </svg>
+                                        Original WhatsApp Intake Message
+                                    </span>
                                 </div>
-                                <div class="p-3 text-xs text-gray-600 font-mono bg-gray-50 h-32 overflow-y-auto whitespace-pre-wrap">{% if item.raw_message %}{{ item.raw_message }}{% else %}No original message available.{% endif %}</div>
+                                <div class="p-3 text-xs text-gray-600 font-mono bg-gray-50 h-32 overflow-y-auto whitespace-pre-wrap">{% if item.raw_message %}{{ item.raw_message }}{% else %}No original text message recorded.{% endif %}</div>
                             </div>
 
-                            <!-- Pipeline Output -->
+                            <!-- Statutory Reasoning -->
                             <div class="bg-white rounded border border-gray-200 shadow-sm overflow-hidden">
                                 <div class="bg-indigo-50 px-3 py-1.5 border-b border-indigo-100 text-xs font-semibold text-indigo-800 flex items-center">
-                                    <svg class="h-3 w-3 mr-1.5 text-indigo-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <svg class="h-3.5 w-3.5 mr-1.5 text-indigo-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
                                     </svg>
-                                    AI Extraction Reasoning
+                                    Tax &amp; Compliance Classification Memo
                                 </div>
                                 <div class="p-3 text-xs text-gray-700 h-32 overflow-y-auto">
-                                    <div class="whitespace-pre-wrap">{% if item.reasoning %}{{ item.reasoning }}{% else %}No AI reasoning provided.{% endif %}</div>
+                                    <div class="whitespace-pre-wrap font-sans">{% if item.reasoning %}{{ item.reasoning }}{% else %}Standard business expense recorded under FRS 105.{% endif %}</div>
                                 </div>
                             </div>
                         </div>
@@ -137,13 +231,13 @@
             </tr>
             {% else %}
             <tr>
-                <td colspan="9" class="px-4 py-8 text-center text-sm text-gray-500">
+                <td colspan="9" class="px-4 py-12 text-center text-sm text-gray-500">
                     <div class="flex flex-col items-center justify-center">
-                        <svg class="h-8 w-8 text-gray-300 mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <svg class="h-10 w-10 text-gray-300 mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                         </svg>
-                        <p class="font-medium text-gray-600">Queue is empty</p>
-                        <p class="text-xs mt-1 text-gray-400">All transactions have been reviewed and approved.</p>
+                        <p class="font-medium text-gray-700">No items in this queue</p>
+                        <p class="text-xs mt-1 text-gray-400">All transactions in this category have been processed or triaged.</p>
                     </div>
                 </td>
             </tr>

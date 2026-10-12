@@ -25,6 +25,7 @@ class HMRCApiError(Exception):
         self.status_code = status_code
         self.payload = payload
 from aes_gcm_security import TokenEncryptionEngine
+from currency_converter import detect_currency, normalize_to_base_currency
 
 logger = get_logger(__name__)
 
@@ -187,12 +188,20 @@ def normalize_date_str(date_val: str | None, fallback_val: str | None = None) ->
 
 async def submit_to_hmrc(item):
     try:
-        if item.get("status") == "DUPLICATE_SUSPECTED":
-            logger.warning("Item marked as DUPLICATE_SUSPECTED. Skipping Xero submission to prevent duplication.", queue_id=item.get("id"))
+        if item.get("status") == "DUPLICATE_SUSPECTED" and not item.get("accountant_approved"):
+            logger.warning("Item marked as DUPLICATE_SUSPECTED without approval. Skipping Xero submission to prevent duplication.", queue_id=item.get("id"))
             return
             
+        sender_id = item.get("sender_id")
+        if not sender_id and item.get("chat_id"):
+            from db import get_connection
+            async with get_connection() as conn:
+                sender_id = await conn.fetchval("SELECT sender_id FROM chat_sessions WHERE id = $1", item["chat_id"])
+        if not sender_id:
+            sender_id = "447123456789"
+            
         from accounting_client import AccountingClient
-        client = AccountingClient(workspace_id=item.get("sender_id", ""), provider="XERO")
+        client = AccountingClient(workspace_id=sender_id, provider="XERO")
         
         fin_data = {}
         if item.get("encrypted_financial_data"):
@@ -219,15 +228,44 @@ async def submit_to_hmrc(item):
         net = safe_float(fin_data.get("net_amount", amount), amount)
         tax = safe_float(fin_data.get("vat_amount", 0.0), 0.0)
         gross = safe_float(fin_data.get("gross_amount", amount), amount)
+
+        # Multi-Currency Handling (VATA 1994 s88 & VAT Notice 700 §7.6)
+        raw_curr = fin_data.get("currency")
+        if not raw_curr:
+            raw_curr = detect_currency(
+                f"{fin_data.get('vendor', '')} {fin_data.get('description', '')} {item.get('raw_message', '')}"
+            )
+        is_foreign = (raw_curr and raw_curr.upper() != "GBP")
+        fx_annotation = ""
+        if is_foreign and not fin_data.get("fx_metadata"):
+            base_gross, base_vat, base_net, fx_meta = normalize_to_base_currency(
+                amount=gross if gross > 0 else amount,
+                currency=raw_curr,
+                vat_amount=tax
+            )
+            gross = base_gross
+            net = base_net
+            tax = 0.0  # Statutory 0% input tax on overseas expenditure
+            fx_annotation = fx_meta.get("annotation", "")
+            fin_data["gross_amount"] = gross
+            fin_data["net_amount"] = net
+            fin_data["vat_amount"] = tax
+            fin_data["tax_code"] = "NONE"
+            fin_data["tax_type"] = "NONE"
+            fin_data["fx_metadata"] = fx_meta
+        elif fin_data.get("fx_metadata"):
+            fx_annotation = fin_data["fx_metadata"].get("annotation", "")
         
         if abs((net + tax) - gross) > 0.01:
-            raise Exception("Math Validation Failed: Net + Tax != Gross")
+            raise Exception(f"Math Validation Failed: Net ({net}) + Tax ({tax}) != Gross ({gross})")
 
         tx_date = normalize_date_str(fin_data.get("date") or fin_data.get("receipt_date") or fin_data.get("transaction_date"), item.get("timestamp"))
         due_date = normalize_date_str(fin_data.get("due_date"), tx_date)
         vendor_name = fin_data.get("vendor") or "Unknown Supplier"
         category_name = item.get("category") or fin_data.get("category") or "General Expense"
-        account_code = map_category_to_xero_account(category_name)
+        
+        # Priority for AccountCode: Accountant triage override -> AI classification -> Category map
+        account_code = str(fin_data.get("account_code") or map_category_to_xero_account(category_name)).strip()
         
         # Match Contact (Name + ContactID if matched in live tenant)
         matched_contact = await client.find_contact(vendor_name)
@@ -235,27 +273,41 @@ async def submit_to_hmrc(item):
 
         inv_number = fin_data.get("invoice_number") or fin_data.get("receipt_number") or f"REC-{item['id']}"
         ref_code = fin_data.get("reference") or f"REC-{item['id']}"
+        if fx_annotation and raw_curr and raw_curr.upper() != "GBP":
+            ref_code = f"{ref_code} {raw_curr.upper()}"[:50]
 
-        tax_code = "INPUT" if tax > 0 else "NONE"
+        # Priority for TaxType: Foreign (NONE) -> Accountant triage override -> Default INPUT/NONE
+        if is_foreign:
+            tax_code = "NONE"
+        elif fin_data.get("tax_type"):
+            tax_code = str(fin_data.get("tax_type")).strip()
+        elif fin_data.get("tax_code"):
+            tax_code = str(fin_data.get("tax_code")).strip()
+        else:
+            tax_code = "INPUT" if tax > 0 else "NONE"
 
         detail_desc = fin_data.get("description") or fin_data.get("reasoning_step_2_nature_of_expense")
         if detail_desc:
             line_desc = f"{detail_desc} ({category_name})"
         else:
             line_desc = f"Purchased from {vendor_name} ({category_name})"
+        if fx_annotation:
+            line_desc = f"{line_desc} {fx_annotation}"
 
         line_items_data = fin_data.get("line_items")
         if line_items_data and isinstance(line_items_data, list) and len(line_items_data) > 0:
             formatted_lines = []
             for idx, li in enumerate(line_items_data):
                 li_desc = li.get("description") or f"Item {idx+1} ({category_name})"
+                if fx_annotation:
+                    li_desc = f"{li_desc} {fx_annotation}"
                 li_qty = safe_float(li.get("quantity", 1), 1.0)
                 if li_qty <= 0:
                     li_qty = 1.0
                 li_unit = safe_float(li.get("unit_amount") or li.get("net_amount") or li.get("amount", net), net)
-                li_tax = safe_float(li.get("vat_amount") or li.get("tax_amount", 0.0), 0.0)
-                li_acc = map_category_to_xero_account(li.get("category") or category_name)
-                li_tax_type = "INPUT" if li_tax > 0 else "NONE"
+                li_tax = 0.0 if is_foreign else safe_float(li.get("vat_amount") or li.get("tax_amount", 0.0), 0.0)
+                li_acc = str(li.get("account_code") or fin_data.get("account_code") or map_category_to_xero_account(li.get("category") or category_name)).strip()
+                li_tax_type = "NONE" if is_foreign else str(li.get("tax_type") or li.get("tax_code") or ("INPUT" if li_tax > 0 else "NONE")).strip()
                 formatted_lines.append({
                     "Description": li_desc,
                     "Quantity": li_qty,
@@ -273,6 +325,7 @@ async def submit_to_hmrc(item):
                 "TaxType": tax_code,
                 "TaxAmount": tax
             }]
+
 
         bill_payload = {
             "Type": "ACCPAY",
