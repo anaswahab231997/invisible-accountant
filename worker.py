@@ -202,8 +202,8 @@ async def submit_to_hmrc(item):
             async with get_connection() as conn:
                 if status_code in (401, 403):
                     logger.warning("401/403 Unauthorized - wiping token for re-auth", whatsapp_id=item["sender_id"])
-                    await conn.execute("DELETE FROM accounting_connections WHERE workspace_id = ", item["sender_id"])
-                    await conn.execute("UPDATE hmrc_ledger SET status = 'AUTH_EXPIRED' WHERE id = ", item["id"])
+                    await conn.execute("DELETE FROM accounting_connections WHERE workspace_id = $1", item["sender_id"])
+                    await conn.execute("UPDATE hmrc_ledger SET status = 'AUTH_EXPIRED' WHERE id = $1", item["id"])
                     return
                 else:
                     row = await conn.fetchrow("""
@@ -211,7 +211,7 @@ async def submit_to_hmrc(item):
                         SET status = CASE WHEN retry_count >= 5 THEN 'FAILED' ELSE 'PENDING' END,
                             retry_count = retry_count + 1,
                             next_retry_at = NOW() + (INTERVAL '1 minute' * pow(2, retry_count))
-                        WHERE id = 
+                        WHERE id = $1
                         RETURNING status
                     """, item["id"])
                     if row and row["status"] == 'FAILED':
@@ -220,7 +220,7 @@ async def submit_to_hmrc(item):
         else:
             from db import get_connection
             async with get_connection() as conn:
-                await conn.execute("UPDATE hmrc_ledger SET status = 'FAILED' WHERE id = ", item["id"])
+                await conn.execute("UPDATE hmrc_ledger SET status = 'FAILED' WHERE id = $1", item["id"])
             logger.info("[91mPROCESSING -> FAILED[0m", queue_id=item["id"])
             raise e
 
