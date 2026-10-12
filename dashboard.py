@@ -1,11 +1,18 @@
 from fastapi import APIRouter, Request, Depends, Form
-from fastapi.responses import HTMLResponse
+from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
 import json
 import os
 import datetime
 from db import get_connection, confirm_and_queue_to_ledger
-from security import verify_api_key
+from security import (
+    verify_accountant_session,
+    verify_api_key,
+    is_authenticated_request,
+    is_valid_api_key,
+    set_accountant_session_cookie,
+    clear_accountant_session_cookie,
+)
 from aes_gcm_security import TokenEncryptionEngine
 from currency_converter import detect_currency, normalize_to_base_currency
 import logging
@@ -13,6 +20,51 @@ import logging
 router = APIRouter()
 templates = Jinja2Templates(directory="templates")
 logger = logging.getLogger(__name__)
+
+def return_dashboard_response(request: Request, response: HTMLResponse) -> HTMLResponse:
+    """Helper to attach session cookie if authenticated via magic link query parameter."""
+    if getattr(request.state, "should_set_cookie", False):
+        set_accountant_session_cookie(response, getattr(request.state, "accountant_session", None), secure=True)
+    return response
+
+@router.get("/dashboard/login", response_class=HTMLResponse)
+async def login_page(request: Request, next: str = "/dashboard"):
+    """Renders login page or redirects to dashboard if already authenticated."""
+    if is_authenticated_request(request):
+        target = next if next and next.startswith("/dashboard") else "/dashboard"
+        return RedirectResponse(url=target, status_code=303)
+    
+    template = templates.get_template("login.html")
+    return HTMLResponse(content=template.render({"request": request, "error": None, "next": next}))
+
+@router.post("/dashboard/login")
+async def login_submit(
+    request: Request,
+    access_key: str = Form(""),
+    next: str = Form("/dashboard")
+):
+    """Authenticates access key, sets accountant_session cookie, and redirects to dashboard."""
+    clean_key = access_key.strip()
+    if is_valid_api_key(clean_key):
+        target = next if next and next.startswith("/dashboard") else "/dashboard"
+        response = RedirectResponse(url=target, status_code=303)
+        set_accountant_session_cookie(response, token=clean_key, secure=True, max_age=604800)
+        return response
+    
+    template = templates.get_template("login.html")
+    context = {
+        "request": request,
+        "error": "Invalid API access key. Please verify your credentials and try again.",
+        "next": next,
+    }
+    return HTMLResponse(content=template.render(context), status_code=401)
+
+@router.get("/dashboard/logout")
+async def logout(request: Request):
+    """Deletes accountant_session cookie and redirects to /dashboard/login."""
+    response = RedirectResponse(url="/dashboard/login", status_code=303)
+    clear_accountant_session_cookie(response, secure=True)
+    return response
 
 MASTER_KEY = os.getenv("ENCRYPTION_MASTER_KEY_B64")
 token_engine = TokenEncryptionEngine(MASTER_KEY) if MASTER_KEY else None
@@ -54,7 +106,7 @@ def format_ts(ts_val) -> str:
     except Exception:
         return str(ts_val or "")
 
-@router.get("/dashboard", response_class=HTMLResponse, dependencies=[Depends(verify_api_key)])
+@router.get("/dashboard", response_class=HTMLResponse, dependencies=[Depends(verify_accountant_session)])
 async def view_dashboard(request: Request, tab: str = "all"):
     items = []
     
@@ -239,9 +291,9 @@ async def view_dashboard(request: Request, tab: str = "all"):
         "tax_labels": TAX_CODE_LABELS
     }
     template = templates.get_template("dashboard.html")
-    return HTMLResponse(content=template.render(context))
+    return return_dashboard_response(request, HTMLResponse(content=template.render(context)))
 
-@router.get("/dashboard/edit/{item_type}/{item_id}", response_class=HTMLResponse)
+@router.get("/dashboard/edit/{item_type}/{item_id}", response_class=HTMLResponse, dependencies=[Depends(verify_accountant_session)])
 async def get_edit_row(request: Request, item_type: str, item_id: int):
     """Renders interactive inline triage form row with nominal code and tax selectors."""
     async with get_connection() as conn:
@@ -306,21 +358,21 @@ async def get_edit_row(request: Request, item_type: str, item_id: int):
         </div>
         """
 
-    return HTMLResponse(f"""
+    response = HTMLResponse(f"""
     <tr class="bg-indigo-50 border-2 border-indigo-300" id="row-{item_type}-{item_id}">
         <td colspan="9" class="p-4">
             <form hx-post="/dashboard/triage/{item_type}/{item_id}" hx-target="#row-{item_type}-{item_id}" hx-swap="outerHTML" class="space-y-3">
                 <div class="flex items-center justify-between pb-2 border-b border-indigo-200">
                     <span class="text-xs font-bold uppercase tracking-wider text-indigo-900 flex items-center">
                         <svg class="w-4 h-4 mr-1 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
-                        Accountant Triage & Statutory Classification — {vendor} (£{amount:.2f})
+                        Accountant Triage &amp; Statutory Classification — {vendor} (£{amount:.2f})
                     </span>
                     <button type="button" hx-get="/dashboard" hx-target="body" class="text-xs text-gray-500 hover:text-gray-800">✕ Cancel</button>
                 </div>
                 
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
                     <div>
-                        <label class="block text-[11px] font-semibold text-gray-700 uppercase mb-1">Xero Account Code (P&L vs Balance Sheet)</label>
+                        <label class="block text-[11px] font-semibold text-gray-700 uppercase mb-1">Xero Account Code (P&amp;L vs Balance Sheet)</label>
                         <select name="account_code" class="w-full text-xs border border-gray-300 rounded p-1.5 bg-white font-mono focus:ring-2 focus:ring-indigo-500">
                             {acc_options_html}
                         </select>
@@ -355,8 +407,9 @@ async def get_edit_row(request: Request, item_type: str, item_id: int):
         </td>
     </tr>
     """)
+    return return_dashboard_response(request, response)
 
-@router.post("/dashboard/triage/{item_type}/{item_id}", response_class=HTMLResponse)
+@router.post("/dashboard/triage/{item_type}/{item_id}", response_class=HTMLResponse, dependencies=[Depends(verify_accountant_session)])
 async def submit_triage(
     request: Request,
     item_type: str,
@@ -458,7 +511,7 @@ async def submit_triage(
                 WHERE id = $2
             """, now_ts, queue_id)
 
-    return HTMLResponse(f"""
+    response = HTMLResponse(f"""
     <tr class="bg-emerald-50 transition-colors" id="row-{item_type}-{item_id}">
         <td colspan="9" class="px-6 py-4 text-xs font-semibold text-emerald-800 text-center flex items-center justify-center space-x-2">
             <svg class="w-5 h-5 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
@@ -466,8 +519,9 @@ async def submit_triage(
         </td>
     </tr>
     """)
+    return return_dashboard_response(request, response)
 
-@router.post("/dashboard/reject/{item_type}/{item_id}", response_class=HTMLResponse)
+@router.post("/dashboard/reject/{item_type}/{item_id}", response_class=HTMLResponse, dependencies=[Depends(verify_accountant_session)])
 async def reject_item(request: Request, item_type: str, item_id: int):
     """Dismisses an item by setting status to REJECTED."""
     async with get_connection() as conn:
@@ -476,25 +530,26 @@ async def reject_item(request: Request, item_type: str, item_id: int):
         else:
             await conn.execute("UPDATE chat_sessions SET staging_payload = NULL WHERE id = $1", item_id)
 
-    return HTMLResponse(f"""
+    response = HTMLResponse(f"""
     <tr class="bg-gray-100 transition-colors opacity-60" id="row-{item_type}-{item_id}">
         <td colspan="9" class="px-6 py-3 text-xs text-gray-500 text-center">
             Item dismissed by accountant.
         </td>
     </tr>
     """)
+    return return_dashboard_response(request, response)
 
 # Backward compatibility routes
-@router.post("/dashboard/approve/{item_id}", response_class=HTMLResponse)
+@router.post("/dashboard/approve/{item_id}", response_class=HTMLResponse, dependencies=[Depends(verify_accountant_session)])
 async def approve_item(request: Request, item_id: int):
     """Direct one-click approval."""
     return await submit_triage(request, item_type="staged", item_id=item_id, account_code="420", tax_type="INPUT2")
 
-@router.get("/dashboard/edit/{item_id}", response_class=HTMLResponse)
+@router.get("/dashboard/edit/{item_id}", response_class=HTMLResponse, dependencies=[Depends(verify_accountant_session)])
 async def legacy_edit_item(request: Request, item_id: int):
     return await get_edit_row(request, item_type="staged", item_id=item_id)
 
-@router.post("/dashboard/bulk-approve", response_class=HTMLResponse)
+@router.post("/dashboard/bulk-approve", response_class=HTMLResponse, dependencies=[Depends(verify_accountant_session)])
 async def bulk_approve(request: Request):
     async with get_connection() as conn:
         rows = await conn.fetch("""

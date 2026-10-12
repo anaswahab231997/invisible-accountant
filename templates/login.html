@@ -1,0 +1,175 @@
+{% extends "base.html" %}
+
+{% block title %}Accountant Gateway Login | Practice Partner Portal | Invisible Accountant{% endblock %}
+
+{% block nav_links %}{% endblock %}
+
+{% block nav_actions %}
+<div class="flex items-center space-x-3">
+    <div class="hidden sm:flex items-center text-xs text-gray-600 bg-gray-50 border border-gray-200 px-3 py-1.5 rounded-lg">
+        <span class="w-2 h-2 rounded-full bg-emerald-500 mr-2"></span>
+        <span class="font-medium text-charcoal">HMRC MTD &amp; Xero Practitioner Gateway</span>
+    </div>
+    <a href="/" class="text-xs font-semibold text-slate hover:text-ukblue transition-colors px-3 py-1.5 rounded-lg border border-gray-200 hover:border-ukblue bg-white shadow-sm flex items-center gap-1.5">
+        <svg class="w-3.5 h-3.5 text-slate" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+        </svg>
+        Public Site
+    </a>
+</div>
+{% endblock %}
+
+{% block content %}
+<div class="min-h-[72vh] flex flex-col justify-center items-center py-6 sm:py-12 px-4 sm:px-6 lg:px-8">
+    <div class="w-full max-w-md">
+        <!-- Gov.uk / Professional Standards Security Strip -->
+        <div class="mb-4 flex items-center justify-between text-[11px] text-gray-500 font-medium px-1">
+            <span class="inline-flex items-center gap-1.5 text-charcoal font-semibold">
+                <svg class="w-3.5 h-3.5 text-ukblue" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M2.166 4.999A11.954 11.954 0 0010 1.944 11.954 11.954 0 0017.834 5c.11.65.166 1.32.166 2.001 0 5.225-3.34 9.67-8 11.317C5.34 16.67 2 12.225 2 7c0-.682.057-1.35.166-2.001zm11.541 3.708a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                </svg>
+                ICAEW &amp; ACCA Practitioner Gateway
+            </span>
+            <span class="text-slate font-mono text-[10px] bg-gray-100 border border-gray-200 px-2 py-0.5 rounded">
+                TLS 1.3 / AES-256
+            </span>
+        </div>
+
+        <!-- Main Login Card -->
+        <div class="bg-white rounded-2xl border border-gray-200/90 shadow-xl shadow-gray-200/60 p-6 sm:p-8">
+            <!-- Header Section -->
+            <div class="text-center">
+                <div class="mx-auto h-12 w-12 rounded-xl bg-blue-50 border border-blue-100 text-ukblue flex items-center justify-center mb-4 shadow-sm">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
+                    </svg>
+                </div>
+                <h1 class="text-2xl font-bold font-heading text-charcoal tracking-tight">
+                    Accountant Gateway Login
+                </h1>
+                <p class="mt-2 text-xs text-slate font-body leading-relaxed max-w-sm mx-auto">
+                    Authenticate with your practice master API key to access client MTD ITSA review queues, statutory audit trails, and automated Xero staging controls.
+                </p>
+            </div>
+
+            <!-- Error Banner -->
+            {% if error %}
+            <div class="mt-6 p-4 rounded-xl bg-rose-50 border border-rose-200 text-xs text-rose-800" role="alert">
+                <div class="flex items-start gap-3">
+                    <div class="flex-shrink-0 mt-0.5">
+                        <svg class="h-4 w-4 text-rose-600" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/>
+                        </svg>
+                    </div>
+                    <div class="space-y-0.5">
+                        <h4 class="font-semibold text-rose-900 uppercase tracking-wider text-[11px]">Authentication Failed</h4>
+                        <p class="text-rose-700 leading-normal">{{ error }}</p>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Form -->
+            <form class="mt-6 space-y-5" action="/dashboard/login" method="POST">
+                <input type="hidden" name="next" value="{{ next or '/dashboard' }}">
+                <div>
+                    <label for="access_key" class="block text-xs font-semibold uppercase tracking-wider text-charcoal mb-2">
+                        API Access Key
+                    </label>
+                    <div class="relative rounded-lg shadow-sm">
+                        <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-gray-400">
+                            <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"></path>
+                            </svg>
+                        </div>
+                        <input
+                            id="access_key"
+                            name="access_key"
+                            type="password"
+                            required
+                            autofocus
+                            autocomplete="current-password"
+                            class="block w-full pl-10 pr-10 py-2.5 text-sm font-mono border border-gray-300 rounded-lg text-charcoal placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-ukblue focus:border-ukblue transition-all"
+                            placeholder="Enter practice secret key (e.g. dev-secret-key-123)"
+                        />
+                        <button
+                            type="button"
+                            onclick="toggleKeyVisibility()"
+                            class="absolute inset-y-0 right-0 pr-3.5 flex items-center text-gray-400 hover:text-gray-600 focus:outline-none"
+                            title="Toggle key visibility"
+                        >
+                            <svg id="eye-icon" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                            </svg>
+                            <svg id="eye-off-icon" class="w-4 h-4 hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l18 18" />
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+
+                <div>
+                    <button
+                        type="submit"
+                        class="w-full flex items-center justify-center gap-2 py-3 px-4 rounded-lg bg-ukblue hover:bg-blue-700 text-white font-semibold text-xs uppercase tracking-wider shadow-sm hover:shadow transition-all focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-ukblue cursor-pointer"
+                    >
+                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                        </svg>
+                        Access Accountant Portal
+                    </button>
+                </div>
+            </form>
+
+            <!-- Guidance Note -->
+            <div class="mt-6 pt-5 border-t border-gray-100">
+                <div class="bg-gray-50/80 border border-gray-200/80 rounded-xl p-3.5">
+                    <div class="flex items-start gap-2.5">
+                        <svg class="w-4 h-4 text-ukblue flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                        </svg>
+                        <div class="text-xs text-slate space-y-1.5 leading-relaxed font-body">
+                            <p class="font-semibold text-charcoal">Practitioner Credentials &amp; MTD Triage Guidance</p>
+                            <p>Enter the master API key configured for your accountancy practice. Authenticated access enables chartered practitioners to audit client expenses, triage capital allowances (&gt;&pound;500 under CAA 2001), verify 90-day deduplication, and release approved records to Xero.</p>
+                            <p class="text-[11px] text-gray-500">Practice direct links (<code>?key=YOUR_KEY</code>) also establish this practitioner session cookie automatically.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Trust Badges -->
+            <div class="mt-6 flex flex-col sm:flex-row items-center justify-between text-[11px] text-gray-500 gap-2">
+                <span class="flex items-center gap-1 font-medium text-charcoal">
+                    <svg class="w-3.5 h-3.5 text-emerald-600" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>
+                    HMRC MTD ITSA Ready
+                </span>
+                <span class="flex items-center gap-1 font-medium text-charcoal">
+                    <svg class="w-3.5 h-3.5 text-blue-600" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M2.166 4.999A11.954 11.954 0 0010 1.944 11.954 11.954 0 0017.834 5c.11.65.166 1.32.166 2.001 0 5.225-3.34 9.67-8 11.317C5.34 16.67 2 12.225 2 7c0-.682.057-1.35.166-2.001zm11.541 3.708a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>
+                    Xero Practice Partner
+                </span>
+                <span class="font-medium text-charcoal">
+                    FRS 105 Compliant
+                </span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function toggleKeyVisibility() {
+        const input = document.getElementById('access_key');
+        const eye = document.getElementById('eye-icon');
+        const eyeOff = document.getElementById('eye-off-icon');
+        if (input.type === 'password') {
+            input.type = 'text';
+            eye.classList.add('hidden');
+            eyeOff.classList.remove('hidden');
+        } else {
+            input.type = 'password';
+            eye.classList.remove('hidden');
+            eyeOff.classList.add('hidden');
+        }
+    }
+</script>
+{% endblock %}

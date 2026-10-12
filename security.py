@@ -90,17 +90,121 @@ def generate_hmrc_fraud_headers(
     }
 
 from fastapi.security.api_key import APIKeyHeader
-from fastapi import Security
+from fastapi import Security, Request, Response
+from fastapi.responses import RedirectResponse
 import secrets
 
 API_KEY = os.environ.get("API_KEY")
 
-api_key_header = APIKeyHeader(name="X-API-Key")
+api_key_header = APIKeyHeader(name="X-API-Key", auto_error=False)
+
+def get_dashboard_api_key() -> str | None:
+    return os.environ.get("API_KEY") or API_KEY
+
+def is_valid_api_key(candidate: str | None) -> bool:
+    expected = get_dashboard_api_key()
+    if not candidate or not expected:
+        return False
+    try:
+        return secrets.compare_digest(str(candidate).strip(), str(expected).strip())
+    except Exception:
+        return False
+
+def is_authenticated_request(request: Request) -> bool:
+    """Helper to check if a request has valid authentication without raising exceptions."""
+    if is_valid_api_key(request.cookies.get("accountant_session")):
+        return True
+    if is_valid_api_key(request.headers.get("X-API-Key")):
+        return True
+    if is_valid_api_key(request.query_params.get("key")):
+        return True
+    return False
+
+def set_accountant_session_cookie(
+    response: Response,
+    token: str | None = None,
+    secure: bool = True,
+    max_age: int = 604800,
+) -> Response:
+    expected = token or get_dashboard_api_key()
+    if expected:
+        response.set_cookie(
+            key="accountant_session",
+            value=expected,
+            httponly=True,
+            secure=secure,
+            samesite="lax",
+            max_age=max_age,
+        )
+    return response
+
+def clear_accountant_session_cookie(
+    response: Response,
+    secure: bool = True,
+) -> Response:
+    response.delete_cookie(
+        key="accountant_session",
+        httponly=True,
+        secure=secure,
+        samesite="lax",
+    )
+    return response
 
 async def verify_api_key(api_key_header_val: str = Security(api_key_header)):
-    if not API_KEY or not secrets.compare_digest(api_key_header_val, API_KEY):
+    expected = get_dashboard_api_key()
+    if not expected or not api_key_header_val or not secrets.compare_digest(str(api_key_header_val).strip(), str(expected).strip()):
         raise HTTPException(status_code=403, detail="Could not validate credentials")
     return api_key_header_val
+
+async def verify_accountant_session(request: Request) -> str:
+    """
+    Hardened dual-auth dependency for Accountant Review Gateway.
+    Checks:
+      a) HTTP cookie: request.cookies.get("accountant_session")
+      b) HTTP header: request.headers.get("X-API-Key")
+      c) Query parameter: request.query_params.get("key") (magic link)
+    Validation is performed against API_KEY using secrets.compare_digest.
+    If authenticated via query parameter ?key=..., flags request.state.should_set_cookie = True.
+    If unauthenticated:
+      - Browser HTML navigation requests (Accept contains text/html, not HTMX) redirect to /dashboard/login?next=... (303).
+      - API / HTMX requests receive HTTP 401 Unauthorized.
+    """
+    expected_key = get_dashboard_api_key()
+
+    # a) HTTP cookie
+    cookie_token = request.cookies.get("accountant_session")
+    if is_valid_api_key(cookie_token):
+        return cookie_token
+
+    # b) HTTP header
+    header_token = request.headers.get("X-API-Key")
+    if is_valid_api_key(header_token):
+        return header_token
+
+    # c) Query parameter (magic link)
+    query_token = request.query_params.get("key")
+    if is_valid_api_key(query_token):
+        request.state.should_set_cookie = True
+        request.state.accountant_session = expected_key
+        return query_token
+
+    # If unauthenticated:
+    accept_header = request.headers.get("accept", "")
+    is_htmx = (request.headers.get("HX-Request", "").lower() == "true")
+    is_browser_nav = ("text/html" in accept_header) and (not is_htmx)
+
+    if is_browser_nav:
+        login_url = f"/dashboard/login?next={request.url.path}"
+        raise HTTPException(
+            status_code=303,
+            headers={"Location": login_url},
+            detail="Authentication required",
+        )
+    else:
+        raise HTTPException(
+            status_code=401,
+            detail="Authentication required",
+        )
 
 
 # --- 5. Receipt Fingerprinting & Deduplication ---
