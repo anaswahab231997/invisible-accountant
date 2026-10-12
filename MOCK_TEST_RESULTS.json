@@ -1,0 +1,35 @@
+{
+  "scenario_1": {
+    "queue_id": 39,
+    "xero_invoice_id": "7f1f1548-556a-4aef-8cd1-6aa25578ef0c",
+    "xero_status": "DRAFT",
+    "contact": "Staples UK",
+    "total": 60.0,
+    "total_tax": 10.0,
+    "has_attachments": true,
+    "attachment_count": 1,
+    "account_code": "420",
+    "tax_type": "INPUT"
+  },
+  "scenario_2": {
+    "queue_id": 40,
+    "status": "DUPLICATE_SUSPECTED",
+    "receipt_fingerprint": "5b1b147351f4d733f96c616dd29024d027560b1ec77f1a9da7f91d26149b6164",
+    "external_bill_id": null
+  },
+  "scenario_3": {
+    "queue_id": 41,
+    "status": "CAPITAL_ALLOWANCE",
+    "amount": 0.0,
+    "triage_gate_passed": true
+  },
+  "scenario_4": {
+    "queue_id": 42,
+    "xero_invoice_id": "3048c4f5-fc8f-49d8-92bf-124f0c1f7e64",
+    "currency_converted": "GBP",
+    "total_gbp": 78.0,
+    "total_tax_gbp": 0.0,
+    "tax_type": "NONE",
+    "line_description": "AWS Cloud Hosting Infrastructure (Admin costs) [100.00 USD converted @ 0.7800 GBP/USD - UK Reverse Charge (VATA 1994 s8)] [REVERSE CHARGE APPLIES: Account for UK Output/Input VAT under VATA 1994 s8]"
+  }
+}

@@ -1,7 +1,8 @@
 """
-Currency Converter & Normalizer for UK Accounting (HMRC VATA 1994 Sch 6 Para 11 & VAT Notice 700 §7.6)
-Safeguards non-multicurrency Xero tenants by converting foreign amounts to base GBP
-and applying statutory zero UK input VAT (TaxType: 'NONE') on overseas transactions.
+Currency Converter & Normalizer for UK Accounting (HMRC VATA 1994 s8, Sch 6 Para 11 & VAT Notice 700 §7.6)
+Safeguards non-multicurrency Xero tenants by converting foreign amounts to base GBP,
+differentiating B2B electronic services subject to the UK Reverse Charge (VATA 1994 s8) from
+general foreign expenditures (No UK VAT / NONE).
 """
 import re
 from datetime import datetime
@@ -18,6 +19,23 @@ DEFAULT_FX_RATES_TO_GBP = {
     "JPY": 0.0052,  # 1 JPY = 0.0052 GBP
     "GBP": 1.0
 }
+
+# Major international digital service / cloud / SaaS providers subject to UK Reverse Charge
+OVERSEAS_REVERSE_CHARGE_PROVIDERS = [
+    "aws", "amazon web services", "google", "openai", "chatgpt", "adobe",
+    "microsoft", "zoom", "slack", "github", "gitlab", "atlassian", "jira",
+    "digitalocean", "cloudflare", "stripe", "hubspot", "mailchimp", "heroku",
+    "notion", "figma", "dropbox", "godaddy", "namecheap", "meta", "facebook ads",
+    "linkedin", "canva", "twilio", "mongodb", "datadog", "vercel", "sentry",
+    "envato", "shutterstock", "jetbrains", "anthropic"
+]
+
+# Service categories / keywords subject to Reverse Charge under VATA 1994 s8
+REVERSE_CHARGE_SERVICE_KEYWORDS = [
+    "software", "saas", "cloud", "hosting", "subscription", "api", "license",
+    "advertising", "ad spend", "marketing", "consulting", "web hosting",
+    "domain", "server", "telecom"
+]
 
 def detect_currency(text: str | None, default: str = "GBP") -> str:
     """Detects currency symbol or ISO code from vendor, memo, or message text."""
@@ -42,30 +60,50 @@ def detect_currency(text: str | None, default: str = "GBP") -> str:
         
     return default
 
+def is_overseas_reverse_charge_candidate(
+    vendor: str | None = None, 
+    description: str | None = None, 
+    category: str | None = None
+) -> bool:
+    """
+    Identifies B2B electronic, cloud, telecommunication, SaaS, or professional services
+    supplied by an overseas provider subject to UK Reverse Charge under VATA 1994 s8.
+    """
+    corpus = f"{vendor or ''} {description or ''} {category or ''}".lower()
+    if any(provider in corpus for provider in OVERSEAS_REVERSE_CHARGE_PROVIDERS):
+        return True
+    if any(kw in corpus for kw in REVERSE_CHARGE_SERVICE_KEYWORDS):
+        return True
+    return False
+
 def normalize_to_base_currency(
     amount: float,
     currency: str,
     vat_amount: float = 0.0,
-    custom_rate: float | None = None
+    custom_rate: float | None = None,
+    vendor: str | None = None,
+    description: str | None = None,
+    category: str | None = None
 ) -> Tuple[float, float, float, Dict[str, Any]]:
     """
     Normalizes an expense to base GBP.
-    Under UK VAT law (VATA 1994 s88, VAT Notice 700 §7.6):
-    - Foreign transactions cannot claim UK input VAT (TaxType must be 'NONE', VAT amount = 0.0).
+    Under UK VAT law (VATA 1994 s8, Sch 6 Para 11 & VAT Notice 700 §7.6):
+    - Identifies B2B electronic services subject to Reverse Charge (TaxType: 'REVERSECHARGES').
+    - Distinguishes general overseas expenditures (TaxType: 'NONE').
     - Returns: (base_gross, base_vat, base_net, fx_metadata)
     """
     curr = currency.upper().strip()
     if curr == "GBP":
         net = round(amount - vat_amount, 2)
-        return (round(amount, 2), round(vat_amount, 2), net, {"currency": "GBP", "rate": 1.0})
+        return (round(amount, 2), round(vat_amount, 2), net, {"currency": "GBP", "rate": 1.0, "is_reverse_charge": False})
     
-    # Foreign currency detected
     rate = custom_rate if custom_rate is not None else DEFAULT_FX_RATES_TO_GBP.get(curr, 0.78)
     base_gross = round(amount * rate, 2)
-    
-    # Statutory rule: No UK input VAT reclaimable on overseas foreign transactions
     base_vat = 0.0
     base_net = base_gross
+    
+    is_rc = is_overseas_reverse_charge_candidate(vendor, description, category)
+    tax_type_override = "REVERSECHARGES" if is_rc else "NONE"
     
     fx_metadata = {
         "original_currency": curr,
@@ -73,8 +111,12 @@ def normalize_to_base_currency(
         "original_vat": round(vat_amount, 2),
         "exchange_rate": rate,
         "converted_currency": "GBP",
-        "tax_type_override": "NONE",
-        "annotation": f"[{amount:.2f} {curr} converted @ {rate:.4f} GBP/{curr}]"
+        "is_reverse_charge": is_rc,
+        "tax_type_override": tax_type_override,
+        "annotation": (
+            f"[{amount:.2f} {curr} converted @ {rate:.4f} GBP/{curr} - "
+            f"{'UK Reverse Charge (VATA 1994 s8)' if is_rc else 'Overseas Expenditure (No UK VAT)'}]"
+        )
     }
     
     return (base_gross, base_vat, base_net, fx_metadata)

@@ -62,65 +62,7 @@ if not encryption_key:
     
 token_engine = TokenEncryptionEngine(encryption_key)
 
-class OAuthManager:
-    def __init__(self):
-        self.client_id = os.getenv("XERO_CLIENT_ID")
-        self.client_secret = os.getenv("XERO_CLIENT_SECRET")
-        self.base_url = os.getenv("XERO_BASE_URL", "https://identity.xero.com")
-
-    async def get_user_identity(self, whatsapp_id: str):
-        encrypted_blob = await get_identity_from_vault(whatsapp_id)
-        if not encrypted_blob:
-            raise Exception("No identity found in secure vault for this user.")
-            
-        encrypted_payload = json.loads(encrypted_blob.decode("utf-8"))
-        decrypted_json = token_engine.decrypt_tokens(
-            encrypted_payload, 
-            associated_data=f"hmrc_identity_{whatsapp_id}"
-        )
-        identity = json.loads(decrypted_json)
-        
-        # Check expiry with a 60-second buffer for network latency
-        if time.time() + 60 > identity.get("expires_at", 0):
-            logger.info("Access token expired. Refreshing token via Xero...", whatsapp_id=whatsapp_id)
-            identity = await self.refresh_user_token(whatsapp_id, identity)
-            
-        return identity
-
-    async def refresh_user_token(self, whatsapp_id: str, identity: dict):
-        from security import generate_hmrc_fraud_headers
-        async with httpx.AsyncClient() as client:
-            resp = await client.post(
-                f"{self.base_url}/connect/token",
-                data={
-                    "client_id": self.client_id,
-                    "client_secret": self.client_secret,
-                    "grant_type": "refresh_token",
-                    "refresh_token": identity.get("refresh_token")
-                },
-                headers=generate_hmrc_fraud_headers()
-            )
-            
-            if resp.status_code != 200:
-                logger.error("Token refresh failed. User must re-authenticate via Gov Gateway.", status=resp.status_code)
-                raise Exception("OAuth 18-month grant expired or refresh token invalid.")
-                
-            token_data = resp.json()
-            identity["access_token"] = token_data["access_token"]
-            identity["refresh_token"] = token_data.get("refresh_token", identity["refresh_token"])
-            identity["expires_at"] = time.time() + token_data.get("expires_in", 14400)
-            
-            # Re-encrypt and store
-            encrypted_blob = token_engine.encrypt_tokens(
-                plaintext=json.dumps(identity),
-                associated_data=f"hmrc_identity_{whatsapp_id}"
-            )
-            await store_identity_in_vault(whatsapp_id, encrypted_blob)
-            
-            return identity
-
 hmrc_breaker = CircuitBreaker(failure_threshold=3, recovery_timeout=15)
-oauth_manager = OAuthManager()
 
 
 from adapters.universal_adapter import UniversalAdapter
@@ -230,7 +172,12 @@ async def submit_to_hmrc(item):
         tax = safe_float(fin_data.get("vat_amount", 0.0), 0.0)
         gross = safe_float(fin_data.get("gross_amount", amount), amount)
 
-        # Multi-Currency Handling (VATA 1994 s88 & VAT Notice 700 §7.6)
+        tx_date = normalize_date_str(fin_data.get("date") or fin_data.get("receipt_date") or fin_data.get("transaction_date"), item.get("timestamp"))
+        due_date = normalize_date_str(fin_data.get("due_date"), tx_date)
+        vendor_name = fin_data.get("vendor") or "Unknown Supplier"
+        category_name = item.get("category") or fin_data.get("category") or "General Expense"
+
+        # Multi-Currency & Overseas Reverse Charge Handling (VATA 1994 s8, Sch 6 Para 11 & VAT Notice 700 §7.6)
         raw_curr = fin_data.get("currency")
         if not raw_curr:
             raw_curr = detect_currency(
@@ -238,32 +185,33 @@ async def submit_to_hmrc(item):
             )
         is_foreign = (raw_curr and raw_curr.upper() != "GBP")
         fx_annotation = ""
+        is_reverse_charge = False
         if is_foreign and not fin_data.get("fx_metadata"):
             base_gross, base_vat, base_net, fx_meta = normalize_to_base_currency(
                 amount=gross if gross > 0 else amount,
                 currency=raw_curr,
-                vat_amount=tax
+                vat_amount=tax,
+                vendor=vendor_name,
+                description=fin_data.get("description"),
+                category=category_name
             )
             gross = base_gross
             net = base_net
-            tax = 0.0  # Statutory 0% input tax on overseas expenditure
+            tax = 0.0  # Base line tax is 0.0; deemed 20% output/input VAT is accounted via REVERSECHARGES
+            is_reverse_charge = fx_meta.get("is_reverse_charge", False)
             fx_annotation = fx_meta.get("annotation", "")
             fin_data["gross_amount"] = gross
             fin_data["net_amount"] = net
             fin_data["vat_amount"] = tax
-            fin_data["tax_code"] = "NONE"
-            fin_data["tax_type"] = "NONE"
+            fin_data["tax_code"] = "REVERSECHARGES" if is_reverse_charge else "NONE"
+            fin_data["tax_type"] = "REVERSECHARGES" if is_reverse_charge else "NONE"
             fin_data["fx_metadata"] = fx_meta
         elif fin_data.get("fx_metadata"):
             fx_annotation = fin_data["fx_metadata"].get("annotation", "")
+            is_reverse_charge = fin_data["fx_metadata"].get("is_reverse_charge", False)
         
         if abs((net + tax) - gross) > 0.01:
             raise Exception(f"Math Validation Failed: Net ({net}) + Tax ({tax}) != Gross ({gross})")
-
-        tx_date = normalize_date_str(fin_data.get("date") or fin_data.get("receipt_date") or fin_data.get("transaction_date"), item.get("timestamp"))
-        due_date = normalize_date_str(fin_data.get("due_date"), tx_date)
-        vendor_name = fin_data.get("vendor") or "Unknown Supplier"
-        category_name = item.get("category") or fin_data.get("category") or "General Expense"
         
         # Priority for AccountCode: Accountant triage override -> AI classification -> Category map
         account_code = str(fin_data.get("account_code") or map_category_to_xero_account(category_name)).strip()
@@ -277,9 +225,9 @@ async def submit_to_hmrc(item):
         if fx_annotation and raw_curr and raw_curr.upper() != "GBP":
             ref_code = f"{ref_code} {raw_curr.upper()}"[:50]
 
-        # Priority for TaxType: Foreign (NONE) -> Accountant triage override -> Default INPUT/NONE
+        # Priority for TaxType: Foreign Reverse Charge -> Foreign None -> Accountant triage override -> Default INPUT/NONE
         if is_foreign:
-            tax_code = "NONE"
+            tax_code = "REVERSECHARGES" if is_reverse_charge else "NONE"
         elif fin_data.get("tax_type"):
             tax_code = str(fin_data.get("tax_type")).strip()
         elif fin_data.get("tax_code"):
@@ -308,7 +256,10 @@ async def submit_to_hmrc(item):
                 li_unit = safe_float(li.get("unit_amount") or li.get("net_amount") or li.get("amount", net), net)
                 li_tax = 0.0 if is_foreign else safe_float(li.get("vat_amount") or li.get("tax_amount", 0.0), 0.0)
                 li_acc = str(li.get("account_code") or fin_data.get("account_code") or map_category_to_xero_account(li.get("category") or category_name)).strip()
-                li_tax_type = "NONE" if is_foreign else str(li.get("tax_type") or li.get("tax_code") or ("INPUT" if li_tax > 0 else "NONE")).strip()
+                if is_foreign:
+                    li_tax_type = "REVERSECHARGES" if is_reverse_charge else "NONE"
+                else:
+                    li_tax_type = str(li.get("tax_type") or li.get("tax_code") or ("INPUT" if li_tax > 0 else "NONE")).strip()
                 formatted_lines.append({
                     "Description": li_desc,
                     "Quantity": li_qty,
@@ -348,6 +299,31 @@ async def submit_to_hmrc(item):
                 invoice_id = await conn.fetchval(
                     "SELECT external_bill_id FROM hmrc_ledger WHERE id = $1", item["id"]
                 )
+
+        # Drop-before-ACK Pre-Flight Query on retries / crash recovery:
+        # If this item has been retried (retry_count > 0) and invoice_id is still None,
+        # query Xero by unique Reference to prevent duplicate bills if a previous attempt
+        # timed out after Xero created the bill but before client received ACK.
+        retry_count = item.get("retry_count") or 0
+        if not invoice_id and retry_count > 0 and ref_code:
+            try:
+                logger.info("Drop-before-ACK Pre-Flight: Checking Xero for existing bill by Reference on retry...", queue_id=item["id"], retry_count=retry_count, reference=ref_code)
+                existing_invoices = await client.get_invoices(where=f'Reference == "{ref_code}"')
+                if existing_invoices and len(existing_invoices) > 0:
+                    matched_inv = existing_invoices[0]
+                    found_id = matched_inv.get("InvoiceID")
+                    if found_id:
+                        logger.warning(
+                            "Drop-before-ACK Pre-Flight HIT: Found existing Xero bill by Reference. Adopting existing InvoiceID to avoid duplicate.",
+                            queue_id=item["id"],
+                            reference=ref_code,
+                            invoice_id=found_id
+                        )
+                        await update_ledger_external_bill_id(item["id"], found_id)
+                        invoice_id = found_id
+                        item["external_bill_id"] = found_id
+            except Exception as e:
+                logger.error("Pre-flight reference lookup failed (proceeding to normal creation flow)", error=str(e), queue_id=item["id"])
 
         if not invoice_id:
             # Step 2: Create draft bill in Xero and IMMEDIATELY write external_bill_id to hmrc_ledger in database

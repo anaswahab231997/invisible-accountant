@@ -12,6 +12,14 @@ import asyncpg
 from db import get_connection
 from aes_gcm_security import TokenEncryptionEngine
 
+class XeroRateLimitExceededError(Exception):
+    def __init__(self, message: str, retry_after_seconds: float = 60.0):
+        super().__init__(message)
+        self.retry_after_seconds = retry_after_seconds
+
+class XeroDailyLimitExceededError(XeroRateLimitExceededError):
+    pass
+
 class XeroTenantRateLimiter:
     """
     In-process rate limiter per Xero Tenant ID.
@@ -71,11 +79,23 @@ class XeroTenantRateLimiter:
                             return resp
                         problem = resp.headers.get("X-Rate-Limit-Problem", "").lower()
                         retry_after_hdr = resp.headers.get("Retry-After")
+                        if "daily" in problem:
+                            retry_seconds = float(retry_after_hdr) if (retry_after_hdr and retry_after_hdr.isdigit()) else 86400.0
+                            raise XeroDailyLimitExceededError(
+                                f"Xero Daily Limit (5,000 req/day) breached for tenant {self.tenant_id}. Reset in {retry_seconds}s.",
+                                retry_after_seconds=retry_seconds
+                            )
                         if "concurrent" in problem:
-                            # Concurrent limit exceeded: fast jitter backoff (150ms - 500ms)
+                            # Concurrent limit exceeded: Xero omits Retry-After; apply fast jitter backoff (150ms - 500ms)
                             sleep_duration = random.uniform(0.15, 0.50) * (2 ** (attempt - 1))
                         elif retry_after_hdr and retry_after_hdr.isdigit():
-                            sleep_duration = float(retry_after_hdr) + random.uniform(0.5, 1.5)
+                            wait_val = float(retry_after_hdr)
+                            if wait_val > 120.0:
+                                raise XeroRateLimitExceededError(
+                                    f"Xero Rate Limit pause exceeds 120s ({wait_val}s requested)",
+                                    retry_after_seconds=wait_val
+                                )
+                            sleep_duration = wait_val + random.uniform(0.5, 1.5)
                         elif "minute" in problem:
                             sleep_duration = 5.0 + random.uniform(1.0, 3.0)
                         else:
@@ -381,7 +401,7 @@ class AccountingClient:
 
         resp = await limiter.execute(lambda: _make_post_request(payload))
         
-        # Automatic fallback if TaxType INPUT2 / INPUT differs in tenant
+        # Automatic fallback if TaxType (INPUT2/INPUT or REVERSECHARGES) differs in tenant
         if resp.status_code == 400 and "TaxType code" in resp.text:
             modified = False
             fallback_payload = json.loads(json.dumps(payload))
@@ -391,6 +411,11 @@ class AccountingClient:
                     modified = True
                 elif line.get("TaxType") == "INPUT":
                     line["TaxType"] = "INPUT2"
+                    modified = True
+                elif line.get("TaxType") in ("REVERSECHARGES", "RDE"):
+                    line["TaxType"] = "NONE"
+                    if "[REVERSE CHARGE APPLIES" not in line.get("Description", ""):
+                        line["Description"] = f"{line.get('Description', '')} [REVERSE CHARGE APPLIES: Account for UK Output/Input VAT under VATA 1994 s8]"
                     modified = True
             if modified:
                 retry_resp = await limiter.execute(lambda: _make_post_request(fallback_payload))
