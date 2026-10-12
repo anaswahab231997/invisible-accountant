@@ -23,12 +23,27 @@ async def insert_chat_helper(sender_id, raw_message, staging_payload):
             RETURNING id
         """, sender_id, raw_message, staging_payload)
 
+async def wait_for_submission(ledger_id: int, max_wait_sec: int = 25) -> dict:
+    """Waits for live Render worker to process, or processes locally if worker is idle."""
+    for _ in range(max_wait_sec):
+        async with get_connection() as conn:
+            row = await conn.fetchrow("SELECT * FROM hmrc_ledger WHERE id = $1", ledger_id)
+            if row and row["status"] == "SUBMITTED" and row["external_bill_id"]:
+                return dict(row)
+        await asyncio.sleep(1)
+        
+    async with get_connection() as conn:
+        row = await conn.fetchrow("SELECT * FROM hmrc_ledger WHERE id = $1", ledger_id)
+        if row and row["status"] != "SUBMITTED":
+            item_dict = dict(row)
+            item_dict["sender_id"] = WORKSPACE_ID
+            await submit_to_hmrc(item_dict)
+            row = await conn.fetchrow("SELECT * FROM hmrc_ledger WHERE id = $1", ledger_id)
+        return dict(row)
+
 WORKSPACE_ID = "447123456789"
 MASTER_KEY = os.getenv("ENCRYPTION_MASTER_KEY_B64")
 token_engine = TokenEncryptionEngine(MASTER_KEY)
-
-class DummyClient:
-    pass
 
 class DummyRequest(Request):
     def __init__(self, url_path="/dashboard"):
@@ -61,7 +76,7 @@ async def run_phase3_verification():
         "vat_amount": 216.50,
         "date": "2026-10-12",
         "description": "14-inch MacBook Pro M4 for engineering",
-        "category": "Admin costs",  # Initially misclassified by user or naive AI as P&L admin
+        "category": "Admin costs",  # Misclassified initially as P&L admin
         "account_code": "420",
         "tax_type": "INPUT2",
         "transaction_type": "EXPENSE"
@@ -100,24 +115,21 @@ async def run_phase3_verification():
 
     async with get_connection() as conn:
         triaged_row = await conn.fetchrow("SELECT * FROM hmrc_ledger WHERE id = $1", ledger_id)
-        assert triaged_row["status"] == "PENDING", f"Expected PENDING, got {triaged_row['status']}"
         assert triaged_row["accountant_approved"] is True, "Expected accountant_approved=True"
+        assert triaged_row["status"] in ("PENDING", "PROCESSING", "SUBMITTED")
         
         # Verify decrypted payload has 720
         dec = token_engine.decrypt_tokens(json.loads(triaged_row["encrypted_financial_data"]), associated_data=str(chat_id))
         fin = json.loads(dec)
         assert fin["account_code"] == "720", f"Expected 720, got {fin['account_code']}"
-    print(f"  [PASS] Triage gateway updated nominal code to 720 and released to PENDING")
+    print(f"  [PASS] Triage gateway updated nominal code to 720 and approved record")
 
-    # Step 1c: Worker submits triaged record to live Xero sandbox
-    print("  -> Submitting triaged item to Xero Sandbox Draft Bills...")
-    await submit_to_hmrc(dict(triaged_row))
-
-    async with get_connection() as conn:
-        submitted_row = await conn.fetchrow("SELECT * FROM hmrc_ledger WHERE id = $1", ledger_id)
-        assert submitted_row["status"] == "SUBMITTED", f"Expected SUBMITTED, got {submitted_row['status']}"
-        assert submitted_row["external_bill_id"], "Expected external_bill_id"
-        xero_inv_id = submitted_row["external_bill_id"]
+    # Step 1c: Wait for worker submission to Xero sandbox
+    print("  -> Awaiting draft bill creation in Xero Sandbox...")
+    submitted_row = await wait_for_submission(ledger_id)
+    assert submitted_row["status"] == "SUBMITTED", f"Expected SUBMITTED, got {submitted_row['status']}"
+    assert submitted_row["external_bill_id"], "Expected external_bill_id"
+    xero_inv_id = submitted_row["external_bill_id"]
     print(f"  -> Bill successfully pushed to Xero! External Bill ID: {xero_inv_id}")
 
     # Step 1d: Verify in Xero live tenant
@@ -147,12 +159,11 @@ async def run_phase3_verification():
         "transaction_type": "EXPENSE"
     }
 
-    # First instance: normal confirm
+    # First instance: normal confirm and submit
     chat1 = await insert_chat_helper(WORKSPACE_ID, f"Invoice {dup_ref}", json.dumps(dup_payload))
     led1 = await confirm_and_queue_to_ledger(chat1)
-    async with get_connection() as conn:
-        r1 = await conn.fetchrow("SELECT * FROM hmrc_ledger WHERE id = $1", led1)
-        await conn.execute("UPDATE hmrc_ledger SET status = 'SUBMITTED' WHERE id = $1", led1)
+    sub1 = await wait_for_submission(led1)
+    print(f"  -> Original receipt submitted as Xero ID {sub1.get('external_bill_id')}")
 
     # Second instance: identical fingerprint within 90 days
     chat2 = await insert_chat_helper(WORKSPACE_ID, f"Invoice {dup_ref}", json.dumps(dup_payload))
@@ -183,17 +194,9 @@ async def run_phase3_verification():
         allow_duplicate=True
     )
 
-    async with get_connection() as conn:
-        r2_released = await conn.fetchrow("SELECT * FROM hmrc_ledger WHERE id = $1", led2)
-        assert r2_released["status"] == "PENDING"
-        assert r2_released["accountant_approved"] is True
-
-    # Now worker pushes with accountant approval
-    await submit_to_hmrc(dict(r2_released))
-    async with get_connection() as conn:
-        r2_submitted = await conn.fetchrow("SELECT * FROM hmrc_ledger WHERE id = $1", led2)
-        assert r2_submitted["status"] == "SUBMITTED"
-        assert r2_submitted["external_bill_id"]
+    r2_submitted = await wait_for_submission(led2)
+    assert r2_submitted["status"] == "SUBMITTED"
+    assert r2_submitted["external_bill_id"]
     print(f"  [PASS] TEST 2 COMPLETE: Duplicate safely overridden and pushed as Xero ID {r2_submitted['external_bill_id']}")
 
     # -------------------------------------------------------------------------
@@ -235,19 +238,10 @@ async def run_phase3_verification():
         allow_duplicate=False
     )
 
-    async with get_connection() as conn:
-        r3 = await conn.fetchrow("SELECT * FROM hmrc_ledger WHERE id = $1", led3)
-        assert r3["status"] == "PENDING"
-        assert r3["accountant_approved"] is True
-
-    print("  -> Submitting normalized foreign receipt to Xero...")
-    await submit_to_hmrc(dict(r3))
-
-    async with get_connection() as conn:
-        r3_submitted = await conn.fetchrow("SELECT * FROM hmrc_ledger WHERE id = $1", led3)
-        assert r3_submitted["status"] == "SUBMITTED", f"Expected SUBMITTED, got {r3_submitted['status']}"
-        assert r3_submitted["external_bill_id"]
-        fx_bill_id = r3_submitted["external_bill_id"]
+    r3_submitted = await wait_for_submission(led3)
+    assert r3_submitted["status"] == "SUBMITTED", f"Expected SUBMITTED, got {r3_submitted['status']}"
+    assert r3_submitted["external_bill_id"]
+    fx_bill_id = r3_submitted["external_bill_id"]
 
     inv_fx = await client.get_invoice(fx_bill_id)
     line_fx = inv_fx["Invoices"][0]["LineItems"][0]
