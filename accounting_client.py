@@ -93,18 +93,99 @@ class AccountingClient:
                 raise Exception(f"Failed to refresh Xero token: {resp.text}")
             return resp.json()
 
-    async def create_draft_bill(self, payload: dict):
+    async def find_contact(self, name: str) -> dict | None:
+        if not name or name.strip().lower() in ("unknown", "unknown supplier", "unknown vendor"):
+            return None
+        try:
+            creds = await self.get_valid_token()
+            clean_name = name.strip()
+            async with httpx.AsyncClient() as client:
+                resp = await client.get(
+                    "https://api.xero.com/api.xro/2.0/Contacts",
+                    headers={
+                        "Authorization": f"Bearer {creds['access_token']}",
+                        "Xero-Tenant-Id": creds["tenant_id"],
+                        "Accept": "application/json"
+                    }
+                )
+                if resp.status_code == 200:
+                    contacts = resp.json().get("Contacts", [])
+                    # Pass 1: exact match
+                    for c in contacts:
+                        if c.get("Name", "").strip().lower() == clean_name.lower():
+                            return {"Name": c["Name"], "ContactID": c["ContactID"]}
+                    # Pass 2: substring match
+                    for c in contacts:
+                        c_name = c.get("Name", "").strip().lower()
+                        if clean_name.lower() in c_name or c_name in clean_name.lower():
+                            return {"Name": c["Name"], "ContactID": c["ContactID"]}
+        except Exception:
+            pass
+        return None
+
+    async def get_accounts(self) -> list:
         creds = await self.get_valid_token()
         async with httpx.AsyncClient() as client:
-            resp = await client.post(
-                "https://api.xero.com/api.xro/2.0/Invoices",
-                json=payload,
+            resp = await client.get(
+                "https://api.xero.com/api.xro/2.0/Accounts",
                 headers={
                     "Authorization": f"Bearer {creds['access_token']}",
                     "Xero-Tenant-Id": creds["tenant_id"],
                     "Accept": "application/json"
                 }
             )
+            if resp.status_code == 200:
+                return resp.json().get("Accounts", [])
+            return []
+
+    async def get_tax_rates(self) -> list:
+        creds = await self.get_valid_token()
+        async with httpx.AsyncClient() as client:
+            resp = await client.get(
+                "https://api.xero.com/api.xro/2.0/TaxRates",
+                headers={
+                    "Authorization": f"Bearer {creds['access_token']}",
+                    "Xero-Tenant-Id": creds["tenant_id"],
+                    "Accept": "application/json"
+                }
+            )
+            if resp.status_code == 200:
+                return resp.json().get("TaxRates", [])
+            return []
+
+    async def create_draft_bill(self, payload: dict):
+        creds = await self.get_valid_token()
+        headers = {
+            "Authorization": f"Bearer {creds['access_token']}",
+            "Xero-Tenant-Id": creds["tenant_id"],
+            "Accept": "application/json",
+            "Content-Type": "application/json"
+        }
+        async with httpx.AsyncClient() as client:
+            resp = await client.post(
+                "https://api.xero.com/api.xro/2.0/Invoices",
+                json=payload,
+                headers=headers
+            )
+            # Automatic fallback if TaxType INPUT2 / INPUT differs in tenant
+            if resp.status_code == 400 and "TaxType code" in resp.text:
+                modified = False
+                fallback_payload = json.loads(json.dumps(payload))
+                for line in fallback_payload.get("LineItems", []):
+                    if line.get("TaxType") == "INPUT2":
+                        line["TaxType"] = "INPUT"
+                        modified = True
+                    elif line.get("TaxType") == "INPUT":
+                        line["TaxType"] = "INPUT2"
+                        modified = True
+                if modified:
+                    retry_resp = await client.post(
+                        "https://api.xero.com/api.xro/2.0/Invoices",
+                        json=fallback_payload,
+                        headers=headers
+                    )
+                    if retry_resp.status_code in (200, 201):
+                        return retry_resp.json()
             if resp.status_code not in (200, 201):
                 raise Exception(f"Failed to create draft bill: {resp.text}")
             return resp.json()

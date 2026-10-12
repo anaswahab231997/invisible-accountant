@@ -127,21 +127,40 @@ from models.unified_record import UnifiedFinancialRecord, TargetSystem
 universal_adapter = UniversalAdapter()
 
 HMRC_TO_XERO_ACCOUNT_MAP = {
+    # Official HMRC Categories mapped to live Chart of Accounts
     "Turnover / Sales Income": "200",
-    "Cost of goods sold": "300",
-    "Construction industry costs": "310",
+    "Cost of goods sold": "310",
+    "Construction industry costs": "485",
     "Staff costs": "477",
-    "Travel costs": "461",
-    "Premises running costs": "459",
-    "Repairs and maintenance": "453",
+    "Travel costs": "404",
+    "Premises running costs": "449",
+    "Repairs and maintenance": "489",
     "Admin costs": "420",
     "Advertising and marketing": "400",
-    "Interest on loans": "437",
-    "Bank and financial charges": "437",
+    "Interest on loans": "473",
+    "Bank and financial charges": "416",
     "Professional fees": "412",
     "Depreciation and loss of assets": "710",
     "Other expenses": "429",
-    "Non-allowable": "429",
+    "Non-allowable": "408",
+    # Specific / alias categories
+    "Phone, fax, stationery and other office costs": "420",
+    "Office Supplies": "420",
+    "Stationery": "420",
+    "Printing & Stationery": "420",
+    "Telephone & Internet": "441",
+    "Utilities": "445",
+    "Rent": "449",
+    "Motor Vehicle Expenses": "453",
+    "Subscriptions": "461",
+    "Consulting & Accounting": "412",
+    "Legal expenses": "437",
+    "Insurance": "433",
+    "Bad Debts": "469",
+    "Wages and Salaries": "477",
+    "Subcontractor Costs": "485",
+    "General Expense": "429",
+    "Other business expenses": "429"
 }
 
 def map_category_to_xero_account(category: str | None) -> str:
@@ -200,20 +219,26 @@ async def submit_to_hmrc(item):
         if abs((net + tax) - gross) > 0.01:
             raise Exception("Math Validation Failed: Net + Tax != Gross")
 
-        tx_date = normalize_date_str(fin_data.get("transaction_date"), item.get("timestamp"))
+        tx_date = normalize_date_str(fin_data.get("date") or fin_data.get("receipt_date") or fin_data.get("transaction_date"), item.get("timestamp"))
         due_date = normalize_date_str(fin_data.get("due_date"), tx_date)
         vendor_name = fin_data.get("vendor") or "Unknown Supplier"
         category_name = item.get("category") or fin_data.get("category") or "General Expense"
         account_code = map_category_to_xero_account(category_name)
         
-        inv_number = fin_data.get("invoice_number") or f"RCPT-{item['id']}"
-        ref_code = fin_data.get("reference") or f"IA-Q{item['id']}"
+        # Match Contact (Name + ContactID if matched in live tenant)
+        matched_contact = await client.find_contact(vendor_name)
+        contact_payload = matched_contact if matched_contact else {"Name": vendor_name}
 
-        detail_desc = fin_data.get("description")
+        inv_number = fin_data.get("invoice_number") or fin_data.get("receipt_number") or f"REC-{item['id']}"
+        ref_code = fin_data.get("reference") or f"REC-{item['id']}"
+
+        tax_code = "INPUT" if tax > 0 else "NONE"
+
+        detail_desc = fin_data.get("description") or fin_data.get("reasoning_step_2_nature_of_expense")
         if detail_desc:
             line_desc = f"{detail_desc} ({category_name})"
         else:
-            line_desc = f"Expense at {vendor_name} - {category_name}"
+            line_desc = f"Purchased from {vendor_name} ({category_name})"
 
         line_items_data = fin_data.get("line_items")
         if line_items_data and isinstance(line_items_data, list) and len(line_items_data) > 0:
@@ -226,11 +251,13 @@ async def submit_to_hmrc(item):
                 li_unit = safe_float(li.get("unit_amount") or li.get("net_amount") or li.get("amount", net), net)
                 li_tax = safe_float(li.get("vat_amount") or li.get("tax_amount", 0.0), 0.0)
                 li_acc = map_category_to_xero_account(li.get("category") or category_name)
+                li_tax_type = "INPUT" if li_tax > 0 else "NONE"
                 formatted_lines.append({
                     "Description": li_desc,
                     "Quantity": li_qty,
                     "UnitAmount": li_unit,
                     "AccountCode": li_acc,
+                    "TaxType": li_tax_type,
                     "TaxAmount": li_tax
                 })
         else:
@@ -239,6 +266,7 @@ async def submit_to_hmrc(item):
                 "Quantity": 1,
                 "UnitAmount": net,
                 "AccountCode": account_code,
+                "TaxType": tax_code,
                 "TaxAmount": tax
             }]
 
@@ -250,9 +278,7 @@ async def submit_to_hmrc(item):
             "DueDate": due_date,
             "InvoiceNumber": inv_number,
             "Reference": ref_code,
-            "Contact": {
-                "Name": vendor_name
-            },
+            "Contact": contact_payload,
             "LineItems": formatted_lines
         }
         resp = await client.create_draft_bill(bill_payload)
