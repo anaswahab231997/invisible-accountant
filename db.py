@@ -24,7 +24,7 @@ async def init_pool():
         raise ValueError("DATABASE_URL environment variable is required")
     async with _pool_lock:
         if db_pool is None:
-            db_pool = await asyncpg.create_pool(DATABASE_URL, min_size=1, max_size=25)
+            db_pool = await asyncpg.create_pool(DATABASE_URL, min_size=1, max_size=8)
 
 async def close_pool():
     global db_pool, _pool_lock
