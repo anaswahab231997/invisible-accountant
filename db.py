@@ -335,9 +335,9 @@ async def get_all_hmrc_queue(limit: int = 100, offset: int = 0):
         return [dict(row) for row in rows]
 
 async def store_accounting_connection(workspace_id: str, provider: str, provider_tenant_id: str, access_token: str, refresh_token: str, expires_in_seconds: int):
-    from datetime import datetime, timedelta
+    from datetime import datetime, timedelta, timezone
     
-    expires_at = (datetime.now() + timedelta(seconds=expires_in_seconds)).isoformat()
+    expires_at = datetime.now(timezone.utc) + timedelta(seconds=expires_in_seconds)
     async with get_connection() as conn:
         await conn.execute(
             """
