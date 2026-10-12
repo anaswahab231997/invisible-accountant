@@ -3,6 +3,7 @@ import asyncio
 import json
 import os
 import uuid
+import httpx
 from dotenv import load_dotenv
 
 load_dotenv()

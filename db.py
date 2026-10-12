@@ -342,7 +342,7 @@ async def store_accounting_connection(workspace_id: str, provider: str, provider
         await conn.execute(
             """
             INSERT INTO accounting_connections (workspace_id, provider, provider_tenant_id, access_token, refresh_token, expires_at)
-            VALUES (, , , , , )
+            VALUES ($1, $2, $3, $4, $5, $6)
             ON CONFLICT (workspace_id, provider) DO UPDATE SET 
                 access_token = EXCLUDED.access_token,
                 refresh_token = EXCLUDED.refresh_token,
