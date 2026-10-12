@@ -308,11 +308,19 @@ async def process_expense_message(
             result = pro_result
 
         # Human-in-the-loop limit logic (2 turns max)
+        # Statutory rule (Schedule 24 Finance Act 2007 & HMRC BIM45000):
+        # Never default an ambiguous or unresolved expense to deductible 'Other expenses'.
+        # Default to 'Non-allowable' with an audit flag so the accountant can review.
         if turn_count >= 2 and result.get("is_ambiguous"):
-            logger.info("Turn limit reached. Forcing category to 'Other expenses'")
+            logger.info("Turn limit reached. Safely defaulting category to 'Non-allowable' for accountant review")
             result["is_ambiguous"] = False
             if result.get("transaction_type") != "INCOME":
-                result["category"] = "Other expenses"
+                result["category"] = "Non-allowable"
+                result["business_proportion_percentage"] = 0
+                result["allowable_business_amount"] = 0.0
+                result["tax_code"] = "No VAT"
+                result["requires_accountant_review"] = True
+                result["compliance_warning"] = "Unresolved after 2 turns: statutorily defaulted to Non-allowable to protect taxpayer from HMRC Schedule 24 FA 2007 penalty exposure."
 
         return result
 

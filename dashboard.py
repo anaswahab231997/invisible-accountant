@@ -43,7 +43,8 @@ TAX_CODE_LABELS = {
     "INPUT": "20% (Standard Input VAT) [INPUT]",
     "NONE": "No VAT (0%) [NONE]",
     "ZERORATEDINPUT": "Zero Rated (0%) [ZERORATEDINPUT]",
-    "EXEMPTINPUT": "Exempt (0%) [EXEMPTINPUT]"
+    "EXEMPTINPUT": "Exempt (0%) [EXEMPTINPUT]",
+    "REVERSECHARGES": "Reverse Charge Expenses (20%) [REVERSECHARGES]"
 }
 
 def format_ts(ts_val) -> str:
@@ -398,14 +399,27 @@ async def submit_triage(
             gross = float(fin.get("gross_amount", row["amount"] or 0.0))
             curr = fin.get("currency", "GBP")
             if curr != "GBP":
-                base_gross, base_vat, base_net, fx_meta = normalize_to_base_currency(gross, curr)
+                vendor_val = fin.get("vendor") or fin.get("merchant")
+                desc_val = fin.get("memo") or fin.get("description")
+                cat_val = fin.get("category")
+                base_gross, base_vat, base_net, fx_meta = normalize_to_base_currency(
+                    gross, curr,
+                    vendor=vendor_val,
+                    description=desc_val,
+                    category=cat_val
+                )
                 fin["gross_amount"] = base_gross
                 fin["net_amount"] = base_net
                 fin["vat_amount"] = base_vat
                 fin["fx_metadata"] = fx_meta
-                # Statutory rule: Override UK tax on foreign invoices to NONE (0%)
-                fin["tax_type"] = "NONE"
-                fin["tax_code"] = "NONE"
+                # Statutory rule (VATA 1994 s8): Retain Reverse Charge if applicable
+                rc_tax = fx_meta.get("tax_type_override", "NONE")
+                if tax_type and tax_type in ("REVERSECHARGES", "NONE", "INPUT2", "INPUT"):
+                    fin["tax_type"] = tax_type
+                    fin["tax_code"] = tax_type
+                else:
+                    fin["tax_type"] = rc_tax
+                    fin["tax_code"] = rc_tax
 
             re_encrypted = json.dumps(token_engine.encrypt_tokens(
                 json.dumps(fin),
