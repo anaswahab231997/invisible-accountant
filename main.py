@@ -153,8 +153,8 @@ async def process_intake_task(
                 payload_str = unconfirmed.get("staging_payload")
                 if payload_str:
                     payload = json.loads(payload_str)
-                    gross = payload.get("gross_amount")
-                    net = payload.get("net_amount")
+                    gross = payload.get("gross_amount") or payload.get("amount")
+                    net = payload.get("net_amount") or payload.get("allowable_business_amount") or payload.get("amount")
                     line_items_sum = sum(safe_float(item.get("unit_amount") or item.get("net_amount") or item.get("amount") or 0.0) for item in payload.get("line_items", []))
                     if not ((gross is not None and safe_float(gross) != 0.0) or (net is not None and safe_float(net) != 0.0) or line_items_sum != 0.0):
                         err_msg = "Cannot proceed: No valid expense amount detected (net sum is 0.0)."

@@ -121,11 +121,15 @@ async def confirm_and_queue_to_ledger(chat_id: int):
         
         queue_status = "DEMO_SAVED" if is_demo else "PENDING"
         
+        gross = safe_float(payload.get("gross_amount") or payload.get("amount", 0.0))
+        vat = safe_float(payload.get("vat_amount", 0.0))
+        net = safe_float(payload.get("net_amount") or (gross - vat if gross else 0.0))
+
         financial_data = {
             "vendor": payload.get("vendor"),
-            "net_amount": payload.get("net_amount"),
-            "vat_amount": payload.get("vat_amount"),
-            "gross_amount": payload.get("gross_amount"),
+            "net_amount": net,
+            "vat_amount": vat,
+            "gross_amount": gross,
             "document_type": payload.get("document_type"),
             "vat_registration_number": payload.get("vat_registration_number"),
             "cis_deduction": payload.get("cis_deduction"),
