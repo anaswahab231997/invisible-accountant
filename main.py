@@ -146,7 +146,8 @@ async def process_intake_task(
     chat_id: int, sender_id: str, message: str, turn_count: int, media_urls: list
 ):
     try:
-        if message.strip().lower() == "proceed":
+        last_message = message.split("\n---\n")[-1].strip().lower() if "\n---\n" in message else message.strip().lower()
+        if last_message == "proceed":
             unconfirmed = await get_unconfirmed_session(sender_id)
             if unconfirmed:
                 import json
