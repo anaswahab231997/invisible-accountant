@@ -3,6 +3,7 @@ import time
 import os
 import json
 import httpx
+from datetime import datetime, timezone
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -125,6 +126,46 @@ from models.unified_record import UnifiedFinancialRecord, TargetSystem
 
 universal_adapter = UniversalAdapter()
 
+HMRC_TO_XERO_ACCOUNT_MAP = {
+    "Turnover / Sales Income": "200",
+    "Cost of goods sold": "300",
+    "Construction industry costs": "310",
+    "Staff costs": "477",
+    "Travel costs": "461",
+    "Premises running costs": "459",
+    "Repairs and maintenance": "453",
+    "Admin costs": "420",
+    "Advertising and marketing": "400",
+    "Interest on loans": "437",
+    "Bank and financial charges": "437",
+    "Professional fees": "412",
+    "Depreciation and loss of assets": "710",
+    "Other expenses": "429",
+    "Non-allowable": "429",
+}
+
+def map_category_to_xero_account(category: str | None) -> str:
+    if not category:
+        return "429"
+    if category in HMRC_TO_XERO_ACCOUNT_MAP:
+        return HMRC_TO_XERO_ACCOUNT_MAP[category]
+    cat_lower = str(category).lower()
+    for hmrc_cat, code in HMRC_TO_XERO_ACCOUNT_MAP.items():
+        if hmrc_cat.lower() in cat_lower or cat_lower in hmrc_cat.lower():
+            return code
+    return "429"
+
+def normalize_date_str(date_val: str | None, fallback_val: str | None = None) -> str:
+    clean_val = str(date_val or fallback_val or "").strip()
+    if len(clean_val) >= 10 and clean_val[4] == '-' and clean_val[7] == '-':
+        return clean_val[:10]
+    for fmt in ("%d/%m/%Y", "%d-%m-%Y", "%Y/%m/%d", "%d/%m/%y", "%Y-%m-%dT%H:%M:%S"):
+        try:
+            return datetime.strptime(clean_val[:19], fmt).strftime("%Y-%m-%d")
+        except (ValueError, TypeError):
+            continue
+    return datetime.now(timezone.utc).strftime("%Y-%m-%d")
+
 async def submit_to_hmrc(item):
     try:
         from accounting_client import AccountingClient
@@ -159,16 +200,60 @@ async def submit_to_hmrc(item):
         if abs((net + tax) - gross) > 0.01:
             raise Exception("Math Validation Failed: Net + Tax != Gross")
 
+        tx_date = normalize_date_str(fin_data.get("transaction_date"), item.get("timestamp"))
+        due_date = normalize_date_str(fin_data.get("due_date"), tx_date)
+        vendor_name = fin_data.get("vendor") or "Unknown Supplier"
+        category_name = item.get("category") or fin_data.get("category") or "General Expense"
+        account_code = map_category_to_xero_account(category_name)
+        
+        inv_number = fin_data.get("invoice_number") or f"RCPT-{item['id']}"
+        ref_code = fin_data.get("reference") or f"IA-Q{item['id']}"
+
+        detail_desc = fin_data.get("description")
+        if detail_desc:
+            line_desc = f"{detail_desc} ({category_name})"
+        else:
+            line_desc = f"Expense at {vendor_name} - {category_name}"
+
+        line_items_data = fin_data.get("line_items")
+        if line_items_data and isinstance(line_items_data, list) and len(line_items_data) > 0:
+            formatted_lines = []
+            for idx, li in enumerate(line_items_data):
+                li_desc = li.get("description") or f"Item {idx+1} ({category_name})"
+                li_qty = safe_float(li.get("quantity", 1), 1.0)
+                if li_qty <= 0:
+                    li_qty = 1.0
+                li_unit = safe_float(li.get("unit_amount") or li.get("net_amount") or li.get("amount", net), net)
+                li_tax = safe_float(li.get("vat_amount") or li.get("tax_amount", 0.0), 0.0)
+                li_acc = map_category_to_xero_account(li.get("category") or category_name)
+                formatted_lines.append({
+                    "Description": li_desc,
+                    "Quantity": li_qty,
+                    "UnitAmount": li_unit,
+                    "AccountCode": li_acc,
+                    "TaxAmount": li_tax
+                })
+        else:
+            formatted_lines = [{
+                "Description": line_desc,
+                "Quantity": 1,
+                "UnitAmount": net,
+                "AccountCode": account_code,
+                "TaxAmount": tax
+            }]
+
         bill_payload = {
             "Type": "ACCPAY",
             "Status": "DRAFT",
-            "Contact": {"Name": fin_data.get("vendor", "Unknown Supplier")},
-            "LineItems": [{
-                "Description": item.get("category", "General Expense"),
-                "Quantity": 1,
-                "UnitAmount": net,
-                "TaxAmount": tax
-            }]
+            "LineAmountTypes": "Exclusive",
+            "Date": tx_date,
+            "DueDate": due_date,
+            "InvoiceNumber": inv_number,
+            "Reference": ref_code,
+            "Contact": {
+                "Name": vendor_name
+            },
+            "LineItems": formatted_lines
         }
         resp = await client.create_draft_bill(bill_payload)
         invoice_id = resp.get("Invoices", [{}])[0].get("InvoiceID")
