@@ -209,3 +209,40 @@ class AccountingClient:
                 return resp.json()
             except Exception:
                 return {"status": "success", "status_code": resp.status_code}
+
+    async def get_invoice(self, invoice_id: str) -> dict:
+        creds = await self.get_valid_token()
+        headers = {
+            "Authorization": f"Bearer {creds['access_token']}",
+            "Xero-Tenant-Id": creds["tenant_id"],
+            "Accept": "application/json"
+        }
+        async with httpx.AsyncClient() as client:
+            resp = await client.get(
+                f"https://api.xero.com/api.xro/2.0/Invoices/{invoice_id}",
+                headers=headers
+            )
+            if resp.status_code != 200:
+                raise Exception(f"Failed to fetch invoice {invoice_id}: {resp.text}")
+            return resp.json()
+
+    async def get_invoices(self, where: str | None = None) -> list:
+        creds = await self.get_valid_token()
+        headers = {
+            "Authorization": f"Bearer {creds['access_token']}",
+            "Xero-Tenant-Id": creds["tenant_id"],
+            "Accept": "application/json"
+        }
+        params = {}
+        if where:
+            params["where"] = where
+        async with httpx.AsyncClient() as client:
+            resp = await client.get(
+                "https://api.xero.com/api.xro/2.0/Invoices",
+                headers=headers,
+                params=params
+            )
+            if resp.status_code != 200:
+                raise Exception(f"Failed to fetch invoices: {resp.text}")
+            return resp.json().get("Invoices", [])
+

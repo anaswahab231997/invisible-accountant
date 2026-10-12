@@ -101,3 +101,60 @@ async def verify_api_key(api_key_header_val: str = Security(api_key_header)):
     if not API_KEY or not secrets.compare_digest(api_key_header_val, API_KEY):
         raise HTTPException(status_code=403, detail="Could not validate credentials")
     return api_key_header_val
+
+
+# --- 5. Receipt Fingerprinting & Deduplication ---
+def normalize_sender_id(sender_id: str | None) -> str:
+    s = str(sender_id or "").strip().lower()
+    if s.startswith("whatsapp:"):
+        s = s[len("whatsapp:"):]
+    return s.strip()
+
+def normalize_vendor(vendor: str | None) -> str:
+    v = str(vendor or "unknown").strip().lower()
+    v = re.sub(r'[\r\n\t]+', ' ', v)
+    v = re.sub(r'[^\w\s]', '', v)
+    v = re.sub(r'\s+', ' ', v)
+    return v.strip()
+
+def normalize_amount(amount: float | str | None) -> str:
+    if amount is None:
+        return "0.00"
+    cleaned = re.sub(r'[^\d\.-]', '', str(amount))
+    try:
+        val = float(cleaned)
+        return f"{val:.2f}"
+    except (ValueError, TypeError):
+        return "0.00"
+
+def normalize_date(date_val: str | None) -> str:
+    if not date_val:
+        return ""
+    clean_val = str(date_val).strip()
+    if len(clean_val) >= 10 and clean_val[4] == '-' and clean_val[7] == '-':
+        return clean_val[:10]
+    for fmt in ("%d/%m/%Y", "%d-%m-%Y", "%Y/%m/%d", "%d/%m/%y", "%Y-%m-%dT%H:%M:%S"):
+        try:
+            from datetime import datetime
+            return datetime.strptime(clean_val[:19], fmt).strftime("%Y-%m-%d")
+        except (ValueError, TypeError):
+            continue
+    return clean_val[:10]
+
+def compute_receipt_fingerprint(
+    sender_id: str | None,
+    vendor: str | None,
+    gross_amount: float | str | None,
+    transaction_date: str | None = None
+) -> str:
+    """
+    Computes a deterministic SHA256 fingerprint for deduplication.
+    Normalized over: (sender_id, vendor, gross_amount, transaction_date).
+    """
+    norm_sender = normalize_sender_id(sender_id)
+    norm_vendor = normalize_vendor(vendor)
+    norm_gross = normalize_amount(gross_amount)
+    norm_date = normalize_date(transaction_date)
+    raw = f"{norm_sender}:{norm_vendor}:{norm_gross}:{norm_date}"
+    return hashlib.sha256(raw.encode("utf-8")).hexdigest()
+

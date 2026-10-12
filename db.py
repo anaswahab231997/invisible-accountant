@@ -5,7 +5,7 @@ from datetime import datetime, timedelta
 import asyncpg
 from contextlib import asynccontextmanager
 from dotenv import load_dotenv
-from security import mask_pii
+from security import mask_pii, compute_receipt_fingerprint
 from aes_gcm_security import TokenEncryptionEngine
 
 load_dotenv()
@@ -102,15 +102,34 @@ def safe_float(val):
     except ValueError:
         return 0.0
 
-async def confirm_and_queue_to_ledger(chat_id: int):
+async def check_active_duplicate_expense(fingerprint: str, days: int = 90) -> dict | None:
+    if not fingerprint:
+        return None
+    async with get_connection() as conn:
+        time_limit = (datetime.now() - timedelta(days=days)).isoformat()
+        row = await conn.fetchrow(
+            """
+            SELECT * FROM hmrc_ledger
+            WHERE receipt_fingerprint = $1
+              AND timestamp >= $2
+              AND status IN ('PENDING', 'PROCESSING', 'SUBMITTED', 'CAPITAL_ALLOWANCE', 'APPROVED')
+            ORDER BY timestamp DESC
+            LIMIT 1
+            """,
+            fingerprint, time_limit
+        )
+        return dict(row) if row else None
+
+async def confirm_and_queue_to_ledger(chat_id: int, allow_duplicate: bool = False):
     timestamp = datetime.now().isoformat()
     async with get_connection() as conn:
-        row = await conn.fetchrow("SELECT staging_payload, is_demo FROM chat_sessions WHERE id = $1", chat_id)
+        row = await conn.fetchrow("SELECT staging_payload, is_demo, sender_id FROM chat_sessions WHERE id = $1", chat_id)
         if not row or not row["staging_payload"]:
             raise ValueError("No staged payload to confirm.")
             
         payload = json.loads(row["staging_payload"])
         is_demo = row["is_demo"]
+        sender_id = row.get("sender_id") or ""
         
         status = await conn.execute(
             "UPDATE chat_sessions SET staging_payload = NULL WHERE id = $1 AND staging_payload IS NOT NULL",
@@ -124,9 +143,31 @@ async def confirm_and_queue_to_ledger(chat_id: int):
         gross = safe_float(payload.get("gross_amount") or payload.get("amount", 0.0))
         vat = safe_float(payload.get("vat_amount", 0.0))
         net = safe_float(payload.get("net_amount") or (gross - vat if gross else 0.0))
+        vendor = payload.get("vendor", "")
+        tx_date = payload.get("transaction_date") or payload.get("date") or payload.get("receipt_date")
+
+        # Deterministic Receipt Fingerprint
+        receipt_fingerprint = compute_receipt_fingerprint(sender_id, vendor, gross, tx_date)
+
+        # 90-day Duplicate Detection Gate
+        if not is_demo and not allow_duplicate:
+            time_limit_90d = (datetime.now() - timedelta(days=90)).isoformat()
+            dup = await conn.fetchrow(
+                """
+                SELECT id FROM hmrc_ledger
+                WHERE receipt_fingerprint = $1
+                  AND timestamp >= $2
+                  AND status IN ('PENDING', 'PROCESSING', 'SUBMITTED', 'CAPITAL_ALLOWANCE', 'APPROVED')
+                ORDER BY timestamp DESC
+                LIMIT 1
+                """,
+                receipt_fingerprint, time_limit_90d
+            )
+            if dup:
+                queue_status = "DUPLICATE_SUSPECTED"
 
         financial_data = {
-            "vendor": payload.get("vendor"),
+            "vendor": vendor,
             "net_amount": net,
             "vat_amount": vat,
             "gross_amount": gross,
@@ -136,7 +177,9 @@ async def confirm_and_queue_to_ledger(chat_id: int):
             "line_items": payload.get("line_items", []),
             "transaction_type": payload.get("transaction_type"),
             "needs_accountant_review": payload.get("needs_accountant_review", False),
-            "transaction_date": payload.get("transaction_date")
+            "transaction_date": payload.get("transaction_date") or tx_date,
+            "reference": payload.get("reference"),
+            "invoice_number": payload.get("invoice_number")
         }
         
         master_key = os.getenv("ENCRYPTION_MASTER_KEY_B64")
@@ -148,19 +191,19 @@ async def confirm_and_queue_to_ledger(chat_id: int):
             plain_amount = 0.0
         else:
             encrypted_financial_data = None
-            plain_vendor = payload.get("vendor", "")
-            plain_amount = safe_float(payload.get("gross_amount") or payload.get("amount", 0.0))
+            plain_vendor = vendor
+            plain_amount = gross
             
-        real_amount = safe_float(payload.get("gross_amount") or payload.get("amount", 0.0))
-        if not is_demo:
+        real_amount = gross
+        if not is_demo and queue_status != "DUPLICATE_SUSPECTED":
             if (payload.get("transaction_type", "EXPENSE") != "INCOME" and real_amount > 500.0) or payload.get("needs_accountant_review", False):
                 if not payload.get("accountant_approved", False):
                     queue_status = "CAPITAL_ALLOWANCE"
         
         queue_id = await conn.fetchval(
             """
-            INSERT INTO hmrc_ledger (chat_id, timestamp, vendor, amount, category, status, encrypted_financial_data, is_demo)
-            VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+            INSERT INTO hmrc_ledger (chat_id, timestamp, vendor, amount, category, status, encrypted_financial_data, is_demo, receipt_fingerprint, external_bill_id)
+            VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
             RETURNING id
             """,
             chat_id,
@@ -170,7 +213,9 @@ async def confirm_and_queue_to_ledger(chat_id: int):
             payload.get("category"),
             queue_status,
             encrypted_financial_data,
-            is_demo
+            is_demo,
+            receipt_fingerprint,
+            None
         )
         return queue_id
 
@@ -222,11 +267,26 @@ async def get_pending_hmrc_queue(limit: int = 100):
             
         return result_items
 
-async def mark_hmrc_submitted(queue_id):
+async def update_ledger_external_bill_id(queue_id: int, external_bill_id: str):
     async with get_connection() as conn:
         await conn.execute(
-            "UPDATE hmrc_ledger SET status = 'SUBMITTED' WHERE id = $1", queue_id
+            "UPDATE hmrc_ledger SET external_bill_id = $1, updated_at = $2 WHERE id = $3",
+            external_bill_id, datetime.now().isoformat(), queue_id
         )
+
+async def mark_hmrc_submitted(queue_id: int, external_bill_id: str | None = None):
+    async with get_connection() as conn:
+        now_ts = datetime.now().isoformat()
+        if external_bill_id:
+            await conn.execute(
+                "UPDATE hmrc_ledger SET status = 'SUBMITTED', external_bill_id = COALESCE(external_bill_id, $2), updated_at = $3 WHERE id = $1",
+                queue_id, external_bill_id, now_ts
+            )
+        else:
+            await conn.execute(
+                "UPDATE hmrc_ledger SET status = 'SUBMITTED', updated_at = $2 WHERE id = $1",
+                queue_id, now_ts
+            )
 
 async def mark_hmrc_failed(queue_id):
     async with get_connection() as conn:

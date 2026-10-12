@@ -12,9 +12,9 @@ DRY_RUN = os.getenv("DRY_RUN", "true").lower() == "true"
 from circuit_breaker import CircuitBreaker, CircuitBreakerOpenException
 from db import (
     get_connection,
-    
     get_pending_hmrc_queue,
     mark_hmrc_submitted,
+    update_ledger_external_bill_id,
     get_identity_from_vault,
     store_identity_in_vault
 )
@@ -187,6 +187,10 @@ def normalize_date_str(date_val: str | None, fallback_val: str | None = None) ->
 
 async def submit_to_hmrc(item):
     try:
+        if item.get("status") == "DUPLICATE_SUSPECTED":
+            logger.warning("Item marked as DUPLICATE_SUSPECTED. Skipping Xero submission to prevent duplication.", queue_id=item.get("id"))
+            return
+            
         from accounting_client import AccountingClient
         client = AccountingClient(workspace_id=item.get("sender_id", ""), provider="XERO")
         
@@ -281,9 +285,35 @@ async def submit_to_hmrc(item):
             "Contact": contact_payload,
             "LineItems": formatted_lines
         }
-        resp = await client.create_draft_bill(bill_payload)
-        invoice_id = resp.get("Invoices", [{}])[0].get("InvoiceID")
-        
+        # Two-Phase Idempotency Engine
+        # Step 1: Check if external_bill_id is already populated (in memory or database)
+        invoice_id = item.get("external_bill_id")
+        if not invoice_id and item.get("id"):
+            from db import get_connection
+            async with get_connection() as conn:
+                invoice_id = await conn.fetchval(
+                    "SELECT external_bill_id FROM hmrc_ledger WHERE id = $1", item["id"]
+                )
+
+        if not invoice_id:
+            # Step 2: Create draft bill in Xero and IMMEDIATELY write external_bill_id to hmrc_ledger in database
+            logger.info("Phase 1: Creating draft bill in Xero...", queue_id=item["id"])
+            resp = await client.create_draft_bill(bill_payload)
+            invoices = resp.get("Invoices", [])
+            if not invoices or not invoices[0].get("InvoiceID"):
+                raise Exception(f"Failed to obtain InvoiceID from Xero response: {resp}")
+            invoice_id = invoices[0]["InvoiceID"]
+            
+            # Persist external_bill_id immediately before proceeding to attachment uploads
+            await update_ledger_external_bill_id(item["id"], invoice_id)
+            item["external_bill_id"] = invoice_id
+            logger.info("Phase 1 Complete: Draft bill created & external_bill_id persisted immediately", queue_id=item["id"], external_bill_id=invoice_id)
+        else:
+            # Step 3: external_bill_id already populated (prior crash/retry) -> SKIP bill creation completely!
+            logger.info("Phase 1 Skipped: external_bill_id already exists. Reusing existing bill (Idempotent replay)", queue_id=item["id"], external_bill_id=invoice_id)
+            item["external_bill_id"] = invoice_id
+
+        # Step 4: Proceed to attachment upload using external_bill_id
         media_urls = item.get("media_urls") or []
         if isinstance(media_urls, str):
             try:
@@ -304,10 +334,9 @@ async def submit_to_hmrc(item):
                     except Exception as upload_err:
                         logger.error("Failed to upload attachment to Xero", error=str(upload_err))
 
-        from db import get_connection
-        async with get_connection() as conn:
-            await conn.execute("UPDATE hmrc_ledger SET status = 'SUBMITTED' WHERE id = $1", item["id"])
-        logger.info("PROCESSING -> SUBMITTED", queue_id=item["id"])
+        # Step 5: Mark the item as SUBMITTED
+        await mark_hmrc_submitted(item["id"], external_bill_id=invoice_id)
+        logger.info("PROCESSING -> SUBMITTED", queue_id=item["id"], external_bill_id=invoice_id)
         
     except Exception as e:
         status_code = getattr(e, 'status_code', 500)

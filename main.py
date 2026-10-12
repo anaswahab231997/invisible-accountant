@@ -40,10 +40,13 @@ from db import (
     get_unconfirmed_session,
     stage_expense,
     confirm_and_queue_to_ledger,
+    check_active_duplicate_expense,
+    get_connection,
     init_db,
     create_chat_session,
     store_identity_in_vault,
 )
+from security import compute_receipt_fingerprint
 from dashboard import router as dashboard_router
 from dev_dashboard import router as dev_dashboard_router
 from logger import get_logger
@@ -165,11 +168,18 @@ async def process_intake_task(
                             to_formatted = f"whatsapp:{sender_id}" if not sender_id.startswith("whatsapp:") else sender_id
                             await asyncio.to_thread(client.messages.create, body=err_msg, from_=os.environ.get('TWILIO_WHATSAPP_NUMBER', 'whatsapp:+17372508034'), to=to_formatted)
                         return
-                await confirm_and_queue_to_ledger(unconfirmed["id"])
-                success_msg = "âœ… All set! I've officially locked this into your tax ledger and it's queued for HMRC."
+                queue_id = await confirm_and_queue_to_ledger(unconfirmed["id"])
+                async with get_connection() as conn:
+                    ledger_status = await conn.fetchval("SELECT status FROM hmrc_ledger WHERE id = $1", queue_id)
+                
+                if ledger_status == "DUPLICATE_SUSPECTED":
+                    success_msg = "⚠️ Notice: This expense matches an active receipt submitted within the last 90 days. It has been flagged as 'DUPLICATE_SUSPECTED' and will not be pushed to Xero to prevent duplicate billing."
+                    logger.warning("Expense confirmed as DUPLICATE_SUSPECTED", queue_id=queue_id, sender_id=sender_id)
+                else:
+                    success_msg = "✅ All set! I've officially locked this into your tax ledger and it's queued for HMRC."
                 logger.info("Outbound WhatsApp message", sender_id=sender_id, message=success_msg)
                 from ws import manager
-                await manager.send_personal_message({"type": "INTAKE_UPDATE", "chat_id": chat_id, "result": {"status": "CONFIRMED"}}, sender_id)
+                await manager.send_personal_message({"type": "INTAKE_UPDATE", "chat_id": chat_id, "result": {"status": "CONFIRMED", "queue_status": ledger_status}}, sender_id)
                 
                 if not sender_id.startswith("demo_web_") and os.environ.get('TWILIO_ACCOUNT_SID'):
                     from twilio.rest import Client
@@ -217,6 +227,21 @@ async def process_intake_task(
                 result["is_ambiguous"] = True
                 result["auditor_question"] = "I couldn't detect an expense amount. Could you clarify the amount?"
             
+            # Receipt Fingerprinting & Deduplication Gate
+            vendor_val = result.get("vendor")
+            gross_val = result.get("gross_amount") or result.get("amount")
+            date_val = result.get("transaction_date") or result.get("date")
+            fingerprint = compute_receipt_fingerprint(sender_id, vendor_val, gross_val, date_val)
+            result["receipt_fingerprint"] = fingerprint
+
+            active_dup = await check_active_duplicate_expense(fingerprint, days=90)
+            if active_dup:
+                logger.warning("Duplicate receipt detected during intake", sender_id=sender_id, fingerprint=fingerprint, existing_id=active_dup["id"])
+                result["is_duplicate"] = True
+                result["is_ambiguous"] = True
+                result["duplicate_item_id"] = active_dup["id"]
+                result["auditor_question"] = f"⚠️ Notice: A receipt from {vendor_val or 'this vendor'} for £{safe_float(gross_val):.2f} was already recorded within the last 90 days (Ledger #{active_dup['id']}). Are you sure this is a new distinct transaction, or is it a duplicate?"
+
             # Staging Gate
             await stage_expense(chat_id, result)
             
