@@ -208,8 +208,15 @@ async def get_pending_hmrc_queue(limit: int = 100):
                 "SELECT sender_id, media_urls FROM chat_sessions WHERE id = $1", r["chat_id"]
             )
             item_dict = dict(r)
-            item_dict["sender_id"] = chat_row["sender_id"] if chat_row else "unknown"
-            item_dict["media_urls"] = chat_row["media_urls"] if chat_row else None
+            raw_media = chat_row["media_urls"] if chat_row else None
+            if raw_media and isinstance(raw_media, str):
+                try:
+                    import json
+                    item_dict["media_urls"] = json.loads(raw_media)
+                except Exception:
+                    item_dict["media_urls"] = [raw_media]
+            else:
+                item_dict["media_urls"] = raw_media or []
             result_items.append(item_dict)
             
         return result_items

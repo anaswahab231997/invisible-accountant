@@ -174,6 +174,12 @@ async def submit_to_hmrc(item):
         invoice_id = resp.get("Invoices", [{}])[0].get("InvoiceID")
         
         media_urls = item.get("media_urls") or []
+        if isinstance(media_urls, str):
+            try:
+                import json
+                media_urls = json.loads(media_urls)
+            except Exception:
+                media_urls = [media_urls] if media_urls.startswith("http") else []
         if invoice_id and media_urls:
             import httpx
             async with httpx.AsyncClient() as dl_client:
