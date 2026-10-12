@@ -144,7 +144,7 @@ async def submit_to_hmrc(item):
         if not accountant_approved and ((amount > 500.0 and fin_data.get("transaction_type", "EXPENSE") != "INCOME") or fin_data.get("needs_accountant_review")):
             from db import get_connection
             async with get_connection() as conn:
-                await conn.execute("UPDATE hmrc_ledger SET status = 'CAPITAL_ALLOWANCE' WHERE id = ", item["id"])
+                await conn.execute("UPDATE hmrc_ledger SET status = 'CAPITAL_ALLOWANCE' WHERE id = $1", item["id"])
             return
             
         def safe_float(val, default=0.0):
@@ -189,7 +189,7 @@ async def submit_to_hmrc(item):
 
         from db import get_connection
         async with get_connection() as conn:
-            await conn.execute("UPDATE hmrc_ledger SET status = 'SUBMITTED' WHERE id = ", item["id"])
+            await conn.execute("UPDATE hmrc_ledger SET status = 'SUBMITTED' WHERE id = $1", item["id"])
         logger.info("PROCESSING -> SUBMITTED", queue_id=item["id"])
         
     except Exception as e:
