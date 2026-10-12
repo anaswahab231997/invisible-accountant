@@ -403,9 +403,9 @@ async def submit_triage(
                 fin["net_amount"] = base_net
                 fin["vat_amount"] = base_vat
                 fin["fx_metadata"] = fx_meta
-                if tax_type == "INPUT2": # Override UK tax on foreign
-                    fin["tax_type"] = "NONE"
-                    fin["tax_code"] = "NONE"
+                # Statutory rule: Override UK tax on foreign invoices to NONE (0%)
+                fin["tax_type"] = "NONE"
+                fin["tax_code"] = "NONE"
 
             re_encrypted = json.dumps(token_engine.encrypt_tokens(
                 json.dumps(fin),
