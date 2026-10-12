@@ -1,4 +1,4 @@
-﻿import os
+import os
 import json
 import httpx
 from datetime import datetime, timezone
@@ -118,9 +118,13 @@ class AccountingClient:
                 headers={
                     "Authorization": f"Bearer {creds['access_token']}",
                     "Xero-Tenant-Id": creds["tenant_id"],
-                    "Content-Type": mime_type
+                    "Content-Type": mime_type,
+                    "Accept": "application/json"
                 }
             )
             if resp.status_code not in (200, 201):
                 raise Exception(f"Failed to upload attachment: {resp.text}")
-            return resp.json()
+            try:
+                return resp.json()
+            except Exception:
+                return {"status": "success", "status_code": resp.status_code}
