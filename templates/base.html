@@ -37,8 +37,19 @@
             evt.detail.credentials = 'same-origin';
         });
     </script>
+    <script src="/assets/hotkeys.js" defer></script>
+    <style>
+        .tabular-nums {
+            font-variant-numeric: tabular-nums;
+        }
+        .active-row {
+            outline: 2px solid #2563eb !important;
+            outline-offset: -2px;
+            background-color: rgba(239, 246, 255, 0.7) !important;
+        }
+    </style>
 </head>
-<body class="bg-gray-100 font-sans text-gray-900 antialiased selection:bg-ukblue selection:text-white" hx-boost="false">
+<body class="bg-slate-50 font-sans text-slate-900 antialiased selection:bg-ukblue selection:text-white" hx-boost="false">
     <div class="min-h-screen flex flex-col">
         <nav class="bg-white border-b border-gray-200 shadow-sm sticky top-0 z-50">
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -96,15 +107,47 @@
             {% block content %}{% endblock %}
         </main>
         
-        <footer class="bg-white border-t border-gray-200 mt-auto">
-            <div class="max-w-7xl mx-auto py-4 px-4 sm:px-6 lg:px-8 flex justify-between items-center">
-                <p class="text-sm text-gray-500">Built for UK Accountants.</p>
-                <div class="flex space-x-4 text-sm text-gray-400">
-                    <span>Xero Partner</span>
-                    <span>HMRC MTD Ready</span>
+        <footer class="bg-white border-t border-gray-200 mt-auto pb-10 sm:pb-8">
+            <div class="max-w-7xl mx-auto py-4 px-4 sm:px-6 lg:px-8 flex justify-between items-center text-xs text-slate-500">
+                <p>Invisible Accountant • Autonomous MTD ITSA Staging Gateway</p>
+                <div class="flex space-x-4">
+                    <span>Xero Partner Core API</span>
+                    <span>HMRC VAT Notice 700/22 §3.3</span>
+                    <span>ICAEW &amp; ACCA Ethics Compliant</span>
                 </div>
             </div>
         </footer>
+    </div>
+
+    <!-- Persistent Slide-Over Inspection Drawer -->
+    <div id="drawer-overlay" class="fixed inset-0 bg-slate-900/40 backdrop-blur-xs z-40 hidden transition-opacity" onclick="window.closeDrawer()"></div>
+    <div id="inspect-drawer" class="fixed inset-y-0 right-0 z-50 w-full sm:w-[500px] bg-white shadow-2xl border-l border-slate-200 transform translate-x-full transition-transform duration-200 ease-in-out flex flex-col">
+        <div id="inspect-drawer-content" class="h-full flex flex-col">
+            <div class="p-6 text-center text-slate-400 text-xs">
+                Select a transaction and press <kbd class="font-mono bg-slate-100 px-1.5 py-0.5 rounded border border-slate-300">Space</kbd> or click Inspect to view the source receipt.
+            </div>
+        </div>
+    </div>
+
+    <!-- Bottom Ergonomic Hotkey Legend -->
+    <div class="fixed bottom-0 inset-x-0 bg-slate-900/95 text-slate-300 text-[11px] font-mono py-1 px-4 flex items-center justify-between border-t border-slate-800 z-30 shadow-lg hidden sm:flex backdrop-blur-sm">
+        <div class="flex items-center space-x-3">
+            <span><kbd class="bg-slate-800 text-slate-200 px-1 py-0.5 rounded border border-slate-700 text-[10px]">J</kbd>/<kbd class="bg-slate-800 text-slate-200 px-1 py-0.5 rounded border border-slate-700 text-[10px]">K</kbd> Navigate</span>
+            <span class="text-slate-600">•</span>
+            <span><kbd class="bg-slate-800 text-emerald-400 px-1.5 py-0.5 rounded border border-slate-700 text-[10px]">Ctrl+↵</kbd> Quick Release</span>
+            <span class="text-slate-600">•</span>
+            <span><kbd class="bg-slate-800 text-amber-300 px-1 py-0.5 rounded border border-slate-700 text-[10px]">Space</kbd> / <kbd class="bg-slate-800 text-amber-300 px-1 py-0.5 rounded border border-slate-700 text-[10px]">E</kbd> Inspect Drawer</span>
+            <span class="text-slate-600">•</span>
+            <span><kbd class="bg-slate-800 text-rose-400 px-1 py-0.5 rounded border border-slate-700 text-[10px]">Del</kbd> Dismiss</span>
+            <span class="text-slate-600">•</span>
+            <span><kbd class="bg-slate-800 text-slate-200 px-1 py-0.5 rounded border border-slate-700 text-[10px]">/</kbd> Filter</span>
+            <span class="text-slate-600">•</span>
+            <span><kbd class="bg-slate-800 text-slate-200 px-1 py-0.5 rounded border border-slate-700 text-[10px]">Esc</kbd> Close Drawer</span>
+        </div>
+        <div class="text-[10px] text-slate-400 flex items-center space-x-1.5">
+            <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
+            <span>High-Density 30px Ledger Engine Active</span>
+        </div>
     </div>
 </body>
 </html>

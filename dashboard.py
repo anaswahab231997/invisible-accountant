@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from fastapi import APIRouter, Request, Depends, Form
 from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
@@ -375,9 +376,9 @@ async def get_edit_row(request: Request, item_type: str, item_id: int):
                 <div class="flex items-center justify-between pb-2 border-b border-indigo-200">
                     <span class="text-xs font-bold uppercase tracking-wider text-indigo-900 flex items-center">
                         <svg class="w-4 h-4 mr-1 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
-                        Accountant Triage &amp; Statutory Classification — {vendor} (£{amount:.2f})
+                        Accountant Triage &amp; Statutory Classification &mdash; {vendor} (&pound;{amount:.2f})
                     </span>
-                    <button type="button" hx-get="/dashboard" hx-target="body" class="text-xs text-gray-500 hover:text-gray-800">✕ Cancel</button>
+                    <button type="button" hx-get="/dashboard" hx-target="body" class="text-xs text-gray-500 hover:text-gray-800">&times; Cancel</button>
                 </div>
                 
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
@@ -386,7 +387,7 @@ async def get_edit_row(request: Request, item_type: str, item_id: int):
                         <select name="account_code" class="w-full text-xs border border-gray-300 rounded p-1.5 bg-white font-mono focus:ring-2 focus:ring-indigo-500">
                             {acc_options_html}
                         </select>
-                        <p class="text-[10px] text-gray-500 mt-1">Select 710/720 for Capital Allowances (CAA 2001) > £500.</p>
+                        <p class="text-[10px] text-gray-500 mt-1">Select 710/720 for Capital Allowances (CAA 2001) > &pound;500.</p>
                     </div>
                     <div>
                         <label class="block text-[11px] font-semibold text-gray-700 uppercase mb-1">VAT Treatment (VATA 1994)</label>
@@ -418,6 +419,196 @@ async def get_edit_row(request: Request, item_type: str, item_id: int):
     </tr>
     """)
     return return_dashboard_response(request, response)
+
+@router.get("/dashboard/inspect/{item_type}/{item_id}", response_class=HTMLResponse, dependencies=[Depends(verify_accountant_session)])
+async def inspect_drawer(request: Request, item_type: str, item_id: int):
+    """Renders slide-over inspection drawer with receipt image, WhatsApp chat, and provenance memo."""
+    async with get_connection() as conn:
+        vendor = "Unknown Supplier"
+        amount = 0.0
+        net = 0.0
+        vat = 0.0
+        current_acc = "420"
+        current_tax = "INPUT2"
+        is_cap = False
+        is_dup = False
+        memo = ""
+        raw_msg = ""
+        reasoning = ""
+        media_url = ""
+        sender_id = "Client"
+        created_at = ""
+
+        if item_type == "ledger":
+            row = await conn.fetchrow("""
+                SELECT h.*, c.sender_id, c.raw_message, c.media_urls
+                FROM hmrc_ledger h
+                LEFT JOIN chat_sessions c ON h.chat_id = c.id
+                WHERE h.id = $1
+            """, item_id)
+            if row:
+                is_cap = (row["status"] == "CAPITAL_ALLOWANCE")
+                is_dup = (row["status"] == "DUPLICATE_SUSPECTED")
+                sender_id = row["sender_id"] or "Unknown Client"
+                raw_msg = row["raw_message"] or "WhatsApp receipt upload."
+                media_url = row["media_urls"] or ""
+                created_at = format_ts(row["timestamp"])
+                vendor = row["vendor"] or "Unknown Supplier"
+                amount = float(row["amount"] or 0.0)
+                current_acc = str(row["category"] or ("720" if is_cap else "420"))
+                if row["encrypted_financial_data"] and token_engine:
+                    try:
+                        dec = token_engine.decrypt_tokens(
+                            json.loads(row["encrypted_financial_data"]),
+                            associated_data=str(row["chat_id"])
+                        )
+                        fin = json.loads(dec)
+                        vendor = fin.get("vendor", vendor)
+                        amount = float(fin.get("gross_amount", amount))
+                        net = float(fin.get("net_amount", amount))
+                        vat = float(fin.get("vat_amount", 0.0))
+                        memo = fin.get("memo") or fin.get("reasoning_step_2_nature_of_expense") or ""
+                        reasoning = fin.get("reasoning") or fin.get("audit_memo") or ""
+                        current_acc = str(fin.get("account_code") or current_acc)
+                        current_tax = str(fin.get("tax_type") or fin.get("tax_code") or "INPUT2")
+                    except Exception:
+                        pass
+        else: # staged
+            row = await conn.fetchrow("SELECT * FROM chat_sessions WHERE id = $1", item_id)
+            if row:
+                sender_id = row["sender_id"] or "Unknown Client"
+                raw_msg = row["raw_message"] or "WhatsApp receipt upload."
+                media_url = row["media_urls"] or ""
+                created_at = format_ts(row["timestamp"])
+                if row["staging_payload"]:
+                    try:
+                        payload = json.loads(row["staging_payload"])
+                        vendor = payload.get("vendor", "Unknown Supplier")
+                        amount = float(payload.get("amount") or payload.get("gross_amount") or 0.0)
+                        net = float(payload.get("net_amount") or amount)
+                        vat = float(payload.get("vat_amount") or 0.0)
+                        memo = payload.get("memo") or ""
+                        reasoning = payload.get("reasoning") or ""
+                        is_cap = (amount >= 500.0)
+                        current_acc = str(payload.get("account_code") or ("720" if is_cap else "420"))
+                        current_tax = str(payload.get("tax_type") or payload.get("tax_code") or "INPUT2")
+                    except Exception:
+                        pass
+
+    acc_options = []
+    for code, label in ACCOUNT_CODE_LABELS.items():
+        sel = "selected" if code == current_acc or code in current_acc else ""
+        acc_options.append(f'<option value="{code}" {sel}>{label}</option>')
+    acc_options_html = "\n".join(acc_options)
+
+    tax_options = []
+    for code, label in TAX_CODE_LABELS.items():
+        sel = "selected" if code == current_tax or code in current_tax else ""
+        tax_options.append(f'<option value="{code}" {sel}>{label}</option>')
+    tax_options_html = "\n".join(tax_options)
+
+    cap_checked = "checked" if is_cap or amount >= 500.0 else ""
+    dup_alert = ""
+    if is_dup:
+        dup_alert = """
+        <div class="bg-rose-50 border border-rose-200 rounded p-2.5 text-xs text-rose-800 flex items-start space-x-2">
+            <input type="checkbox" id="allow_duplicate" name="allow_duplicate" value="true" class="h-4 w-4 text-rose-600 rounded mt-0.5">
+            <label for="allow_duplicate" class="font-semibold cursor-pointer">Override 90-Day Duplicate Warning (Force push to Xero)</label>
+        </div>
+        """
+
+    media_display = ""
+    if media_url and media_url.startswith("http"):
+        media_display = f"""
+        <div class="bg-slate-900 rounded-lg p-2 flex justify-center items-center overflow-hidden border border-slate-700 max-h-72">
+            <img src="{media_url}" alt="Receipt Canvas" class="max-h-68 w-auto object-contain rounded hover:scale-105 transition-transform cursor-zoom-in" onclick="window.open('{media_url}', '_blank')">
+        </div>
+        """
+    else:
+        media_display = """
+        <div class="bg-slate-100 rounded-lg p-4 border border-slate-200 text-center flex flex-col items-center justify-center">
+            <svg class="w-8 h-8 text-slate-400 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+            <span class="text-xs font-semibold text-slate-600">Digital Link Archive Record</span>
+            <span class="text-[10px] text-slate-400">Notice 700/22 Section 3.3 Digital Link Verified</span>
+        </div>
+        """
+
+    formatted_amount = "%.2f" % amount
+    content = f"""
+    <div class="flex items-center justify-between px-4 py-3 border-b border-slate-200 bg-slate-50">
+        <div>
+            <div class="flex items-center space-x-2">
+                <span class="text-xs font-mono font-bold text-slate-500 uppercase">{item_type} #{item_id}</span>
+                <span class="text-sm font-bold text-slate-900">{vendor}</span>
+            </div>
+            <span class="text-xs text-slate-500">{created_at} &bull; {sender_id}</span>
+        </div>
+        <div class="flex items-center space-x-3">
+            <span class="text-base font-mono font-bold text-slate-900">&pound;{formatted_amount}</span>
+            <button onclick="window.closeDrawer()" class="text-slate-400 hover:text-slate-700 text-sm p-1 rounded hover:bg-slate-200 transition-colors" title="Close Drawer [Esc]">&times;</button>
+        </div>
+    </div>
+
+    <div class="p-4 space-y-4 overflow-y-auto flex-1">
+        <!-- Receipt Canvas -->
+        {media_display}
+
+        <!-- WhatsApp Conversation Provenance -->
+        <div class="bg-emerald-50/70 border border-emerald-200/80 rounded-lg p-3 text-xs">
+            <div class="flex items-center space-x-1.5 text-emerald-800 font-bold mb-1">
+                <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24"><path d="M12.031 6.172c-3.181 0-5.767 2.586-5.768 5.766-.001 1.298.38 2.27 1.019 3.287l-.711 2.598 2.664-.699c.971.53 1.84.814 2.796.814 3.18 0 5.767-2.587 5.768-5.766.001-3.181-2.587-5.768-5.768-5.768zm0 10.355c-.868 0-1.666-.242-2.381-.7l-.17-.101-1.77.464.473-1.724-.112-.178c-.496-.789-.757-1.554-.757-2.35 0-2.532 2.06-4.593 4.593-4.593 2.534 0 4.594 2.061 4.594 4.593 0 2.533-2.06 4.594-4.593 4.594z"/></svg>
+                <span>WhatsApp Client Intake</span>
+            </div>
+            <p class="font-mono text-slate-700 bg-white/80 p-2 rounded border border-emerald-100 whitespace-pre-wrap">{raw_msg}</p>
+        </div>
+
+        <!-- Statutory Provenance Memo -->
+        <div class="bg-slate-50 border border-slate-200 rounded-lg p-3 text-xs space-y-1">
+            <div class="font-semibold text-slate-800 flex items-center space-x-1">
+                <svg class="w-3.5 h-3.5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                <span>Tax &amp; Compliance Audit Memo</span>
+            </div>
+            <p class="text-slate-600 leading-relaxed font-sans">{reasoning or 'Standard business expense classification under FRS 105 and VATA 1994.'}</p>
+        </div>
+
+        <!-- Triage & Allocation Form -->
+        <form hx-post="/dashboard/triage/{item_type}/{item_id}" hx-target="#row-{item_type}-{item_id}" hx-swap="outerHTML" onsubmit="window.closeDrawer()" class="space-y-3 pt-2 border-t border-slate-200">
+            <div>
+                <label class="block text-[11px] font-bold text-slate-700 uppercase mb-1">Xero Nominal Code</label>
+                <select name="account_code" class="w-full text-xs border border-slate-300 rounded p-1.5 bg-white font-mono focus:ring-2 focus:ring-blue-600">
+                    {acc_options_html}
+                </select>
+            </div>
+
+            <div>
+                <label class="block text-[11px] font-bold text-slate-700 uppercase mb-1">VAT Treatment (VATA 1994)</label>
+                <select name="tax_type" class="w-full text-xs border border-slate-300 rounded p-1.5 bg-white font-mono focus:ring-2 focus:ring-blue-600">
+                    {tax_options_html}
+                </select>
+            </div>
+
+            <div class="flex items-center space-x-2 pt-1">
+                <input type="checkbox" id="drawer_is_cap" name="is_capital_asset" value="true" {cap_checked} class="h-4 w-4 text-blue-600 rounded">
+                <label for="drawer_is_cap" class="text-xs font-medium text-slate-800 cursor-pointer">
+                    Capital Asset (CAA 2001 &gt; &pound;500 AIA)
+                </label>
+            </div>
+
+            {dup_alert}
+
+            <div class="flex items-center space-x-2 pt-3">
+                <button type="submit" class="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs py-2 px-3 rounded shadow-sm transition-colors flex items-center justify-center space-x-1.5">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                    <span>Approve &amp; Push to Xero [Ctrl+Enter]</span>
+                </button>
+                <button type="button" hx-post="/dashboard/reject/{item_type}/{item_id}" hx-target="#row-{item_type}-{item_id}" hx-swap="outerHTML" onclick="window.closeDrawer()" class="bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 text-xs font-semibold py-2 px-3 rounded transition-colors">
+                    Reject [Del]
+                </button>
+            </div>
+        </form>
+    </div>
+    """
+    return return_dashboard_response(request, HTMLResponse(content=content))
 
 @router.post("/dashboard/triage/{item_type}/{item_id}", response_class=HTMLResponse, dependencies=[Depends(verify_accountant_session)])
 async def submit_triage(

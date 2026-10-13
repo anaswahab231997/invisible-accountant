@@ -1,247 +1,275 @@
 {% extends "base.html" %}
 
 {% block content %}
-<div class="mb-6 flex flex-col md:flex-row md:justify-between md:items-end gap-4">
+<!-- Top Header & Ergonomic Action Bar -->
+<div class="mb-4 flex flex-col md:flex-row md:justify-between md:items-center gap-3 bg-white p-3.5 rounded-lg border border-slate-200 shadow-xs">
     <div>
-        <h1 class="text-2xl font-bold text-gray-900 tracking-tight">Accountant Triage & Review Gateway</h1>
-        <p class="text-xs text-gray-500 mt-1">HMRC Capital Allowances (CAA 2001), 90-Day Deduplication &amp; Multi-Currency Normalization before pushing to Xero.</p>
+        <div class="flex items-center space-x-2">
+            <h1 class="text-xl font-bold text-slate-900 tracking-tight">Accountant Triage &amp; Review Gateway</h1>
+            <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-blue-50 text-blue-800 border border-blue-200">
+                30px High-Density Mode
+            </span>
+        </div>
+        <p class="text-xs text-slate-500 mt-0.5 font-sans">
+            100% Keyboard-Driven • Schedule 24 Audit Trails • Capital Allowances (CAA 2001) &amp; Notice 700/22 Staging to Xero Draft
+        </p>
     </div>
+
+    <!-- Quick Action Toolbars -->
     <div class="flex items-center space-x-2">
-        <button hx-get="/dashboard?tab={{ current_tab }}" hx-target="body" class="bg-white border border-gray-300 text-gray-700 px-3 py-1.5 rounded text-xs font-medium hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-ukblue shadow-sm transition-colors flex items-center">
-            <svg class="w-3.5 h-3.5 mr-1 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
-            Refresh
+        <!-- Instant Filter Input -->
+        <div class="relative">
+            <input type="text" id="table-search" oninput="window.filterTable(this.value)" placeholder="Filter queue... [/]" 
+                   class="w-48 sm:w-64 text-xs font-mono bg-slate-50 border border-slate-300 rounded px-2.5 py-1.5 pl-7 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-blue-600 transition-all">
+            <svg class="w-3.5 h-3.5 text-slate-400 absolute left-2 top-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+        </div>
+
+        <button id="btn-refresh" hx-get="/dashboard?tab={{ current_tab }}" hx-target="body" 
+                class="bg-white border border-slate-300 text-slate-700 hover:bg-slate-50 px-2.5 py-1.5 rounded text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-blue-600 shadow-xs transition-colors flex items-center" 
+                title="Refresh Table [R]">
+            <svg class="w-3.5 h-3.5 mr-1 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
+            <span>Refresh</span>
+            <kbd class="ml-1 text-[10px] text-slate-400 font-mono">R</kbd>
         </button>
-        <button hx-post="/dashboard/bulk-approve" hx-target="body" class="bg-indigo-600 text-white px-3 py-1.5 rounded text-xs font-medium hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-indigo-600 shadow-sm transition-colors flex items-center">
+
+        <button hx-post="/dashboard/bulk-approve" hx-target="body" 
+                class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1.5 rounded text-xs font-bold focus:outline-none focus:ring-2 focus:ring-blue-600 shadow-xs transition-colors flex items-center"
+                title="Bulk Approve All Non-Flagged Items">
             <svg class="w-3.5 h-3.5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
-            Bulk Approve Safe Items
+            <span>Bulk Release Safe</span>
         </button>
-        <a href="/dashboard/logout" class="bg-white border border-gray-300 text-gray-600 hover:text-rose-600 hover:border-rose-300 px-3 py-1.5 rounded text-xs font-medium focus:outline-none shadow-sm transition-colors flex items-center">
-            <svg class="w-3.5 h-3.5 mr-1 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path></svg>
-            Logout
-        </a>
     </div>
 </div>
 
 <!-- Tabs Navigation -->
-<div class="border-b border-gray-200 mb-6">
+<div class="border-b border-slate-200 mb-3 bg-white px-3 pt-2 rounded-t-lg border-x border-t">
     <nav class="-mb-px flex space-x-6 overflow-x-auto text-xs">
-        <a href="/dashboard?tab=all" class="{% if current_tab == 'all' %}border-indigo-600 text-indigo-600 font-semibold border-b-2{% else %}border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 border-b-2{% endif %} pb-3 px-1 flex items-center whitespace-nowrap transition-colors">
+        <a href="/dashboard?tab=all" class="{% if current_tab == 'all' %}active-tab border-blue-600 text-blue-700 font-bold border-b-2{% else %}border-transparent text-slate-600 hover:text-slate-900 hover:border-slate-300 border-b-2{% endif %} pb-2.5 px-1 flex items-center whitespace-nowrap transition-colors">
             All Records
-            <span class="ml-2 py-0.5 px-2 rounded-full text-[10px] font-bold {% if current_tab == 'all' %}bg-indigo-100 text-indigo-800{% else %}bg-gray-100 text-gray-600{% endif %}">
+            <span class="ml-2 py-0.2 px-1.5 rounded-full text-[10px] font-mono font-bold {% if current_tab == 'all' %}bg-blue-100 text-blue-800{% else %}bg-slate-100 text-slate-600{% endif %}">
                 {{ tabs_summary.all }}
             </span>
         </a>
-        <a href="/dashboard?tab=capital_allowances" class="{% if current_tab == 'capital_allowances' %}border-amber-600 text-amber-700 font-semibold border-b-2{% else %}border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 border-b-2{% endif %} pb-3 px-1 flex items-center whitespace-nowrap transition-colors">
-            Capital Allowances (>£500)
-            <span class="ml-2 py-0.5 px-2 rounded-full text-[10px] font-bold {% if tabs_summary.capital_allowances > 0 %}bg-amber-100 text-amber-800 border border-amber-300{% else %}bg-gray-100 text-gray-600{% endif %}">
+        <a href="/dashboard?tab=capital_allowances" class="{% if current_tab == 'capital_allowances' %}active-tab border-amber-600 text-amber-800 font-bold border-b-2{% else %}border-transparent text-slate-600 hover:text-slate-900 hover:border-slate-300 border-b-2{% endif %} pb-2.5 px-1 flex items-center whitespace-nowrap transition-colors">
+            Capital Allowances (&gt;£500)
+            <span class="ml-2 py-0.2 px-1.5 rounded-full text-[10px] font-mono font-bold {% if tabs_summary.capital_allowances > 0 %}bg-amber-100 text-amber-900 border border-amber-300{% else %}bg-slate-100 text-slate-600{% endif %}">
                 {{ tabs_summary.capital_allowances }}
             </span>
         </a>
-        <a href="/dashboard?tab=duplicates" class="{% if current_tab == 'duplicates' %}border-rose-600 text-rose-700 font-semibold border-b-2{% else %}border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 border-b-2{% endif %} pb-3 px-1 flex items-center whitespace-nowrap transition-colors">
+        <a href="/dashboard?tab=duplicates" class="{% if current_tab == 'duplicates' %}active-tab border-rose-600 text-rose-800 font-bold border-b-2{% else %}border-transparent text-slate-600 hover:text-slate-900 hover:border-slate-300 border-b-2{% endif %} pb-2.5 px-1 flex items-center whitespace-nowrap transition-colors">
             Duplicate Suspected
-            <span class="ml-2 py-0.5 px-2 rounded-full text-[10px] font-bold {% if tabs_summary.duplicates > 0 %}bg-rose-100 text-rose-800 border border-rose-300{% else %}bg-gray-100 text-gray-600{% endif %}">
+            <span class="ml-2 py-0.2 px-1.5 rounded-full text-[10px] font-mono font-bold {% if tabs_summary.duplicates > 0 %}bg-rose-100 text-rose-800 border border-rose-300{% else %}bg-slate-100 text-slate-600{% endif %}">
                 {{ tabs_summary.duplicates }}
             </span>
         </a>
-        <a href="/dashboard?tab=pending" class="{% if current_tab == 'pending' %}border-blue-600 text-blue-700 font-semibold border-b-2{% else %}border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 border-b-2{% endif %} pb-3 px-1 flex items-center whitespace-nowrap transition-colors">
+        <a href="/dashboard?tab=pending" class="{% if current_tab == 'pending' %}active-tab border-indigo-600 text-indigo-700 font-bold border-b-2{% else %}border-transparent text-slate-600 hover:text-slate-900 hover:border-slate-300 border-b-2{% endif %} pb-2.5 px-1 flex items-center whitespace-nowrap transition-colors">
             Queued to Xero
-            <span class="ml-2 py-0.5 px-2 rounded-full text-[10px] font-bold bg-gray-100 text-gray-600">
+            <span class="ml-2 py-0.2 px-1.5 rounded-full text-[10px] font-mono font-bold bg-slate-100 text-slate-600">
                 {{ tabs_summary.pending }}
             </span>
         </a>
-        <a href="/dashboard?tab=submitted" class="{% if current_tab == 'submitted' %}border-emerald-600 text-emerald-700 font-semibold border-b-2{% else %}border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 border-b-2{% endif %} pb-3 px-1 flex items-center whitespace-nowrap transition-colors">
+        <a href="/dashboard?tab=submitted" class="{% if current_tab == 'submitted' %}active-tab border-emerald-600 text-emerald-800 font-bold border-b-2{% else %}border-transparent text-slate-600 hover:text-slate-900 hover:border-slate-300 border-b-2{% endif %} pb-2.5 px-1 flex items-center whitespace-nowrap transition-colors">
             Pushed to Xero
-            <span class="ml-2 py-0.5 px-2 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-700">
+            <span class="ml-2 py-0.2 px-1.5 rounded-full text-[10px] font-mono font-bold bg-emerald-50 text-emerald-800">
                 {{ tabs_summary.submitted }}
             </span>
         </a>
     </nav>
 </div>
 
-<div class="bg-white shadow-sm rounded-lg border border-gray-200 overflow-x-auto">
-    <table class="w-full text-left border-collapse min-w-max">
+<!-- High-Density Tabular Ledger (30px Row Height) -->
+<div class="bg-white shadow-xs rounded-b-lg border border-slate-200 overflow-x-auto">
+    <table class="w-full text-left border-collapse min-w-max select-none">
         <thead>
-            <tr class="bg-gray-50 border-b border-gray-200 text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                <th class="px-4 py-3 w-10"></th>
-                <th class="px-4 py-3">Status / Gate</th>
-                <th class="px-4 py-3">Client</th>
-                <th class="px-4 py-3">Date</th>
-                <th class="px-4 py-3 w-1/4">Vendor &amp; Description</th>
-                <th class="px-4 py-3">Nominal Code</th>
-                <th class="px-4 py-3">Tax Type</th>
-                <th class="px-4 py-3 text-right">Amount</th>
-                <th class="px-4 py-3 text-right">Accountant Actions</th>
+            <tr class="bg-slate-100/80 border-b border-slate-200 text-[11px] font-bold text-slate-600 uppercase tracking-wider sticky top-0 z-10">
+                <th class="px-2 py-2 w-8 text-center" title="Inspect [Space]">#</th>
+                <th class="px-2.5 py-2 w-32">Status / Gate</th>
+                <th class="px-2.5 py-2 w-28">Client</th>
+                <th class="px-2.5 py-2 w-24">Date</th>
+                <th class="px-3 py-2 flex-1">Vendor &amp; Description</th>
+                <th class="px-2 py-2 w-24 text-center">Nominal</th>
+                <th class="px-2 py-2 w-24 text-center">VAT Code</th>
+                <th class="px-3 py-2 w-28 text-right">Amount (£)</th>
+                <th class="px-3 py-2 w-48 text-right">Accountant Actions</th>
             </tr>
         </thead>
-        <tbody class="divide-y divide-gray-200 text-sm text-gray-800" id="queue-table">
+        <tbody class="divide-y divide-slate-200 text-xs text-slate-800" id="queue-table">
             {% for item in items %}
-            <tr id="row-{{ item.item_type }}-{{ item.id }}" class="hover:bg-blue-50/40 transition-colors group">
-                <td class="px-4 py-3 text-center text-gray-400">
-                    <button onclick="document.getElementById('details-{{ item.item_type }}-{{ item.id }}').classList.toggle('hidden')" class="hover:text-indigo-600 transition-colors focus:outline-none" title="View Audit Log &amp; Reasoning">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 transform transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+            <tr id="row-{{ item.item_type }}-{{ item.id }}" 
+                data-item-type="{{ item.item_type }}" 
+                data-item-id="{{ item.id }}" 
+                tabindex="0"
+                class="triage-row h-[30px] border-b border-slate-200 hover:bg-blue-50/50 cursor-pointer transition-colors group">
+                
+                <!-- Inspect Action / Row Handle -->
+                <td class="px-2 py-1 text-center text-slate-400">
+                    <button data-action="inspect"
+                            hx-get="/dashboard/inspect/{{ item.item_type }}/{{ item.id }}" 
+                            hx-target="#inspect-drawer-content" 
+                            onclick="window.openDrawer()" 
+                            class="hover:text-blue-600 transition-colors focus:outline-none p-1 rounded" 
+                            title="Inspect Receipt Document [Space / E]">
+                        <svg class="h-3.5 w-3.5 text-slate-400 group-hover:text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
                         </svg>
                     </button>
                 </td>
-                <td class="px-4 py-3">
-                    {% if item.status == 'CAPITAL_ALLOWANCE' %}
-                    <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-amber-100 text-amber-900 border border-amber-300 uppercase tracking-wide">
-                        <svg class="w-3 h-3 mr-1 text-amber-600" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"></path></svg>
-                        Capital Asset (>£500)
+
+                <!-- Status / Gate Badge -->
+                <td class="px-2.5 py-1 whitespace-nowrap">
+                    {% if item.status == 'CAPITAL_ALLOWANCE' or item.is_capital_allowance %}
+                    <span class="inline-flex items-center px-1.5 py-0.2 rounded text-[10px] font-mono font-bold bg-amber-50 text-amber-900 border border-amber-300 uppercase tracking-wide">
+                        Asset &gt;£500
                     </span>
-                    {% elif item.status == 'DUPLICATE_SUSPECTED' %}
-                    <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-rose-100 text-rose-800 border border-rose-300 uppercase tracking-wide">
-                        <svg class="w-3 h-3 mr-1 text-rose-600" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0118 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"></path></svg>
-                        Duplicate Suspected
+                    {% elif item.status == 'DUPLICATE_SUSPECTED' or item.is_duplicate %}
+                    <span class="inline-flex items-center px-1.5 py-0.2 rounded text-[10px] font-mono font-bold bg-rose-50 text-rose-800 border border-rose-300 uppercase tracking-wide">
+                        Duplicate
                     </span>
                     {% elif item.status == 'SUBMITTED' %}
-                    <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-300 uppercase tracking-wide">
-                        <svg class="w-3 h-3 mr-1 text-emerald-600" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path></svg>
+                    <span class="inline-flex items-center px-1.5 py-0.2 rounded text-[10px] font-mono font-bold bg-emerald-50 text-emerald-800 border border-emerald-300 uppercase tracking-wide">
                         Pushed to Xero
                     </span>
                     {% elif item.status == 'PENDING' %}
-                    <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-blue-100 text-blue-800 border border-blue-200 uppercase tracking-wide">
-                        Queued to Xero
+                    <span class="inline-flex items-center px-1.5 py-0.2 rounded text-[10px] font-mono font-bold bg-blue-50 text-blue-800 border border-blue-200 uppercase tracking-wide">
+                        Queued Draft
                     </span>
                     {% elif item.flagged %}
-                    <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-yellow-100 text-yellow-800 border border-yellow-200 uppercase tracking-wide">
+                    <span class="inline-flex items-center px-1.5 py-0.2 rounded text-[10px] font-mono font-bold bg-amber-50 text-amber-800 border border-amber-200 uppercase tracking-wide">
                         Needs Review
                     </span>
                     {% else %}
-                    <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-gray-100 text-gray-700 border border-gray-200 uppercase tracking-wide">
+                    <span class="inline-flex items-center px-1.5 py-0.2 rounded text-[10px] font-mono font-semibold bg-slate-100 text-slate-700 border border-slate-200 uppercase tracking-wide">
                         {{ item.status_label }}
                     </span>
                     {% endif %}
                 </td>
-                <td class="px-4 py-3 font-medium text-gray-900 whitespace-nowrap">
+
+                <!-- Client Identifier -->
+                <td class="px-2.5 py-1 font-mono text-slate-700 whitespace-nowrap text-[11px]">
                     {{ item.sender_id }}
                 </td>
-                <td class="px-4 py-3 text-gray-500 whitespace-nowrap text-xs">
-                    {{ item.created_at }}
+
+                <!-- Date -->
+                <td class="px-2.5 py-1 text-slate-500 tabular-nums whitespace-nowrap text-[11px]">
+                    {{ item.created_at[:10] }}
                 </td>
-                <td class="px-4 py-3">
+
+                <!-- Vendor & Description -->
+                <td class="px-3 py-1 max-w-sm truncate">
                     {% if item.is_failed_api %}
-                        <span class="text-rose-600 font-bold text-xs uppercase tracking-wide flex items-center">
-                            <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                            API Limit Exhausted
-                        </span>
-                        <div class="text-[10px] text-gray-500 mt-1">Pending background retry.</div>
+                        <span class="text-rose-600 font-bold text-xs">API Limit Exhausted — Retry queued</span>
                     {% else %}
-                        <div class="font-medium text-gray-900 flex items-center space-x-1.5">
-                            <span>{{ item.vendor }}</span>
+                        <div class="flex items-center space-x-1.5">
+                            <span class="font-bold text-slate-900">{{ item.vendor }}</span>
                             {% if item.currency and item.currency != 'GBP' %}
-                            <span class="inline-flex items-center px-1.5 py-0.2 rounded text-[9px] font-mono font-bold bg-purple-100 text-purple-800 border border-purple-200">
-                                {{ item.currency }} FX Norm
+                            <span class="px-1 rounded text-[9px] font-mono font-bold bg-purple-50 text-purple-700 border border-purple-200">
+                                {{ item.currency }}
                             </span>
                             {% endif %}
+                            <span class="text-slate-400">•</span>
+                            <span class="text-slate-500 truncate text-[11px]" title="{{ item.memo }}">{{ item.memo }}</span>
                         </div>
-                        <div class="text-xs text-gray-500 truncate max-w-xs" title="{{ item.memo }}">{{ item.memo }}</div>
-                        {% if item.external_bill_id %}
-                        <div class="text-[10px] text-gray-400 font-mono mt-0.5">Xero ID: {{ item.external_bill_id }}</div>
-                        {% endif %}
                     {% endif %}
                 </td>
-                <td class="px-4 py-3 whitespace-nowrap">
+
+                <!-- Nominal Code -->
+                <td class="px-2 py-1 text-center whitespace-nowrap">
                     {% if not item.is_failed_api %}
-                    <span class="inline-flex items-center px-1.5 py-0.5 rounded text-xs font-mono font-semibold {% if item.account_code in ('710', '720', '764', '760') %}bg-amber-100 text-amber-800 border border-amber-300{% else %}bg-gray-100 text-gray-700 border border-gray-200{% endif %}">
+                    <span class="inline-flex items-center px-1.5 py-0.2 rounded text-[10px] font-mono font-bold {% if item.account_code in ('710', '720', '764', '760') %}bg-amber-100 text-amber-900 border border-amber-300{% else %}bg-slate-100 text-slate-800 border border-slate-200{% endif %}" title="{{ account_labels.get(item.account_code, item.account_code) }}">
                         {{ item.account_code }}
                     </span>
                     {% endif %}
                 </td>
-                <td class="px-4 py-3 whitespace-nowrap">
+
+                <!-- VAT Code -->
+                <td class="px-2 py-1 text-center whitespace-nowrap">
                     {% if not item.is_failed_api %}
-                    <span class="inline-flex items-center px-1.5 py-0.5 rounded text-xs font-mono font-semibold {% if item.tax_code in ('INPUT2', 'INPUT') %}bg-blue-50 text-blue-700 border border-blue-200{% else %}bg-gray-100 text-gray-600 border border-gray-200{% endif %}">
-                        {{ item.tax_code }}
+                    {% if item.tax_code in ('INPUT2', 'INPUT') %}
+                    <span class="inline-flex items-center px-1.5 py-0.2 rounded text-[10px] font-mono font-bold bg-emerald-50 text-emerald-800 border border-emerald-200">
+                        20% Std
+                    </span>
+                    {% elif item.tax_code == 'ZERORATEDINPUT' %}
+                    <span class="inline-flex items-center px-1.5 py-0.2 rounded text-[10px] font-mono font-bold bg-sky-50 text-sky-800 border border-sky-200">
+                        0% Zero
+                    </span>
+                    {% elif item.tax_code == 'EXEMPTINPUT' %}
+                    <span class="inline-flex items-center px-1.5 py-0.2 rounded text-[10px] font-mono font-bold bg-purple-50 text-purple-800 border border-purple-200">
+                        Exempt
+                    </span>
+                    {% elif item.tax_code == 'REVERSECHARGES' %}
+                    <span class="inline-flex items-center px-1.5 py-0.2 rounded text-[10px] font-mono font-bold bg-amber-100 text-amber-900 border border-amber-400">
+                        DRC CIS
+                    </span>
+                    {% else %}
+                    <span class="inline-flex items-center px-1.5 py-0.2 rounded text-[10px] font-mono font-medium bg-slate-100 text-slate-600 border border-slate-200">
+                        No VAT
                     </span>
                     {% endif %}
+                    {% endif %}
                 </td>
-                <td class="px-4 py-3 text-right font-mono font-semibold text-gray-900 whitespace-nowrap">
+
+                <!-- Amount -->
+                <td class="px-3 py-1 text-right font-mono font-bold text-slate-900 tabular-nums whitespace-nowrap">
                     {% if not item.is_failed_api %}
                     £{{ "%.2f"|format(item.amount) }}
-                    {% if item.business_proportion_percentage < 100 %}
-                    <br/><span class="text-xs text-gray-400 font-sans font-normal">{{ item.business_proportion_percentage }}% of £{{ "%.2f"|format(item.amount) }}</span>
-                    {% endif %}
                     {% endif %}
                 </td>
-                <td class="px-4 py-3 text-right whitespace-nowrap">
+
+                <!-- Actions -->
+                <td class="px-3 py-1 text-right whitespace-nowrap">
                     {% if not item.is_failed_api %}
                     <div class="flex justify-end items-center space-x-1.5">
                         {% if item.status == 'SUBMITTED' %}
-                        <span class="inline-flex items-center text-xs font-semibold text-emerald-600 px-2 py-1">
-                            <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                        <span class="inline-flex items-center text-[11px] font-semibold text-emerald-700 px-1.5">
+                            <svg class="w-3.5 h-3.5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
                             Synced
                         </span>
-                        {% elif item.status in ('CAPITAL_ALLOWANCE', 'DUPLICATE_SUSPECTED', 'NEEDS_REVIEW') or item.flagged %}
-                        <button hx-get="/dashboard/edit/{{ item.item_type }}/{{ item.id }}" hx-target="#row-{{ item.item_type }}-{{ item.id }}" hx-swap="outerHTML" class="bg-amber-500 hover:bg-amber-600 text-white font-medium text-xs rounded px-2.5 py-1 transition-all shadow-sm flex items-center">
-                            <svg class="w-3.5 h-3.5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
-                            Triage
-                        </button>
-                        <button hx-post="/dashboard/reject/{{ item.item_type }}/{{ item.id }}" hx-target="#row-{{ item.item_type }}-{{ item.id }}" hx-swap="outerHTML" class="text-gray-400 hover:text-rose-600 text-xs px-1.5 py-1 transition-colors" title="Reject / Dismiss">
-                            ✕
-                        </button>
                         {% else %}
-                        <button hx-get="/dashboard/edit/{{ item.item_type }}/{{ item.id }}" hx-target="#row-{{ item.item_type }}-{{ item.id }}" hx-swap="outerHTML" class="text-gray-600 hover:text-indigo-600 font-medium text-xs border border-gray-200 hover:bg-white rounded px-2 py-1 transition-all shadow-sm">
-                            Edit
+                        <!-- Triage / Inspect Button -->
+                        <button hx-get="/dashboard/inspect/{{ item.item_type }}/{{ item.id }}" 
+                                hx-target="#inspect-drawer-content" 
+                                onclick="window.openDrawer()" 
+                                class="text-slate-600 hover:text-blue-700 hover:bg-slate-100 font-semibold text-[11px] border border-slate-200 rounded px-2 py-0.5 transition-colors"
+                                title="Open Inspection Drawer [E / Space]">
+                            Triage <kbd class="font-mono text-[9px] text-slate-400">E</kbd>
                         </button>
-                        <button hx-post="/dashboard/triage/{{ item.item_type }}/{{ item.id }}" hx-target="#row-{{ item.item_type }}-{{ item.id }}" hx-swap="outerHTML" class="bg-emerald-600 hover:bg-emerald-700 text-white font-medium text-xs rounded px-2.5 py-1 transition-all shadow-sm flex items-center">
-                            Release
+                        
+                        <!-- Release & Push to Xero -->
+                        <button data-action="release"
+                                onclick="window.optimisticApprove(this.closest('tr'))"
+                                hx-post="/dashboard/triage/{{ item.item_type }}/{{ item.id }}" 
+                                hx-target="#row-{{ item.item_type }}-{{ item.id }}" 
+                                hx-swap="outerHTML" 
+                                class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-[11px] rounded px-2 py-0.5 shadow-xs transition-colors flex items-center space-x-1"
+                                title="Release to Xero [Ctrl+Enter]">
+                            <span>Release</span>
+                            <kbd class="font-mono text-[9px] text-emerald-200">↵</kbd>
+                        </button>
+
+                        <!-- Dismiss / Reject -->
+                        <button data-action="reject"
+                                hx-post="/dashboard/reject/{{ item.item_type }}/{{ item.id }}" 
+                                hx-target="#row-{{ item.item_type }}-{{ item.id }}" 
+                                hx-swap="outerHTML" 
+                                class="text-slate-400 hover:text-rose-600 text-xs p-1 transition-colors" 
+                                title="Dismiss [Del]">
+                            ✕
                         </button>
                         {% endif %}
                     </div>
                     {% endif %}
                 </td>
             </tr>
-            <!-- Audit Log / Expanded Row -->
-            <tr id="details-{{ item.item_type }}-{{ item.id }}" class="hidden bg-gray-50 border-t border-gray-100">
-                <td colspan="9" class="px-6 py-4">
-                    <div class="pl-4 border-l-2 border-indigo-300">
-                        <div class="flex items-center justify-between mb-3">
-                            <h4 class="text-xs font-bold text-gray-800 uppercase tracking-wider flex items-center">
-                                <svg class="w-4 h-4 mr-1.5 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
-                                Statutory Audit Trail &amp; AI Extraction Memo
-                            </h4>
-                            <span class="text-[11px] text-gray-400 font-mono">Row Type: {{ item.item_type }} #{{ item.id }}</span>
-                        </div>
-                        
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <!-- Original Source -->
-                            <div class="bg-white rounded border border-gray-200 shadow-sm overflow-hidden">
-                                <div class="bg-gray-100 px-3 py-1.5 border-b border-gray-200 text-xs font-semibold text-gray-600 flex items-center justify-between">
-                                    <span class="flex items-center">
-                                        <svg class="h-3.5 w-3.5 mr-1.5 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
-                                        </svg>
-                                        Original WhatsApp Intake Message
-                                    </span>
-                                </div>
-                                <div class="p-3 text-xs text-gray-600 font-mono bg-gray-50 h-32 overflow-y-auto whitespace-pre-wrap">{% if item.raw_message %}{{ item.raw_message }}{% else %}No original text message recorded.{% endif %}</div>
-                            </div>
-
-                            <!-- Statutory Reasoning -->
-                            <div class="bg-white rounded border border-gray-200 shadow-sm overflow-hidden">
-                                <div class="bg-indigo-50 px-3 py-1.5 border-b border-indigo-100 text-xs font-semibold text-indigo-800 flex items-center">
-                                    <svg class="h-3.5 w-3.5 mr-1.5 text-indigo-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
-                                    </svg>
-                                    Tax &amp; Compliance Classification Memo
-                                </div>
-                                <div class="p-3 text-xs text-gray-700 h-32 overflow-y-auto">
-                                    <div class="whitespace-pre-wrap font-sans">{% if item.reasoning %}{{ item.reasoning }}{% else %}Standard business expense recorded under FRS 105.{% endif %}</div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </td>
-            </tr>
             {% else %}
             <tr>
-                <td colspan="9" class="px-4 py-12 text-center text-sm text-gray-500">
+                <td colspan="9" class="px-4 py-12 text-center text-sm text-slate-500">
                     <div class="flex flex-col items-center justify-center">
-                        <svg class="h-10 w-10 text-gray-300 mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <svg class="h-8 w-8 text-slate-300 mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                         </svg>
-                        <p class="font-medium text-gray-700">No items in this queue</p>
-                        <p class="text-xs mt-1 text-gray-400">All transactions in this category have been processed or triaged.</p>
+                        <p class="font-bold text-slate-700 text-xs">Review Queue Clear (Zero Inbox Achieved)</p>
+                        <p class="text-[11px] mt-0.5 text-slate-400">All transactions in this category have been verified and staged to Xero.</p>
                     </div>
                 </td>
             </tr>
