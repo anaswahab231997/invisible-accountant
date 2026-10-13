@@ -244,7 +244,11 @@
   </text>
 </svg>
         </a>
-        <a href="/dashboard" class="text-sm font-semibold text-charcoal hover:text-ukblue transition-colors px-4 py-2 rounded-lg border border-gray-200 hover:border-ukblue bg-white shadow-sm flex items-center gap-1.5"><i data-lucide="lock" class="w-3.5 h-3.5 text-ukblue"></i> Accountant Portal</a>
+        <div class="flex items-center gap-2 sm:gap-3">
+            <a href="#pricing" class="hidden sm:inline-block text-sm font-semibold text-charcoal hover:text-ukblue transition-colors px-3 py-2">Pricing</a>
+            <a href="/partner/login" class="text-xs sm:text-sm font-semibold text-charcoal hover:text-ukblue transition-colors px-3 py-2 rounded-lg border border-gray-200 hover:border-ukblue bg-white shadow-sm flex items-center gap-1.5"><i data-lucide="lock" class="w-3.5 h-3.5 text-ukblue"></i> Partner Portal</a>
+            <a href="/partner/register" class="text-xs sm:text-sm font-bold text-white bg-ukblue hover:bg-blue-700 transition-colors px-3.5 py-2 rounded-lg shadow-sm flex items-center gap-1.5">Practice Register</a>
+        </div>
     </nav>
 
     <main class="max-w-7xl mx-auto px-6 md:px-12 pt-8 md:pt-16 pb-16 md:pb-24 grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-16 items-center">
@@ -502,21 +506,244 @@
         </div>
     </section>
 
-    <!-- B2B2C / Accountants Section (Visa Viability Strategy) -->
-    <section class="py-16 md:py-24 bg-charcoal text-white text-center px-6">
-        <div class="max-w-4xl mx-auto">
-            <h2 class="font-heading font-bold text-3xl md:text-4xl mb-6">Are you an Accountancy Firm?</h2>
-            <p class="text-lg text-gray-300 font-body mb-8">
-                Stop chasing clients for receipts. White-label our Live Inference Engine and offer your entire client base a frictionless, MTD-compliant WhatsApp assistant.
-            </p>
-            <div class="inline-flex gap-4 flex-col sm:flex-row">
-                <button class="bg-white text-charcoal px-8 py-3 rounded-full font-bold shadow-float hover:scale-105 transition-transform">
-                    View Enterprise Pricing
-                </button>
-                <button class="bg-transparent border border-gray-500 text-white px-8 py-3 rounded-full font-bold hover:bg-white/10 transition-colors">
-                    Book a Technical Demo
-                </button>
+    <!-- Dual-Funnel Pricing & Partner Section -->
+    <section id="pricing" class="py-20 md:py-28 bg-calmstone/60 border-b border-gray-200">
+        <div class="max-w-7xl mx-auto px-6 md:px-12">
+            
+            <div class="text-center max-w-3xl mx-auto mb-14">
+                <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-blue-50 border border-blue-200 text-ukblue text-xs font-semibold mb-4">
+                    <i data-lucide="sparkles" class="w-3.5 h-3.5"></i>
+                    <span>Transparent UK Pricing • Zero Hidden Fees</span>
+                </div>
+                <h2 class="font-heading font-bold text-3xl sm:text-4xl md:text-5xl text-charcoal tracking-tight mb-4">
+                    Built for Sole Traders. <br class="hidden sm:inline">
+                    <span class="text-ukblue">Championed by UK Accountancy Practices.</span>
+                </h2>
+                <p class="text-slate text-base sm:text-lg leading-relaxed">
+                    Choose your perspective below to see how Invisible Accountant eliminates tax anxiety, automates receipt chasing, and generates recurring value.
+                </p>
+
+                <!-- Dual-Funnel Toggle -->
+                <div class="mt-8 inline-flex p-1.5 rounded-xl bg-gray-200/80 border border-gray-300 max-w-md w-full justify-center">
+                    <button id="toggle-soletrader-btn" onclick="switchPricingFunnel('soletrader')" class="w-1/2 py-2.5 px-4 rounded-lg font-heading font-bold text-sm transition-all duration-200 bg-white text-charcoal shadow-sm">
+                        For Sole Traders & Landlords
+                    </button>
+                    <button id="toggle-practice-btn" onclick="switchPricingFunnel('practice')" class="w-1/2 py-2.5 px-4 rounded-lg font-heading font-bold text-sm transition-all duration-200 text-slate hover:text-charcoal flex items-center justify-center gap-1.5">
+                        <span>For Accountancy Firms</span>
+                        <span class="text-[10px] bg-emerald-100 text-emerald-800 font-semibold px-2 py-0.5 rounded-full">Revenue Share</span>
+                    </button>
+                </div>
             </div>
+
+            <!-- Funnel A: Sole Traders & Landlords -->
+            <div id="pricing-soletrader-panel" class="max-w-4xl mx-auto transition-all duration-300">
+                <div class="bg-white rounded-3xl border border-gray-200 shadow-xl overflow-hidden grid grid-cols-1 md:grid-cols-12">
+                    
+                    <div class="p-8 sm:p-10 md:col-span-7 flex flex-col justify-between">
+                        <div>
+                            <div class="inline-block px-3 py-1 rounded-full bg-emerald-50 text-emerald-800 text-xs font-bold uppercase tracking-wider mb-4 border border-emerald-200">
+                                Unlimited WhatsApp Receipt Capture
+                            </div>
+                            <h3 class="font-heading font-bold text-2xl sm:text-3xl text-charcoal mb-3">
+                                Sole Trader & Landlord MTD Plan
+                            </h3>
+                            <p class="text-slate text-sm sm:text-base leading-relaxed mb-6">
+                                Stop dreading quarterly tax deadlines. Snap a photo of any receipt or invoice on WhatsApp, and our AI files it securely in compliance with HMRC rules.
+                            </p>
+
+                            <div class="space-y-3.5 mb-8">
+                                <div class="flex items-start gap-3">
+                                    <i data-lucide="check" class="w-5 h-5 text-emerald-600 flex-shrink-0 mt-0.5"></i>
+                                    <span class="text-xs sm:text-sm text-charcoal font-medium"><strong>Unlimited WhatsApp OCR:</strong> Snap receipts, petrol dockets, and materials on site.</span>
+                                </div>
+                                <div class="flex items-start gap-3">
+                                    <i data-lucide="check" class="w-5 h-5 text-emerald-600 flex-shrink-0 mt-0.5"></i>
+                                    <span class="text-xs sm:text-sm text-charcoal font-medium"><strong>HMRC Digital Links:</strong> Cryptographic SHA-256 receipt vaulting (VAT Notice 700/22 §3.3).</span>
+                                </div>
+                                <div class="flex items-start gap-3">
+                                    <i data-lucide="check" class="w-5 h-5 text-emerald-600 flex-shrink-0 mt-0.5"></i>
+                                    <span class="text-xs sm:text-sm text-charcoal font-medium"><strong>Capital Allowances Triage:</strong> Equipment over £500 safely flagged for accountant review.</span>
+                                </div>
+                                <div class="flex items-start gap-3">
+                                    <i data-lucide="check" class="w-5 h-5 text-emerald-600 flex-shrink-0 mt-0.5"></i>
+                                    <span class="text-xs sm:text-sm text-charcoal font-medium"><strong>Direct Accountant Sync:</strong> Seamless draft bills pushed to your accountant's Xero / QBO.</span>
+                                </div>
+                                <div class="flex items-start gap-3">
+                                    <i data-lucide="check" class="w-5 h-5 text-emerald-600 flex-shrink-0 mt-0.5"></i>
+                                    <span class="text-xs sm:text-sm text-charcoal font-medium"><strong>No App Fatigue:</strong> 100% inside WhatsApp. No new apps to download or passwords to lose.</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="pt-4 border-t border-gray-100 flex items-center gap-2 text-xs text-slate">
+                            <i data-lucide="shield-check" class="w-4 h-4 text-ukblue"></i>
+                            <span>14-day free trial • Cancel anytime • No credit card required upfront</span>
+                        </div>
+                    </div>
+
+                    <div class="p-8 sm:p-10 md:col-span-5 bg-gradient-to-b from-gray-50 to-gray-100/70 border-t md:border-t-0 md:border-l border-gray-200 flex flex-col justify-center items-center text-center">
+                        <span class="text-xs font-bold text-gray-500 uppercase tracking-widest mb-1">Simple Flat Pricing</span>
+                        <div class="flex items-baseline gap-1 my-3">
+                            <span class="font-heading font-extrabold text-5xl sm:text-6xl text-charcoal">£9.99</span>
+                            <span class="text-slate font-medium text-base">/ month</span>
+                        </div>
+                        <p class="text-xs text-slate max-w-xs mb-8">
+                            Less than the price of two flat whites. Eliminates hours of tax bookkeeping anxiety every month.
+                        </p>
+
+                        <a href="https://wa.me/447000000000?text=Hi%20Emma%2C%20I%20want%20to%20start%20my%2014-day%20free%20trial" class="w-full py-4 px-6 bg-wapp hover:bg-[#20bd5a] text-white rounded-xl font-heading font-bold text-base shadow-[0_4px_14px_0_rgba(37,211,102,0.39)] transition-all flex items-center justify-center gap-2.5">
+                            <i data-lucide="message-circle" class="w-5 h-5"></i>
+                            Start Free Trial on WhatsApp
+                        </a>
+
+                        <div class="mt-4 text-[11px] text-gray-400">
+                            Already working with an accountant? <a href="/partner/login" class="text-ukblue underline">Connect your firm</a>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- Funnel B: Accountancy Practices (The Irresistible Partner Offer & Calculator) -->
+            <div id="pricing-practice-panel" class="hidden transition-all duration-300">
+                <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+                    
+                    <!-- Left Column: The Partner Offer -->
+                    <div class="lg:col-span-6 bg-white rounded-3xl border border-gray-200 shadow-xl p-8 sm:p-10 flex flex-col justify-between h-full">
+                        <div>
+                            <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-purple-50 text-purple-800 text-xs font-bold uppercase tracking-wider mb-4 border border-purple-200">
+                                <i data-lucide="award" class="w-3.5 h-3.5"></i>
+                                Official Practice Partnership Program
+                            </div>
+                            
+                            <h3 class="font-heading font-bold text-3xl sm:text-4xl text-charcoal mb-4">
+                                The £0 Practice Platform Model
+                            </h3>
+
+                            <p class="text-slate text-sm sm:text-base leading-relaxed mb-6">
+                                Why pay hundreds in practice fees for Dext or AutoEntry shelfware? Invisible Accountant charges your practice <strong>£0</strong>, automates receipt-chasing on WhatsApp, and pays your firm <strong>£3.00/client/month</strong> in recurring passive profit.
+                            </p>
+
+                            <div class="bg-emerald-50/70 border border-emerald-200 rounded-2xl p-5 mb-6">
+                                <div class="grid grid-cols-2 gap-4 text-center">
+                                    <div class="border-r border-emerald-200 pr-2">
+                                        <div class="text-[11px] font-bold text-emerald-800 uppercase tracking-wide">Practice Platform Fee</div>
+                                        <div class="text-3xl font-heading font-extrabold text-emerald-700 mt-1">£0.00</div>
+                                        <div class="text-[10px] text-emerald-600 mt-0.5">Zero upfront or monthly software cost</div>
+                                    </div>
+                                    <div class="pl-2">
+                                        <div class="text-[11px] font-bold text-emerald-800 uppercase tracking-wide">Practice Revenue Share</div>
+                                        <div class="text-3xl font-heading font-extrabold text-ukblue mt-1">+£3.00</div>
+                                        <div class="text-[10px] text-slate mt-0.5">Per active client / month via BACS</div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="space-y-3 mb-8">
+                                <div class="flex items-start gap-3">
+                                    <i data-lucide="check-circle-2" class="w-5 h-5 text-emerald-600 flex-shrink-0 mt-0.5"></i>
+                                    <span class="text-xs sm:text-sm text-charcoal font-medium"><strong>Automated Receipt Chasing:</strong> Emma chases slow sole traders on WhatsApp on your firm's behalf.</span>
+                                </div>
+                                <div class="flex items-start gap-3">
+                                    <i data-lucide="check-circle-2" class="w-5 h-5 text-emerald-600 flex-shrink-0 mt-0.5"></i>
+                                    <span class="text-xs sm:text-sm text-charcoal font-medium"><strong>Zero Shelfware Risk:</strong> Clients are billed £9.99/mo directly. You only earn on active clients.</span>
+                                </div>
+                                <div class="flex items-start gap-3">
+                                    <i data-lucide="check-circle-2" class="w-5 h-5 text-emerald-600 flex-shrink-0 mt-0.5"></i>
+                                    <span class="text-xs sm:text-sm text-charcoal font-medium"><strong>Multi-Tenant Practice Portal:</strong> Review receipts, override account codes, and push to Xero/QBO in bulk.</span>
+                                </div>
+                                <div class="flex items-start gap-3">
+                                    <i data-lucide="check-circle-2" class="w-5 h-5 text-emerald-600 flex-shrink-0 mt-0.5"></i>
+                                    <span class="text-xs sm:text-sm text-charcoal font-medium"><strong>Branded Practice Link &amp; QR:</strong> Custom onboarding portal e.g. <code class="text-xs bg-gray-100 px-1 py-0.5 rounded">/join/your-firm</code>.</span>
+                                </div>
+                                <div class="flex items-start gap-3">
+                                    <i data-lucide="check-circle-2" class="w-5 h-5 text-emerald-600 flex-shrink-0 mt-0.5"></i>
+                                    <span class="text-xs sm:text-sm text-charcoal font-medium"><strong>90-Day Pilot LOI Protection:</strong> Formal digital agreement compliant with ICAEW/ACCA ethics.</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="pt-6 border-t border-gray-100 flex flex-col sm:flex-row gap-3">
+                            <a href="/partner/register" class="flex-1 py-3.5 px-6 bg-ukblue hover:bg-blue-700 text-white rounded-xl font-heading font-bold text-center text-sm shadow-md transition-all flex items-center justify-center gap-2">
+                                <i data-lucide="building" class="w-4 h-4"></i>
+                                Register Your Practice Free
+                            </a>
+                            <a href="/partner/login" class="py-3.5 px-6 bg-gray-100 hover:bg-gray-200 text-charcoal rounded-xl font-heading font-semibold text-center text-sm border border-gray-300 transition-all flex items-center justify-center gap-2">
+                                <i data-lucide="log-in" class="w-4 h-4"></i>
+                                Partner Sign In
+                            </a>
+                        </div>
+                    </div>
+
+                    <!-- Right Column: Interactive Practice Commission & Time-Saved Calculator -->
+                    <div class="lg:col-span-6 bg-white rounded-3xl border border-gray-200 shadow-xl p-8 sm:p-10">
+                        <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 text-emerald-800 text-xs font-bold uppercase tracking-wider mb-4 border border-emerald-200">
+                            <i data-lucide="calculator" class="w-3.5 h-3.5"></i>
+                            Interactive Practice Impact Calculator
+                        </div>
+
+                        <h3 class="font-heading font-bold text-2xl sm:text-3xl text-charcoal mb-2">
+                            Calculate Your Firm's Annual Return
+                        </h3>
+                        <p class="text-slate text-xs sm:text-sm mb-8 leading-relaxed">
+                            Drag the slider to match your firm's active sole trader and landlord client base.
+                        </p>
+
+                        <!-- Slider Control -->
+                        <div class="bg-gray-50 border border-gray-200 rounded-2xl p-6 mb-8">
+                            <div class="flex justify-between items-center mb-4">
+                                <label for="calc-clients-slider" class="text-xs font-bold text-charcoal uppercase tracking-wider">Active Sole Trader Clients</label>
+                                <span id="calc-client-display" class="font-heading font-extrabold text-2xl text-ukblue">100 clients</span>
+                            </div>
+                            <input type="range" id="calc-clients-slider" min="10" max="500" step="5" value="100" oninput="updatePracticeCalculator(this.value)" class="w-full h-2.5 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-ukblue">
+                            <div class="flex justify-between text-[11px] text-gray-400 font-medium mt-2">
+                                <span>10 clients</span>
+                                <span>100</span>
+                                <span>250</span>
+                                <span>500 clients</span>
+                            </div>
+                        </div>
+
+                        <!-- Calculated Results Grid -->
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8">
+                            <div class="bg-emerald-50/60 border border-emerald-200 rounded-2xl p-5 text-center">
+                                <div class="text-[11px] font-bold text-emerald-800 uppercase tracking-wider">Annual Practice Revenue Share</div>
+                                <div id="calc-annual-commission" class="text-3xl font-heading font-black text-emerald-700 my-1.5">£3,600</div>
+                                <div id="calc-monthly-commission" class="text-xs font-semibold text-emerald-800">£300.00 / month passive profit</div>
+                            </div>
+
+                            <div class="bg-blue-50/60 border border-blue-200 rounded-2xl p-5 text-center">
+                                <div class="text-[11px] font-bold text-blue-900 uppercase tracking-wider">Annual Chasing Hours Saved</div>
+                                <div id="calc-annual-hours" class="text-3xl font-heading font-black text-ukblue my-1.5">720 hrs</div>
+                                <div id="calc-weekly-hours" class="text-xs font-semibold text-blue-800">~15 hrs/week partner time saved</div>
+                            </div>
+                        </div>
+
+                        <!-- Summary Comparison Card -->
+                        <div class="bg-charcoal text-white rounded-2xl p-6 mb-6 space-y-3">
+                            <div class="flex items-center justify-between text-xs pb-3 border-b border-gray-700">
+                                <span class="text-gray-300">Traditional Software Cost (Dext/AutoEntry):</span>
+                                <span id="calc-traditional-cost" class="font-bold text-rose-400">-£2,400 / yr</span>
+                            </div>
+                            <div class="flex items-center justify-between text-xs pb-3 border-b border-gray-700">
+                                <span class="text-gray-300">Invisible Accountant Practice Cost:</span>
+                                <span class="font-bold text-emerald-400">£0.00</span>
+                            </div>
+                            <div class="flex items-center justify-between text-sm font-heading font-bold pt-1">
+                                <span class="text-white">Net Practice Financial Advantage:</span>
+                                <span id="calc-net-advantage" class="text-emerald-400 font-extrabold text-base">+£6,000 / yr</span>
+                            </div>
+                        </div>
+
+                        <a href="/partner/register" class="w-full py-4 px-6 bg-ukblue hover:bg-blue-700 text-white rounded-xl font-heading font-bold text-center text-sm shadow-lg transition-all flex items-center justify-center gap-2">
+                            <span>Join the 90-Day Practice Pilot (Zero Risk)</span>
+                            <i data-lucide="arrow-right" class="w-4 h-4"></i>
+                        </a>
+                    </div>
+
+                </div>
+            </div>
+
         </div>
     </section>
 
@@ -832,6 +1059,54 @@
                 chat.innerHTML += `<div class="msg-ai px-3 py-2 text-[15px] shadow-sm max-w-[85%] mb-2 text-red-600">Connection error. Please try again.</div>`;
                 inp.disabled = false;
             }
+        }
+
+        // Dual-Funnel Pricing Switcher & Practice Impact Calculator
+        function switchPricingFunnel(type) {
+            const soletraderBtn = document.getElementById('toggle-soletrader-btn');
+            const practiceBtn = document.getElementById('toggle-practice-btn');
+            const soletraderPanel = document.getElementById('pricing-soletrader-panel');
+            const practicePanel = document.getElementById('pricing-practice-panel');
+
+            if (type === 'practice') {
+                soletraderBtn.className = "w-1/2 py-2.5 px-4 rounded-lg font-heading font-bold text-sm transition-all duration-200 text-slate hover:text-charcoal";
+                practiceBtn.className = "w-1/2 py-2.5 px-4 rounded-lg font-heading font-bold text-sm transition-all duration-200 bg-white text-charcoal shadow-sm flex items-center justify-center gap-1.5";
+                soletraderPanel.classList.add('hidden');
+                practicePanel.classList.remove('hidden');
+            } else {
+                soletraderBtn.className = "w-1/2 py-2.5 px-4 rounded-lg font-heading font-bold text-sm transition-all duration-200 bg-white text-charcoal shadow-sm";
+                practiceBtn.className = "w-1/2 py-2.5 px-4 rounded-lg font-heading font-bold text-sm transition-all duration-200 text-slate hover:text-charcoal flex items-center justify-center gap-1.5";
+                practicePanel.classList.add('hidden');
+                soletraderPanel.classList.remove('hidden');
+            }
+            if (window.lucide) lucide.createIcons();
+        }
+
+        function updatePracticeCalculator(val) {
+            const clients = parseInt(val, 10);
+            const clientDisp = document.getElementById('calc-client-display');
+            if (clientDisp) clientDisp.textContent = `${clients} clients`;
+            
+            const monthlyCommission = clients * 3.0;
+            const annualCommission = monthlyCommission * 12;
+            const weeklyHours = Math.round(clients * 0.15);
+            const annualHours = Math.round(clients * 7.2);
+            const traditionalCost = clients * 24; // Average £2/client/month on legacy packages
+            const netAdvantage = annualCommission + traditionalCost;
+
+            const annualCommEl = document.getElementById('calc-annual-commission');
+            const monthlyCommEl = document.getElementById('calc-monthly-commission');
+            const annualHoursEl = document.getElementById('calc-annual-hours');
+            const weeklyHoursEl = document.getElementById('calc-weekly-hours');
+            const tradCostEl = document.getElementById('calc-traditional-cost');
+            const netAdvEl = document.getElementById('calc-net-advantage');
+
+            if (annualCommEl) annualCommEl.textContent = `£${annualCommission.toLocaleString()}`;
+            if (monthlyCommEl) monthlyCommEl.textContent = `£${monthlyCommission.toFixed(2)} / month passive profit`;
+            if (annualHoursEl) annualHoursEl.textContent = `${annualHours} hrs`;
+            if (weeklyHoursEl) weeklyHoursEl.textContent = `~${weeklyHours} hrs/week partner time saved`;
+            if (tradCostEl) tradCostEl.textContent = `-£${traditionalCost.toLocaleString()} / yr`;
+            if (netAdvEl) netAdvEl.textContent = `+£${netAdvantage.toLocaleString()} / yr`;
         }
 
     </script>

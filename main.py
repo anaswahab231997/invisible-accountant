@@ -49,6 +49,7 @@ from db import (
 from security import compute_receipt_fingerprint
 from dashboard import router as dashboard_router
 from dev_dashboard import router as dev_dashboard_router
+from partner_routes import partner_router
 from logger import get_logger
 from worker import process_hmrc_queue, process_ttl_sweeper
 
@@ -74,6 +75,7 @@ async def add_security_headers(request: Request, call_next):
 
 app.include_router(dashboard_router)
 app.include_router(dev_dashboard_router)
+app.include_router(partner_router)
 app.mount("/assets", StaticFiles(directory="assets"), name="assets")
 #title="Invisible Accountant Webhook Prototype (V2 Enterprise)", docs_url=None, redoc_url=None, openapi_url=None)
 app.state.limiter = limiter
@@ -149,7 +151,57 @@ async def process_intake_task(
     chat_id: int, sender_id: str, message: str, turn_count: int, media_urls: list
 ):
     try:
-        last_message = message.split("\n---\n")[-1].strip().lower() if "\n---\n" in message else message.strip().lower()
+        raw_last = message.split("\n---\n")[-1].strip() if "\n---\n" in message else message.strip()
+        last_message = raw_last.lower()
+
+        # Intercept Practice Join Invitation Codes (e.g. JOIN_IA-1234 or JOIN IA-1234)
+        import re
+        join_match = re.search(r"^\s*join[_\s]+(ia-)?([a-z0-9\-]+)", raw_last, re.IGNORECASE)
+        if join_match:
+            raw_code = join_match.group(2).strip().upper()
+            candidate_code = f"IA-{raw_code}" if not raw_code.startswith("IA-") else raw_code
+            practice = await db.get_practice_by_code(candidate_code)
+            if not practice:
+                practice = await db.get_practice_by_code(raw_code)
+
+            if practice:
+                await db.link_client_to_practice(
+                    practice_id=practice["id"],
+                    client_sender_id=sender_id,
+                    client_name=None,
+                    client_email=None
+                )
+                async with get_connection() as conn:
+                    await conn.execute("UPDATE chat_sessions SET practice_id = $1 WHERE id = $2", practice["id"], chat_id)
+
+                welcome_msg = (
+                    f"🤝 Connected to *{practice['name']}*!\n\n"
+                    f"Your WhatsApp number is now linked to your accountant. Whenever you snap receipts, bills, or invoices here, "
+                    f"we will extract the VAT & allowable expenses, keep your HMRC digital links compliant, "
+                    f"and sync them directly to {practice['name']}.\n\n"
+                    f"📸 Try it now: Snap a photo of any receipt!"
+                )
+                logger.info("Client linked to practice via WhatsApp join code", sender_id=sender_id, practice_name=practice["name"], firm_code=practice["firm_code"])
+                from ws import manager
+                await manager.send_personal_message({"type": "INTAKE_UPDATE", "chat_id": chat_id, "result": {"status": "PRACTICE_LINKED", "practice_name": practice["name"], "message": welcome_msg}}, sender_id)
+
+                if not sender_id.startswith("demo_web_") and os.environ.get('TWILIO_ACCOUNT_SID'):
+                    from twilio.rest import Client
+                    client = Client(os.environ.get('TWILIO_ACCOUNT_SID'), os.environ.get('TWILIO_AUTH_TOKEN'))
+                    to_formatted = f"whatsapp:{sender_id}" if not sender_id.startswith("whatsapp:") else sender_id
+                    await asyncio.to_thread(client.messages.create, body=welcome_msg, from_=os.environ.get('TWILIO_WHATSAPP_NUMBER', 'whatsapp:+17372508034'), to=to_formatted)
+                return
+            else:
+                not_found_msg = f"⚠️ Could not find an active accountancy practice matching code '{candidate_code}'. Please check the invite link or ask your accountant for their practice join code."
+                from ws import manager
+                await manager.send_personal_message({"type": "INTAKE_UPDATE", "chat_id": chat_id, "result": {"status": "ERROR", "message": not_found_msg}}, sender_id)
+                if not sender_id.startswith("demo_web_") and os.environ.get('TWILIO_ACCOUNT_SID'):
+                    from twilio.rest import Client
+                    client = Client(os.environ.get('TWILIO_ACCOUNT_SID'), os.environ.get('TWILIO_AUTH_TOKEN'))
+                    to_formatted = f"whatsapp:{sender_id}" if not sender_id.startswith("whatsapp:") else sender_id
+                    await asyncio.to_thread(client.messages.create, body=not_found_msg, from_=os.environ.get('TWILIO_WHATSAPP_NUMBER', 'whatsapp:+17372508034'), to=to_formatted)
+                return
+
         if last_message == "proceed":
             unconfirmed = await get_unconfirmed_session(sender_id)
             if unconfirmed:
@@ -172,11 +224,14 @@ async def process_intake_task(
                 async with get_connection() as conn:
                     ledger_status = await conn.fetchval("SELECT status FROM hmrc_ledger WHERE id = $1", queue_id)
                 
+                client_practice = await db.get_client_practice(sender_id)
+                practice_suffix = f" and notified {client_practice['name']}." if client_practice else "."
+
                 if ledger_status == "DUPLICATE_SUSPECTED":
                     success_msg = "⚠️ Notice: This expense matches an active receipt submitted within the last 90 days. It has been flagged as 'DUPLICATE_SUSPECTED' and will not be pushed to Xero to prevent duplicate billing."
                     logger.warning("Expense confirmed as DUPLICATE_SUSPECTED", queue_id=queue_id, sender_id=sender_id)
                 else:
-                    success_msg = "✅ All set! I've officially locked this into your tax ledger and it's queued for HMRC."
+                    success_msg = f"✅ All set! I've officially locked this into your tax ledger and queued it for HMRC{practice_suffix}"
                 logger.info("Outbound WhatsApp message", sender_id=sender_id, message=success_msg)
                 from ws import manager
                 await manager.send_personal_message({"type": "INTAKE_UPDATE", "chat_id": chat_id, "result": {"status": "CONFIRMED", "queue_status": ledger_status}}, sender_id)

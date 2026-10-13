@@ -262,3 +262,80 @@ def compute_receipt_fingerprint(
     raw = f"{norm_sender}:{norm_vendor}:{norm_gross}:{norm_date}"
     return hashlib.sha256(raw.encode("utf-8")).hexdigest()
 
+
+# --- Practice Multi-Tenant Authentication & Session Security ---
+
+def hash_practice_password(password: str) -> str:
+    salt = os.getenv("PASSWORD_SALT", "IA_PRACTICE_SALT_2026")
+    return hashlib.pbkdf2_hmac('sha256', password.encode('utf-8'), salt.encode('utf-8'), 100000).hex()
+
+def verify_practice_password(password: str, hashed: str | None) -> bool:
+    if not hashed or not password:
+        return False
+    try:
+        expected = hash_practice_password(password)
+        return secrets.compare_digest(expected, hashed)
+    except Exception:
+        return False
+
+def create_practice_token(practice_id: int, slug: str) -> str:
+    import time
+    timestamp = int(time.time())
+    payload = f"{practice_id}:{slug}:{timestamp}"
+    secret = os.getenv("API_KEY", "fallback_secret_key_uk_mtd_2026")
+    signature = hmac.new(secret.encode('utf-8'), payload.encode('utf-8'), hashlib.sha256).hexdigest()
+    return f"{payload}:{signature}"
+
+def verify_practice_token(token: str | None) -> dict | None:
+    if not token or ":" not in token:
+        return None
+    try:
+        parts = token.split(":")
+        if len(parts) != 4:
+            return None
+        practice_id_str, slug, timestamp_str, signature = parts
+        payload = f"{practice_id_str}:{slug}:{timestamp_str}"
+        secret = os.getenv("API_KEY", "fallback_secret_key_uk_mtd_2026")
+        expected_sig = hmac.new(secret.encode('utf-8'), payload.encode('utf-8'), hashlib.sha256).hexdigest()
+        if not secrets.compare_digest(signature, expected_sig):
+            return None
+        import time
+        # Valid for 14 days
+        if int(time.time()) - int(timestamp_str) > 14 * 86400:
+            return None
+        return {"practice_id": int(practice_id_str), "slug": slug}
+    except Exception:
+        return None
+
+async def verify_practice_session(request: Request) -> dict:
+    """
+    Enforces practice-scoped row-level security for partner portal.
+    Checks cookie 'practice_session' and query param ?token=.
+    Redirects unauthenticated browser requests to /partner/login.
+    """
+    cookie_token = request.cookies.get("practice_session")
+    data = verify_practice_token(cookie_token)
+    if data:
+        return data
+
+    query_token = request.query_params.get("token")
+    data = verify_practice_token(query_token)
+    if data:
+        request.state.should_set_practice_cookie = True
+        request.state.practice_token = query_token
+        return data
+
+    accept_header = request.headers.get("accept", "")
+    is_htmx = (request.headers.get("HX-Request", "").lower() == "true")
+    is_browser_nav = ("text/html" in accept_header) and (not is_htmx)
+
+    if is_browser_nav:
+        login_url = f"/partner/login?next={request.url.path}"
+        raise HTTPException(
+            status_code=303,
+            headers={"Location": login_url},
+            detail="Redirecting to partner login"
+        )
+    raise HTTPException(status_code=401, detail="Practice authentication required")
+
+

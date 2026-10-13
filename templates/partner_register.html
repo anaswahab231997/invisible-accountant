@@ -1,0 +1,133 @@
+{% extends "base.html" %}
+
+{% block title %}Accountancy Practice Registration | Invisible Accountant Partner Network{% endblock %}
+
+{% block nav_actions %}
+<div class="flex items-center space-x-3">
+    <div class="hidden sm:flex items-center text-xs text-gray-600 bg-gray-50 border border-gray-200 px-3 py-1.5 rounded-lg">
+        <span class="w-2 h-2 rounded-full bg-emerald-500 mr-2"></span>
+        <span class="font-medium text-charcoal">HMRC MTD Wholesale Partner Network</span>
+    </div>
+    <a href="/partner/login" class="text-xs font-semibold text-ukblue hover:underline px-3 py-1.5">
+        Already a partner? Sign In
+    </a>
+</div>
+{% endblock %}
+
+{% block content %}
+<div class="min-h-[75vh] flex flex-col justify-center items-center py-8 sm:py-12 px-4 sm:px-6 lg:px-8">
+    <div class="w-full max-w-xl">
+        <!-- Security Strip -->
+        <div class="mb-4 flex items-center justify-between text-[11px] text-gray-500 font-medium px-1">
+            <span class="inline-flex items-center gap-1.5 text-charcoal font-semibold">
+                <svg class="w-3.5 h-3.5 text-ukblue" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M2.166 4.999A11.954 11.954 0 0010 1.944 11.954 11.954 0 0017.834 5c.11.65.166 1.32.166 2.001 0 5.225-3.34 9.67-8 11.317C5.34 16.67 2 12.225 2 7c0-.682.057-1.35.166-2.001zm11.541 3.708a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                </svg>
+                ICAEW &amp; ACCA Partner Practice Network
+            </span>
+            <span class="text-emerald-700 font-semibold text-[11px] bg-emerald-50 border border-emerald-200 px-2.5 py-0.5 rounded-full">
+                £0 Platform Fee + £3.00/client/mo Rev-Share
+            </span>
+        </div>
+
+        <div class="bg-white rounded-2xl border border-gray-200 shadow-xl shadow-gray-200/60 p-6 sm:p-8">
+            <div class="text-center mb-6">
+                <div class="mx-auto h-12 w-12 rounded-xl bg-blue-50 border border-blue-100 text-ukblue flex items-center justify-center mb-3">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>
+                    </svg>
+                </div>
+                <h1 class="text-2xl font-bold font-heading text-charcoal tracking-tight">
+                    Register Your Accountancy Firm
+                </h1>
+                <p class="mt-2 text-xs text-slate font-body leading-relaxed max-w-md mx-auto">
+                    Deploy automated WhatsApp receipt capture across your sole trader &amp; landlord clients. Zero practice subscription fees, automated Xero draft bills, and recurring commission.
+                </p>
+            </div>
+
+            {% if error %}
+            <div class="mb-5 p-3.5 rounded-xl bg-rose-50 border border-rose-200 text-xs text-rose-800">
+                {{ error }}
+            </div>
+            {% endif %}
+
+            <form action="/partner/register" method="POST" class="space-y-4">
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-semibold text-charcoal mb-1">Practice / Firm Name *</label>
+                        <input type="text" name="name" required placeholder="e.g. Apex Chartered Accountants" class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-ukblue focus:border-ukblue">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-charcoal mb-1">Managing Partner / Contact Name *</label>
+                        <input type="text" name="contact_name" required placeholder="e.g. Sarah Jenkins FCA" class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-ukblue focus:border-ukblue">
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-semibold text-charcoal mb-1">Direct Practice Email *</label>
+                        <input type="email" name="contact_email" required placeholder="sarah@apexaccountants.co.uk" class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-ukblue focus:border-ukblue">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-charcoal mb-1">Contact Phone</label>
+                        <input type="tel" name="contact_phone" placeholder="0161 820 9410" class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-ukblue focus:border-ukblue">
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    <div>
+                        <label class="block text-xs font-semibold text-charcoal mb-1">Supervisory Body</label>
+                        <select name="regulatory_body" class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-ukblue focus:border-ukblue bg-white">
+                            <option value="ICAEW">ICAEW</option>
+                            <option value="ACCA">ACCA</option>
+                            <option value="AAT">AAT</option>
+                            <option value="ICAS">ICAS</option>
+                            <option value="CIMA">CIMA</option>
+                            <option value="ICB">ICB</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-charcoal mb-1">Firm / Member Reg No.</label>
+                        <input type="text" name="regulatory_number" placeholder="e.g. C0019284" class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-ukblue focus:border-ukblue">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-charcoal mb-1">Companies House CRN</label>
+                        <input type="text" name="company_number" placeholder="e.g. 10928471" class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-ukblue focus:border-ukblue">
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-semibold text-charcoal mb-1">Desired Client Portal URL *</label>
+                        <div class="flex items-center rounded-lg border border-gray-300 overflow-hidden focus-within:ring-2 focus-within:ring-ukblue focus-within:border-ukblue">
+                            <span class="bg-gray-50 text-gray-500 text-xs px-2.5 py-2 border-r border-gray-200">/join/</span>
+                            <input type="text" name="slug" required placeholder="apex-tax" class="w-full px-2 py-2 text-sm outline-none">
+                        </div>
+                        <p class="text-[10px] text-gray-400 mt-0.5">Your clients will onboard via invisibleaccountant.co.uk/join/your-slug</p>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-charcoal mb-1">Create Password *</label>
+                        <input type="password" name="password" required minlength="8" placeholder="••••••••••••" class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-ukblue focus:border-ukblue">
+                    </div>
+                </div>
+
+                <div class="pt-2">
+                    <label class="flex items-start gap-2.5 text-xs text-slate cursor-pointer">
+                        <input type="checkbox" required class="mt-0.5 rounded border-gray-300 text-ukblue focus:ring-ukblue">
+                        <span>
+                            I confirm our practice is authorized to operate in the UK. I accept the <a href="/terms" class="text-ukblue underline">Partner Terms</a>, £0 practice platform fee, and monthly recurring commission terms.
+                        </span>
+                    </label>
+                </div>
+
+                <button type="submit" class="w-full py-3 px-4 bg-ukblue hover:bg-blue-700 text-white font-semibold rounded-xl text-sm shadow-md transition-all flex items-center justify-center gap-2">
+                    <span>Create Free Practice Account &amp; Generate WhatsApp Gateway</span>
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
+                    </svg>
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

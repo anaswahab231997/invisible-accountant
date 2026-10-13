@@ -54,11 +54,15 @@ async def create_chat_session(sender_id: str, message: str, media_urls: list[str
     safe_message = mask_pii(message)
     
     async with get_connection() as conn:
+        practice_id = await conn.fetchval(
+            "SELECT practice_id FROM practice_clients WHERE client_sender_id = $1 LIMIT 1",
+            sender_id
+        )
         chat_id = await conn.fetchval('''
-            INSERT INTO chat_sessions (timestamp, sender_id, raw_message, media_urls, turn_count, ttl_timestamp, is_demo)
-            VALUES ($1, $2, $3, $4, $5, $6, $7)
+            INSERT INTO chat_sessions (timestamp, sender_id, raw_message, media_urls, turn_count, ttl_timestamp, is_demo, practice_id)
+            VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
             RETURNING id
-        ''', timestamp, sender_id, safe_message, json.dumps(media_urls), turn_count, ttl, is_demo)
+        ''', timestamp, sender_id, safe_message, json.dumps(media_urls), turn_count, ttl, is_demo, practice_id)
         return chat_id
 
 async def get_recent_intakes_by_sender(sender_id: str, limit: int = 5):
@@ -123,13 +127,19 @@ async def check_active_duplicate_expense(fingerprint: str, days: int = 90) -> di
 async def confirm_and_queue_to_ledger(chat_id: int, allow_duplicate: bool = False):
     timestamp = datetime.now().isoformat()
     async with get_connection() as conn:
-        row = await conn.fetchrow("SELECT staging_payload, is_demo, sender_id FROM chat_sessions WHERE id = $1", chat_id)
+        row = await conn.fetchrow("SELECT staging_payload, is_demo, sender_id, practice_id FROM chat_sessions WHERE id = $1", chat_id)
         if not row or not row["staging_payload"]:
             raise ValueError("No staged payload to confirm.")
             
         payload = json.loads(row["staging_payload"])
         is_demo = row["is_demo"]
         sender_id = row.get("sender_id") or ""
+        practice_id = row.get("practice_id")
+        if not practice_id and sender_id:
+            practice_id = await conn.fetchval(
+                "SELECT practice_id FROM practice_clients WHERE client_sender_id = $1 LIMIT 1",
+                sender_id
+            )
         
         status = await conn.execute(
             "UPDATE chat_sessions SET staging_payload = NULL WHERE id = $1 AND staging_payload IS NOT NULL",
@@ -208,8 +218,8 @@ async def confirm_and_queue_to_ledger(chat_id: int, allow_duplicate: bool = Fals
         
         queue_id = await conn.fetchval(
             """
-            INSERT INTO hmrc_ledger (chat_id, timestamp, vendor, amount, category, status, encrypted_financial_data, is_demo, receipt_fingerprint, external_bill_id)
-            VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
+            INSERT INTO hmrc_ledger (chat_id, timestamp, vendor, amount, category, status, encrypted_financial_data, is_demo, receipt_fingerprint, external_bill_id, practice_id)
+            VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
             RETURNING id
             """,
             chat_id,
@@ -221,8 +231,21 @@ async def confirm_and_queue_to_ledger(chat_id: int, allow_duplicate: bool = Fals
             encrypted_financial_data,
             is_demo,
             receipt_fingerprint,
-            None
+            None,
+            practice_id
         )
+
+        if practice_id and sender_id and not is_demo:
+            await conn.execute(
+                """
+                UPDATE practice_clients
+                SET total_receipts_count = total_receipts_count + 1,
+                    last_receipt_at = NOW()
+                WHERE practice_id = $1 AND client_sender_id = $2
+                """,
+                practice_id, sender_id
+            )
+
         return queue_id
 
 async def sweep_orphaned_processing():
@@ -460,3 +483,171 @@ async def store_accounting_connection(workspace_id: str, provider: str, provider
             """,
             workspace_id, provider, provider_tenant_id, access_token, refresh_token, expires_at
         )
+
+
+# --- Practice & Multi-Tenancy Management ---
+
+async def create_practice(
+    name: str,
+    slug: str,
+    firm_code: str,
+    contact_name: str,
+    contact_email: str,
+    contact_phone: str = "",
+    company_number: str = "",
+    regulatory_body: str = "ICAEW",
+    regulatory_number: str = "",
+    password_hash: str = "",
+    primary_accounting_platform: str = "XERO"
+) -> int:
+    async with get_connection() as conn:
+        practice_id = await conn.fetchval(
+            """
+            INSERT INTO practices (
+                name, slug, firm_code, contact_name, contact_email, contact_phone,
+                company_number, regulatory_body, regulatory_number, password_hash,
+                primary_accounting_platform, commission_rate_gbp, status
+            )
+            VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, 3.00, 'ACTIVE')
+            RETURNING id
+            """,
+            name, slug, firm_code, contact_name, contact_email, contact_phone,
+            company_number, regulatory_body, regulatory_number, password_hash,
+            primary_accounting_platform
+        )
+        return practice_id
+
+async def get_practice_by_id(practice_id: int):
+    async with get_connection() as conn:
+        row = await conn.fetchrow("SELECT * FROM practices WHERE id = $1", practice_id)
+        return dict(row) if row else None
+
+async def get_practice_by_slug(slug: str):
+    async with get_connection() as conn:
+        row = await conn.fetchrow("SELECT * FROM practices WHERE slug = $1", slug)
+        return dict(row) if row else None
+
+async def get_practice_by_code(firm_code: str):
+    async with get_connection() as conn:
+        row = await conn.fetchrow("SELECT * FROM practices WHERE firm_code = $1", firm_code)
+        return dict(row) if row else None
+
+async def get_practice_by_email(email: str):
+    async with get_connection() as conn:
+        row = await conn.fetchrow("SELECT * FROM practices WHERE contact_email = $1", email)
+        return dict(row) if row else None
+
+async def link_client_to_practice(practice_id: int, client_sender_id: str, client_name: str = None, client_email: str = None):
+    async with get_connection() as conn:
+        await conn.execute(
+            """
+            INSERT INTO practice_clients (practice_id, client_sender_id, client_name, client_email, status)
+            VALUES ($1, $2, $3, $4, 'ACTIVE')
+            ON CONFLICT (practice_id, client_sender_id) DO UPDATE SET
+                client_name = COALESCE(EXCLUDED.client_name, practice_clients.client_name),
+                client_email = COALESCE(EXCLUDED.client_email, practice_clients.client_email),
+                status = 'ACTIVE'
+            """,
+            practice_id, client_sender_id, client_name, client_email
+        )
+
+async def get_practice_clients(practice_id: int):
+    async with get_connection() as conn:
+        rows = await conn.fetch(
+            """
+            SELECT * FROM practice_clients
+            WHERE practice_id = $1
+            ORDER BY joined_at DESC
+            """,
+            practice_id
+        )
+        return [dict(row) for row in rows]
+
+async def get_client_practice(client_sender_id: str):
+    async with get_connection() as conn:
+        row = await conn.fetchrow(
+            """
+            SELECT p.* FROM practices p
+            JOIN practice_clients pc ON p.id = pc.practice_id
+            WHERE pc.client_sender_id = $1
+            LIMIT 1
+            """,
+            client_sender_id
+        )
+        return dict(row) if row else None
+
+async def increment_client_receipt_count(practice_id: int, client_sender_id: str):
+    async with get_connection() as conn:
+        await conn.execute(
+            """
+            UPDATE practice_clients
+            SET total_receipts_count = total_receipts_count + 1,
+                last_receipt_at = NOW()
+            WHERE practice_id = $1 AND client_sender_id = $2
+            """,
+            practice_id, client_sender_id
+        )
+
+async def get_practice_stats(practice_id: int):
+    async with get_connection() as conn:
+        client_count = await conn.fetchval(
+            "SELECT COUNT(*) FROM practice_clients WHERE practice_id = $1 AND status = 'ACTIVE'",
+            practice_id
+        ) or 0
+        total_receipts = await conn.fetchval(
+            "SELECT COALESCE(SUM(total_receipts_count), 0) FROM practice_clients WHERE practice_id = $1",
+            practice_id
+        ) or 0
+        loi_count = await conn.fetchval(
+            "SELECT COUNT(*) FROM practice_lois WHERE practice_id = $1",
+            practice_id
+        ) or 0
+        
+        commission_rate = 3.00
+        accrued_commission = float(client_count) * commission_rate
+        return {
+            "active_clients": client_count,
+            "total_receipts": total_receipts,
+            "loi_signed": loi_count > 0,
+            "commission_rate_gbp": commission_rate,
+            "monthly_commission_accrued_gbp": accrued_commission,
+            "annual_commission_projected_gbp": accrued_commission * 12
+        }
+
+async def record_practice_loi(
+    practice_id: int,
+    signatory_name: str,
+    signatory_title: str,
+    firm_legal_name: str,
+    firm_crn: str,
+    firm_address: str,
+    pledged_client_seats: int,
+    signature_data_url: str,
+    signature_ip_address: str,
+    document_sha256: str
+) -> int:
+    async with get_connection() as conn:
+        loi_id = await conn.fetchval(
+            """
+            INSERT INTO practice_lois (
+                practice_id, signatory_name, signatory_title, firm_legal_name,
+                firm_crn, firm_address, pledged_client_seats, pilot_duration_days,
+                signature_data_url, signature_ip_address, document_sha256, status
+            )
+            VALUES ($1, $2, $3, $4, $5, $6, $7, 90, $8, $9, $10, 'EXECUTED')
+            RETURNING id
+            """,
+            practice_id, signatory_name, signatory_title, firm_legal_name,
+            firm_crn, firm_address, pledged_client_seats, signature_data_url,
+            signature_ip_address, document_sha256
+        )
+        return loi_id
+
+async def get_practice_lois(practice_id: int):
+    async with get_connection() as conn:
+        rows = await conn.fetch(
+            "SELECT * FROM practice_lois WHERE practice_id = $1 ORDER BY signed_at DESC",
+            practice_id
+        )
+        return [dict(row) for row in rows]
+
