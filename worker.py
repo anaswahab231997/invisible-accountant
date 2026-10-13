@@ -157,7 +157,15 @@ async def submit_to_hmrc(item):
             amount = float(item["amount"])
         
         accountant_approved = item.get("accountant_approved", False)
-        if not accountant_approved and ((amount > 500.0 and fin_data.get("transaction_type", "EXPENSE") != "INCOME") or fin_data.get("needs_accountant_review")):
+        cap_threshold = 500.0
+        if item.get("practice_id"):
+            from db import get_connection
+            async with get_connection() as conn:
+                pt = await conn.fetchval("SELECT capitalisation_threshold_gbp FROM practices WHERE id = $1", item["practice_id"])
+                if pt is not None:
+                    cap_threshold = float(pt)
+
+        if not accountant_approved and ((amount > cap_threshold and fin_data.get("transaction_type", "EXPENSE") != "INCOME") or fin_data.get("needs_accountant_review")):
             from db import get_connection
             async with get_connection() as conn:
                 await conn.execute("UPDATE hmrc_ledger SET status = 'CAPITAL_ALLOWANCE' WHERE id = $1", item["id"])

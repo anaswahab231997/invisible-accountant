@@ -111,10 +111,20 @@ def format_ts(ts_val) -> str:
         return str(ts_val or "")
 
 @router.get("/dashboard", response_class=HTMLResponse, dependencies=[Depends(verify_accountant_session)])
-async def view_dashboard(request: Request, tab: str = "all"):
+async def view_dashboard(request: Request, tab: str = "all", practice_id: int | None = None):
     items = []
     counts_map = {}
     staged_count = 0
+    cap_threshold = 500.0
+    if practice_id:
+        try:
+            async with get_connection() as conn:
+                pt = await conn.fetchval("SELECT capitalisation_threshold_gbp FROM practices WHERE id = $1", practice_id)
+                if pt is not None:
+                    cap_threshold = float(pt)
+        except Exception:
+            pass
+
     try:
         async with get_connection() as conn:
             # Source 1: Staged items from chat_sessions (unconfirmed)
@@ -167,8 +177,8 @@ async def view_dashboard(request: Request, tab: str = "all"):
                         "reasoning": reasoning or 'Pre-confirmed intake staged.',
                         "status": "STAGED",
                         "status_label": "Unconfirmed",
-                        "flagged": payload.get('is_ambiguous', False) or gross >= 500.0,
-                        "is_capital_allowance": gross >= 500.0,
+                        "flagged": payload.get('is_ambiguous', False) or gross >= cap_threshold,
+                        "is_capital_allowance": gross >= cap_threshold,
                         "is_duplicate": False,
                         "allowable_business_amount": float(payload.get('allowable_business_amount', gross)),
                         "business_proportion_percentage": payload.get('business_proportion_percentage', 100),
@@ -257,13 +267,14 @@ async def view_dashboard(request: Request, tab: str = "all"):
                         "status": status,
                         "status_label": status_label,
                         "flagged": status in ("CAPITAL_ALLOWANCE", "DUPLICATE_SUSPECTED", "NEEDS_REVIEW"),
-                        "is_capital_allowance": (status == "CAPITAL_ALLOWANCE") or (gross >= 500.0),
+                        "is_capital_allowance": (status == "CAPITAL_ALLOWANCE") or (gross >= cap_threshold),
                         "is_duplicate": (status == "DUPLICATE_SUSPECTED"),
                         "allowable_business_amount": gross,
                         "business_proportion_percentage": 100,
                         "is_failed_api": False,
                         "accountant_approved": r['accountant_approved'],
-                        "external_bill_id": r['external_bill_id']
+                        "external_bill_id": r['external_bill_id'],
+                        "cap_threshold": cap_threshold
                     })
     except Exception as e:
         logger.error(f"Error fetching dashboard items: {e}")
@@ -299,7 +310,8 @@ async def view_dashboard(request: Request, tab: str = "all"):
         "current_tab": tab,
         "tabs_summary": tabs_summary,
         "account_labels": ACCOUNT_CODE_LABELS,
-        "tax_labels": TAX_CODE_LABELS
+        "tax_labels": TAX_CODE_LABELS,
+        "cap_threshold": cap_threshold
     }
     template = templates.get_template("dashboard.html")
     return return_dashboard_response(request, HTMLResponse(content=template.render(context)))
@@ -437,6 +449,7 @@ async def inspect_drawer(request: Request, item_type: str, item_id: int):
     media_url = ""
     sender_id = "Client"
     created_at = ""
+    row = None
 
     try:
         async with get_connection() as conn:
@@ -498,6 +511,28 @@ async def inspect_drawer(request: Request, item_type: str, item_id: int):
     except Exception as e:
         logger.error(f"Error in inspect_drawer: {e}")
 
+    cap_threshold = 500.0
+    if row:
+        practice_id = row.get("practice_id")
+        if not practice_id and sender_id and sender_id != "Unknown Client":
+            try:
+                cp = await db.get_client_practice(sender_id)
+                if cp:
+                    practice_id = cp.get("id")
+            except Exception:
+                pass
+        if practice_id:
+            try:
+                async with get_connection() as conn:
+                    pt = await conn.fetchval("SELECT capitalisation_threshold_gbp FROM practices WHERE id = $1", practice_id)
+                    if pt is not None:
+                        cap_threshold = float(pt)
+            except Exception:
+                pass
+
+    if amount >= cap_threshold:
+        is_cap = True
+
     acc_options = []
     for code, label in ACCOUNT_CODE_LABELS.items():
         sel = "selected" if code == current_acc or code in current_acc else ""
@@ -510,7 +545,7 @@ async def inspect_drawer(request: Request, item_type: str, item_id: int):
         tax_options.append(f'<option value="{code}" {sel}>{label}</option>')
     tax_options_html = "\n".join(tax_options)
 
-    cap_checked = "checked" if is_cap or amount >= 500.0 else ""
+    cap_checked = "checked" if is_cap or amount >= cap_threshold else ""
     dup_alert = ""
     if is_dup:
         dup_alert = """
@@ -538,7 +573,7 @@ async def inspect_drawer(request: Request, item_type: str, item_id: int):
             conflict_reason = "Supermarket receipt without explicit fuel itemisation. Food items may be zero-rated or disallowable entertaining (BIM45000)."
     elif is_cap and current_acc in ("420", "429", "310", "400"):
         conflict_detected = True
-        conflict_reason = f"Expenditure (&pound;{amount:.2f}) exceeds the &pound;500 threshold but is currently allocated to Expense code {current_acc}. AIA 100% Capital Allowance review required."
+        conflict_reason = f"Expenditure (&pound;{amount:.2f}) exceeds the &pound;{cap_threshold:.0f} practice capitalization threshold but is currently allocated to Expense code {current_acc}. AIA 100% Capital Allowance review required."
 
     conflict_banner = ""
     if conflict_detected:
@@ -655,7 +690,7 @@ async def inspect_drawer(request: Request, item_type: str, item_id: int):
             <div class="flex items-center space-x-2 pt-1">
                 <input type="checkbox" id="drawer_is_cap" name="is_capital_asset" value="true" {cap_checked} class="h-4 w-4 text-blue-600 rounded">
                 <label for="drawer_is_cap" class="text-xs font-medium text-slate-800 cursor-pointer">
-                    Capital Asset (CAA 2001 &gt; &pound;500 AIA)
+                    Capital Asset (CAA 2001 &gt; &pound;{int(cap_threshold)} AIA)
                 </label>
             </div>
 

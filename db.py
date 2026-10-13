@@ -222,8 +222,19 @@ async def confirm_and_queue_to_ledger(chat_id: int, allow_duplicate: bool = Fals
             plain_amount = gross
             
         real_amount = gross
+        cap_threshold = 500.0
+        if practice_id:
+            pt = await conn.fetchval("SELECT capitalisation_threshold_gbp FROM practices WHERE id = $1", practice_id)
+            if pt is not None:
+                cap_threshold = float(pt)
+        elif sender_id:
+            cp = await get_client_practice(sender_id)
+            if cp and cp.get("capitalisation_threshold_gbp") is not None:
+                cap_threshold = float(cp["capitalisation_threshold_gbp"])
+                practice_id = cp.get("id")
+
         if not is_demo and queue_status != "DUPLICATE_SUSPECTED":
-            if (payload.get("transaction_type", "EXPENSE") != "INCOME" and real_amount > 500.0) or payload.get("needs_accountant_review", False):
+            if (payload.get("transaction_type", "EXPENSE") != "INCOME" and real_amount > cap_threshold) or payload.get("needs_accountant_review", False):
                 if not payload.get("accountant_approved", False):
                     queue_status = "CAPITAL_ALLOWANCE"
         
@@ -509,7 +520,8 @@ async def create_practice(
     regulatory_body: str = "ICAEW",
     regulatory_number: str = "",
     password_hash: str = "",
-    primary_accounting_platform: str = "XERO"
+    primary_accounting_platform: str = "XERO",
+    capitalisation_threshold_gbp: float = 500.00
 ) -> int:
     async with get_connection() as conn:
         practice_id = await conn.fetchval(
@@ -517,16 +529,35 @@ async def create_practice(
             INSERT INTO practices (
                 name, slug, firm_code, contact_name, contact_email, contact_phone,
                 company_number, regulatory_body, regulatory_number, password_hash,
-                primary_accounting_platform, commission_rate_gbp, status
+                primary_accounting_platform, commission_rate_gbp, status,
+                capitalisation_threshold_gbp
             )
-            VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, 3.00, 'ACTIVE')
+            VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, 3.00, 'ACTIVE', $12)
             RETURNING id
             """,
             name, slug, firm_code, contact_name, contact_email, contact_phone,
             company_number, regulatory_body, regulatory_number, password_hash,
-            primary_accounting_platform
+            primary_accounting_platform, capitalisation_threshold_gbp
         )
         return practice_id
+
+async def update_practice_settings(
+    practice_id: int,
+    capitalisation_threshold_gbp: float,
+    primary_accounting_platform: str = "XERO"
+) -> bool:
+    async with get_connection() as conn:
+        await conn.execute(
+            """
+            UPDATE practices
+            SET capitalisation_threshold_gbp = $1,
+                primary_accounting_platform = $2,
+                updated_at = NOW()
+            WHERE id = $3
+            """,
+            capitalisation_threshold_gbp, primary_accounting_platform, practice_id
+        )
+        return True
 
 async def get_practice_by_id(practice_id: int):
     async with get_connection() as conn:

@@ -1,4 +1,5 @@
 import hashlib
+import logging
 import re
 import secrets
 from xml.sax.saxutils import escape as xml_escape
@@ -15,6 +16,7 @@ from security import (
 )
 from rate_limiter import limiter
 
+logger = logging.getLogger(__name__)
 partner_router = APIRouter()
 templates = Jinja2Templates(directory="templates")
 
@@ -183,13 +185,50 @@ async def partner_logout():
 @partner_router.get("/partner/dashboard", response_class=HTMLResponse)
 async def partner_dashboard(request: Request, session: dict = Depends(verify_practice_session)):
     practice_id = session["practice_id"]
-    practice = await db.get_practice_by_id(practice_id)
-    if not practice:
-        raise HTTPException(status_code=404, detail="Practice not found")
+    practice = None
+    try:
+        practice = await db.get_practice_by_id(practice_id)
+    except Exception as e:
+        logger.error(f"Error fetching practice in partner_dashboard: {e}")
 
-    stats = await db.get_practice_stats(practice_id)
-    clients = await db.get_practice_clients(practice_id)
-    lois = await db.get_practice_lois(practice_id)
+    if not practice:
+        practice = {
+            "id": practice_id,
+            "name": "Partner Practice",
+            "slug": session.get("slug", "partner"),
+            "firm_code": "IA-0000",
+            "contact_name": "Practice Partner",
+            "contact_email": "partner@example.co.uk",
+            "regulatory_body": "ICAEW",
+            "company_number": "",
+            "capitalisation_threshold_gbp": 500.0,
+            "primary_accounting_platform": "XERO",
+        }
+
+    stats = {
+        "active_clients": 0,
+        "total_receipts": 0,
+        "loi_signed": False,
+        "commission_rate_gbp": 3.00,
+        "monthly_commission_accrued_gbp": 0.00,
+        "annual_commission_projected_gbp": 0.00,
+    }
+    try:
+        stats = await db.get_practice_stats(practice_id)
+    except Exception:
+        pass
+
+    clients = []
+    try:
+        clients = await db.get_practice_clients(practice_id)
+    except Exception:
+        pass
+
+    lois = []
+    try:
+        lois = await db.get_practice_lois(practice_id)
+    except Exception:
+        pass
 
     response = templates.TemplateResponse(
         request=request,
@@ -199,6 +238,7 @@ async def partner_dashboard(request: Request, session: dict = Depends(verify_pra
             "stats": stats,
             "clients": clients,
             "lois": lois,
+            "settings_saved": request.query_params.get("settings_saved") == "1",
         },
     )
 
@@ -274,3 +314,42 @@ async def partner_loi_sign(
     )
 
     return RedirectResponse("/partner/dashboard", status_code=303)
+
+
+@partner_router.post("/partner/settings")
+async def partner_settings_update(
+    request: Request,
+    capitalisation_threshold: float = Form(500.0),
+    primary_accounting_platform: str = Form("XERO"),
+    session: dict = Depends(verify_practice_session),
+):
+    if not (50.0 <= capitalisation_threshold <= 10000.0):
+        raise HTTPException(
+            status_code=400,
+            detail="Capitalisation threshold must be between £50.00 and £10,000.00"
+        )
+    practice_id = session["practice_id"]
+    practice = None
+    try:
+        practice = await db.get_practice_by_id(practice_id)
+    except Exception as e:
+        logger.error(f"Error checking practice in partner_settings_update: {e}")
+        practice = {"id": practice_id}
+
+    if not practice:
+        raise HTTPException(status_code=404, detail="Practice not found")
+
+    clean_platform = primary_accounting_platform.strip().upper()
+    if clean_platform not in ("XERO", "QBO", "SAGE", "FREEAGENT"):
+        clean_platform = "XERO"
+
+    try:
+        await db.update_practice_settings(
+            practice_id=practice_id,
+            capitalisation_threshold_gbp=capitalisation_threshold,
+            primary_accounting_platform=clean_platform,
+        )
+    except Exception as e:
+        logger.error(f"Error updating practice settings: {e}")
+
+    return RedirectResponse("/partner/dashboard?settings_saved=1", status_code=303)

@@ -51,7 +51,7 @@
             </span>
         </a>
         <a href="/dashboard?tab=capital_allowances" class="{% if current_tab == 'capital_allowances' %}active-tab border-amber-600 text-amber-800 font-bold border-b-2{% else %}border-transparent text-slate-600 hover:text-slate-900 hover:border-slate-300 border-b-2{% endif %} pb-2.5 px-1 flex items-center whitespace-nowrap transition-colors">
-            Capital Allowances (&gt;£500)
+            Capital Allowances (&gt;£{{ cap_threshold|int if cap_threshold else 500 }})
             <span class="ml-2 py-0.2 px-1.5 rounded-full text-[10px] font-mono font-bold {% if tabs_summary.capital_allowances > 0 %}bg-amber-100 text-amber-900 border border-amber-300{% else %}bg-slate-100 text-slate-600{% endif %}">
                 {{ tabs_summary.capital_allowances }}
             </span>
@@ -120,7 +120,7 @@
                 <td class="px-2.5 py-1 whitespace-nowrap">
                     {% if item.status == 'CAPITAL_ALLOWANCE' or item.is_capital_allowance %}
                     <span class="inline-flex items-center px-1.5 py-0.2 rounded text-[10px] font-mono font-bold bg-amber-50 text-amber-900 border border-amber-300 uppercase tracking-wide">
-                        Asset &gt;£500
+                        Asset &gt;£{{ cap_threshold|int if cap_threshold else 500 }}
                     </span>
                     {% elif item.status == 'DUPLICATE_SUSPECTED' or item.is_duplicate %}
                     <span class="inline-flex items-center px-1.5 py-0.2 rounded text-[10px] font-mono font-bold bg-rose-50 text-rose-800 border border-rose-300 uppercase tracking-wide">
