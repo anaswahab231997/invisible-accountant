@@ -423,77 +423,80 @@ async def get_edit_row(request: Request, item_type: str, item_id: int):
 @router.get("/dashboard/inspect/{item_type}/{item_id}", response_class=HTMLResponse, dependencies=[Depends(verify_accountant_session)])
 async def inspect_drawer(request: Request, item_type: str, item_id: int):
     """Renders slide-over inspection drawer with receipt image, WhatsApp chat, and provenance memo."""
-    async with get_connection() as conn:
-        vendor = "Unknown Supplier"
-        amount = 0.0
-        net = 0.0
-        vat = 0.0
-        current_acc = "420"
-        current_tax = "INPUT2"
-        is_cap = False
-        is_dup = False
-        memo = ""
-        raw_msg = ""
-        reasoning = ""
-        media_url = ""
-        sender_id = "Client"
-        created_at = ""
+    vendor = "Unknown Supplier"
+    amount = 0.0
+    net = 0.0
+    vat = 0.0
+    current_acc = "420"
+    current_tax = "INPUT2"
+    is_cap = False
+    is_dup = False
+    memo = ""
+    raw_msg = ""
+    reasoning = ""
+    media_url = ""
+    sender_id = "Client"
+    created_at = ""
 
-        if item_type == "ledger":
-            row = await conn.fetchrow("""
-                SELECT h.*, c.sender_id, c.raw_message, c.media_urls
-                FROM hmrc_ledger h
-                LEFT JOIN chat_sessions c ON h.chat_id = c.id
-                WHERE h.id = $1
-            """, item_id)
-            if row:
-                is_cap = (row["status"] == "CAPITAL_ALLOWANCE")
-                is_dup = (row["status"] == "DUPLICATE_SUSPECTED")
-                sender_id = row["sender_id"] or "Unknown Client"
-                raw_msg = row["raw_message"] or "WhatsApp receipt upload."
-                media_url = row["media_urls"] or ""
-                created_at = format_ts(row["timestamp"])
-                vendor = row["vendor"] or "Unknown Supplier"
-                amount = float(row["amount"] or 0.0)
-                current_acc = str(row["category"] or ("720" if is_cap else "420"))
-                if row["encrypted_financial_data"] and token_engine:
-                    try:
-                        dec = token_engine.decrypt_tokens(
-                            json.loads(row["encrypted_financial_data"]),
-                            associated_data=str(row["chat_id"])
-                        )
-                        fin = json.loads(dec)
-                        vendor = fin.get("vendor", vendor)
-                        amount = float(fin.get("gross_amount", amount))
-                        net = float(fin.get("net_amount", amount))
-                        vat = float(fin.get("vat_amount", 0.0))
-                        memo = fin.get("memo") or fin.get("reasoning_step_2_nature_of_expense") or ""
-                        reasoning = fin.get("reasoning") or fin.get("audit_memo") or ""
-                        current_acc = str(fin.get("account_code") or current_acc)
-                        current_tax = str(fin.get("tax_type") or fin.get("tax_code") or "INPUT2")
-                    except Exception:
-                        pass
-        else: # staged
-            row = await conn.fetchrow("SELECT * FROM chat_sessions WHERE id = $1", item_id)
-            if row:
-                sender_id = row["sender_id"] or "Unknown Client"
-                raw_msg = row["raw_message"] or "WhatsApp receipt upload."
-                media_url = row["media_urls"] or ""
-                created_at = format_ts(row["timestamp"])
-                if row["staging_payload"]:
-                    try:
-                        payload = json.loads(row["staging_payload"])
-                        vendor = payload.get("vendor", "Unknown Supplier")
-                        amount = float(payload.get("amount") or payload.get("gross_amount") or 0.0)
-                        net = float(payload.get("net_amount") or amount)
-                        vat = float(payload.get("vat_amount") or 0.0)
-                        memo = payload.get("memo") or ""
-                        reasoning = payload.get("reasoning") or ""
-                        is_cap = (amount >= 500.0)
-                        current_acc = str(payload.get("account_code") or ("720" if is_cap else "420"))
-                        current_tax = str(payload.get("tax_type") or payload.get("tax_code") or "INPUT2")
-                    except Exception:
-                        pass
+    try:
+        async with get_connection() as conn:
+            if item_type == "ledger":
+                row = await conn.fetchrow("""
+                    SELECT h.*, c.sender_id, c.raw_message, c.media_urls
+                    FROM hmrc_ledger h
+                    LEFT JOIN chat_sessions c ON h.chat_id = c.id
+                    WHERE h.id = $1
+                """, item_id)
+                if row:
+                    is_cap = (row["status"] == "CAPITAL_ALLOWANCE")
+                    is_dup = (row["status"] == "DUPLICATE_SUSPECTED")
+                    sender_id = row["sender_id"] or "Unknown Client"
+                    raw_msg = row["raw_message"] or "WhatsApp receipt upload."
+                    media_url = row["media_urls"] or ""
+                    created_at = format_ts(row["timestamp"])
+                    vendor = row["vendor"] or "Unknown Supplier"
+                    amount = float(row["amount"] or 0.0)
+                    current_acc = str(row["category"] or ("720" if is_cap else "420"))
+                    if row["encrypted_financial_data"] and token_engine:
+                        try:
+                            dec = token_engine.decrypt_tokens(
+                                json.loads(row["encrypted_financial_data"]),
+                                associated_data=str(row["chat_id"])
+                            )
+                            fin = json.loads(dec)
+                            vendor = fin.get("vendor", vendor)
+                            amount = float(fin.get("gross_amount", amount))
+                            net = float(fin.get("net_amount", amount))
+                            vat = float(fin.get("vat_amount", 0.0))
+                            memo = fin.get("memo") or fin.get("reasoning_step_2_nature_of_expense") or ""
+                            reasoning = fin.get("reasoning") or fin.get("audit_memo") or ""
+                            current_acc = str(fin.get("account_code") or current_acc)
+                            current_tax = str(fin.get("tax_type") or fin.get("tax_code") or "INPUT2")
+                        except Exception:
+                            pass
+            else: # staged
+                row = await conn.fetchrow("SELECT * FROM chat_sessions WHERE id = $1", item_id)
+                if row:
+                    sender_id = row["sender_id"] or "Unknown Client"
+                    raw_msg = row["raw_message"] or "WhatsApp receipt upload."
+                    media_url = row["media_urls"] or ""
+                    created_at = format_ts(row["timestamp"])
+                    if row["staging_payload"]:
+                        try:
+                            payload = json.loads(row["staging_payload"])
+                            vendor = payload.get("vendor", "Unknown Supplier")
+                            amount = float(payload.get("amount") or payload.get("gross_amount") or 0.0)
+                            net = float(payload.get("net_amount") or amount)
+                            vat = float(payload.get("vat_amount") or 0.0)
+                            memo = payload.get("memo") or ""
+                            reasoning = payload.get("reasoning") or ""
+                            is_cap = (amount >= 500.0)
+                            current_acc = str(payload.get("account_code") or ("720" if is_cap else "420"))
+                            current_tax = str(payload.get("tax_type") or payload.get("tax_code") or "INPUT2")
+                        except Exception:
+                            pass
+    except Exception as e:
+        logger.error(f"Error in inspect_drawer: {e}")
 
     acc_options = []
     for code, label in ACCOUNT_CODE_LABELS.items():
@@ -517,11 +520,70 @@ async def inspect_drawer(request: Request, item_type: str, item_id: int):
         </div>
         """
 
+    # Schedule 24 Auditor Conflict Resolver (CRCO Compliance Engine)
+    conflict_detected = False
+    conflict_reason = ""
+    lower_msg = (raw_msg or "").lower()
+    lower_vendor = (vendor or "").lower()
+
+    if any(k in lower_msg for k in ["personal", "home", "private", "present", "gift", "for my wife", "for my kid"]):
+        conflict_detected = True
+        conflict_reason = "Client indicated personal or non-business expenditure in WhatsApp dialogue. Reclaiming input tax or business expense may incur Schedule 24 FA 2007 carelessness penalties."
+    elif any(s in lower_vendor for s in ["tesco", "sainsbury", "asda", "morrisons", "waitrose", "marks & spencer", "m&s"]):
+        if any(w in lower_msg for w in ["tools", "materials", "van parts"]):
+            conflict_detected = True
+            conflict_reason = "Client claimed 'materials/tools' at a retail supermarket. High probability of non-deductible personal groceries or mixed-rate basket."
+        elif "fuel" not in lower_msg and "petrol" not in lower_msg:
+            conflict_detected = True
+            conflict_reason = "Supermarket receipt without explicit fuel itemisation. Food items may be zero-rated or disallowable entertaining (BIM45000)."
+    elif is_cap and current_acc in ("420", "429", "310", "400"):
+        conflict_detected = True
+        conflict_reason = f"Expenditure (&pound;{amount:.2f}) exceeds the &pound;500 threshold but is currently allocated to Expense code {current_acc}. AIA 100% Capital Allowance review required."
+
+    conflict_banner = ""
+    if conflict_detected:
+        conflict_banner = f"""
+        <div class="bg-amber-50 border-2 border-amber-300 rounded-lg p-3 text-xs text-amber-900 shadow-xs">
+            <div class="flex items-center space-x-1.5 font-bold text-amber-900 mb-1">
+                <svg class="w-4 h-4 text-amber-600 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"></path></svg>
+                <span>SCHEDULE 24 AUDITOR CONFLICT WARNING</span>
+            </div>
+            <p class="leading-relaxed font-sans">{conflict_reason}</p>
+            <div class="mt-2 text-[10px] text-amber-800 font-mono">
+                Statutory Sign-off Required &bull; VATA 1994 s84 &amp; TMA 1970 s12B
+            </div>
+        </div>
+        """
+
+    drc_verification = ""
+    if current_tax == "REVERSECHARGES":
+        drc_verification = """
+        <div class="bg-amber-50 border border-amber-300 rounded p-2 text-xs text-amber-900 flex items-start space-x-2">
+            <input type="checkbox" id="drc_end_user" name="drc_end_user_confirmed" value="true" class="h-4 w-4 text-amber-600 rounded mt-0.5" required>
+            <label for="drc_end_user" class="font-semibold cursor-pointer">
+                Confirmed: Customer is CIS &amp; VAT registered and NOT an End User (HMRC Notice 735)
+            </label>
+        </div>
+        """
+
     media_display = ""
     if media_url and media_url.startswith("http"):
         media_display = f"""
-        <div class="bg-slate-900 rounded-lg p-2 flex justify-center items-center overflow-hidden border border-slate-700 max-h-72">
-            <img src="{media_url}" alt="Receipt Canvas" class="max-h-68 w-auto object-contain rounded hover:scale-105 transition-transform cursor-zoom-in" onclick="window.open('{media_url}', '_blank')">
+        <div class="bg-slate-950 rounded-lg p-2 relative flex flex-col items-center justify-center overflow-hidden border border-slate-700 min-h-64 max-h-96">
+            <!-- Canvas Controls -->
+            <div class="absolute top-2 right-2 z-10 flex items-center space-x-1 bg-slate-900/90 p-1 rounded border border-slate-700 text-xs backdrop-blur-xs">
+                <button type="button" onclick="window.receiptZoom(0.2)" class="text-slate-300 hover:text-white px-1.5 py-0.5 rounded hover:bg-slate-800" title="Zoom In [+]">+</button>
+                <button type="button" onclick="window.receiptZoom(-0.2)" class="text-slate-300 hover:text-white px-1.5 py-0.5 rounded hover:bg-slate-800" title="Zoom Out [-]">-</button>
+                <button type="button" onclick="window.receiptRotate()" class="text-slate-300 hover:text-white px-1.5 py-0.5 rounded hover:bg-slate-800" title="Rotate 90deg [R]">Rotate</button>
+                <button type="button" onclick="window.receiptToggleThermal()" class="text-amber-400 hover:text-amber-300 px-1.5 py-0.5 rounded hover:bg-slate-800 font-bold" title="Faded Thermal Receipt Enhance [T]">Thermal B&amp;W</button>
+                <button type="button" onclick="window.receiptReset()" class="text-slate-400 hover:text-slate-200 px-1.5 py-0.5 rounded hover:bg-slate-800" title="Reset View [0]">100%</button>
+            </div>
+            
+            <div id="receipt-canvas-viewport" class="overflow-auto w-full h-full flex items-center justify-center p-2">
+                <img id="active-receipt-img" src="{media_url}" alt="Receipt Canvas" 
+                     class="max-h-80 w-auto object-contain rounded transition-all duration-150 cursor-grab active:cursor-grabbing" 
+                     style="transform: scale(1) rotate(0deg);">
+            </div>
         </div>
         """
     else:
@@ -550,14 +612,17 @@ async def inspect_drawer(request: Request, item_type: str, item_id: int):
     </div>
 
     <div class="p-4 space-y-4 overflow-y-auto flex-1">
-        <!-- Receipt Canvas -->
+        <!-- Receipt Canvas Viewer -->
         {media_display}
+
+        <!-- Schedule 24 Conflict Banner (if any) -->
+        {conflict_banner}
 
         <!-- WhatsApp Conversation Provenance -->
         <div class="bg-emerald-50/70 border border-emerald-200/80 rounded-lg p-3 text-xs">
             <div class="flex items-center space-x-1.5 text-emerald-800 font-bold mb-1">
                 <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24"><path d="M12.031 6.172c-3.181 0-5.767 2.586-5.768 5.766-.001 1.298.38 2.27 1.019 3.287l-.711 2.598 2.664-.699c.971.53 1.84.814 2.796.814 3.18 0 5.767-2.587 5.768-5.766.001-3.181-2.587-5.768-5.768-5.768zm0 10.355c-.868 0-1.666-.242-2.381-.7l-.17-.101-1.77.464.473-1.724-.112-.178c-.496-.789-.757-1.554-.757-2.35 0-2.532 2.06-4.593 4.593-4.593 2.534 0 4.594 2.061 4.594 4.593 0 2.533-2.06 4.594-4.593 4.594z"/></svg>
-                <span>WhatsApp Client Intake</span>
+                <span>WhatsApp Client Intake Memo</span>
             </div>
             <p class="font-mono text-slate-700 bg-white/80 p-2 rounded border border-emerald-100 whitespace-pre-wrap">{raw_msg}</p>
         </div>
@@ -594,6 +659,7 @@ async def inspect_drawer(request: Request, item_type: str, item_id: int):
                 </label>
             </div>
 
+            {drc_verification}
             {dup_alert}
 
             <div class="flex items-center space-x-2 pt-3">

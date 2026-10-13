@@ -87,6 +87,51 @@
     }
 
     // Drawer Management
+    let currentZoom = 1.0;
+    let currentRotate = 0;
+    let isThermalEnhanced = false;
+
+    window.receiptZoom = function (delta) {
+        const img = document.getElementById('active-receipt-img');
+        if (!img) return;
+        currentZoom = Math.min(3.0, Math.max(0.5, currentZoom + delta));
+        applyReceiptTransform();
+    };
+
+    window.receiptRotate = function () {
+        const img = document.getElementById('active-receipt-img');
+        if (!img) return;
+        currentRotate = (currentRotate + 90) % 360;
+        applyReceiptTransform();
+    };
+
+    window.receiptToggleThermal = function () {
+        const img = document.getElementById('active-receipt-img');
+        if (!img) return;
+        isThermalEnhanced = !isThermalEnhanced;
+        if (isThermalEnhanced) {
+            img.style.filter = 'contrast(190%) grayscale(100%) brightness(92%)';
+        } else {
+            img.style.filter = 'none';
+        }
+    };
+
+    window.receiptReset = function () {
+        currentZoom = 1.0;
+        currentRotate = 0;
+        isThermalEnhanced = false;
+        const img = document.getElementById('active-receipt-img');
+        if (img) img.style.filter = 'none';
+        applyReceiptTransform();
+    };
+
+    function applyReceiptTransform() {
+        const img = document.getElementById('active-receipt-img');
+        if (img) {
+            img.style.transform = `scale(${currentZoom}) rotate(${currentRotate}deg)`;
+        }
+    }
+
     window.openDrawer = function (contentHtml) {
         const drawer = document.getElementById('inspect-drawer');
         const overlay = document.getElementById('drawer-overlay');
@@ -97,6 +142,7 @@
         if (overlay) {
             overlay.classList.remove('hidden');
         }
+        window.receiptReset();
     };
 
     window.closeDrawer = function () {
