@@ -46,7 +46,8 @@ from db import (
     create_chat_session,
     store_identity_in_vault,
 )
-from security import compute_receipt_fingerprint
+from security import compute_receipt_fingerprint, verify_accountant_session
+from rate_limiter import limiter
 from dashboard import router as dashboard_router
 from dev_dashboard import router as dev_dashboard_router
 from partner_routes import partner_router
@@ -54,9 +55,6 @@ from logger import get_logger
 from worker import process_hmrc_queue, process_ttl_sweeper
 
 logger = get_logger(__name__)
-def get_real_ip(request: Request) -> str:
-    return request.headers.get("CF-Connecting-IP", request.client.host if request.client else "127.0.0.1")
-limiter = Limiter(key_func=get_real_ip)
 
 app = FastAPI(
     title="Invisible Accountant",
@@ -567,9 +565,9 @@ async def receive_whatsapp(
 async def view_hmrc_queue(limit: int = 100, offset: int = 0):
     return {"queue": await get_all_hmrc_queue(limit=limit, offset=offset)}
 
-@app.get("/api/queue")
+@app.get("/api/queue", dependencies=[Depends(verify_accountant_session)])
 async def view_hmrc_queue_bff(limit: int = 100, offset: int = 0):
-    # BFF route for the frontend dashboard. In a real app, we'd check session cookies.
+    # Secured BFF route for the accountant dashboard
     return {"queue": await get_all_hmrc_queue(limit=limit, offset=offset)}
 
 
@@ -588,6 +586,10 @@ import asyncio
 
 @app.websocket("/ws/{client_id}")
 async def websocket_endpoint(websocket: WebSocket, client_id: str):
+    # WebSocket simulator is strictly scoped to browser demo and test sessions
+    if not (client_id.startswith("demo_web_") or client_id.startswith("test_")):
+        await websocket.close(code=1008)
+        return
     await manager.connect(websocket, client_id)
 
     async def heartbeat():
@@ -612,7 +614,10 @@ async def websocket_endpoint(websocket: WebSocket, client_id: str):
 async def api_simulate_whatsapp(
     payload: WhatsAppPayload,
 ):
-    # This is the BFF route for the frontend Simulator. No HMAC required.
+    # This is the BFF route for the frontend Simulator. Scoped to demo client sessions.
+    if not (payload.sender_id.startswith("demo_web_") or payload.sender_id.startswith("test_")):
+        raise HTTPException(status_code=403, detail="Simulate endpoint is restricted to demo client sessions.")
+
     masked_message = mask_pii(payload.message)
     media_urls_str = [str(url) for url in (payload.media_urls or [])]
 

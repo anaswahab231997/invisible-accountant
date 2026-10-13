@@ -23,10 +23,10 @@
                 <svg class="w-3.5 h-3.5 text-ukblue" fill="currentColor" viewBox="0 0 20 20">
                     <path fill-rule="evenodd" d="M2.166 4.999A11.954 11.954 0 0010 1.944 11.954 11.954 0 0017.834 5c.11.65.166 1.32.166 2.001 0 5.225-3.34 9.67-8 11.317C5.34 16.67 2 12.225 2 7c0-.682.057-1.35.166-2.001zm11.541 3.708a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
                 </svg>
-                ICAEW &amp; ACCA Partner Practice Network
+                Designed for ICAEW &amp; ACCA Member Practices
             </span>
             <span class="text-emerald-700 font-semibold text-[11px] bg-emerald-50 border border-emerald-200 px-2.5 py-0.5 rounded-full">
-                £0 Platform Fee + £3.00/client/mo Rev-Share
+                £0 Platform Fee • Section 330 Ethics Aligned
             </span>
         </div>
 
@@ -108,6 +108,27 @@
                     <div>
                         <label class="block text-xs font-semibold text-charcoal mb-1">Create Password *</label>
                         <input type="password" name="password" required minlength="8" placeholder="••••••••••••" class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-ukblue focus:border-ukblue">
+                    </div>
+                </div>
+
+                <!-- Section 330 Code of Ethics Model Selector -->
+                <div class="p-3.5 bg-gray-50 border border-gray-200 rounded-xl space-y-2">
+                    <label class="block text-xs font-semibold text-charcoal">Commercial Model (ICAEW &amp; ACCA Section 330 Aligned)</label>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
+                        <label class="flex items-start gap-2 p-2 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-ukblue">
+                            <input type="radio" name="commercial_model" value="margin" checked class="mt-0.5 text-ukblue focus:ring-ukblue">
+                            <div>
+                                <span class="font-bold text-charcoal block">Retain Practice Margin</span>
+                                <span class="text-[11px] text-slate block">Earn £3.00/client/mo recurring practice revenue share.</span>
+                            </div>
+                        </label>
+                        <label class="flex items-start gap-2 p-2 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-ukblue">
+                            <input type="radio" name="commercial_model" value="subsidy" class="mt-0.5 text-ukblue focus:ring-ukblue">
+                            <div>
+                                <span class="font-bold text-charcoal block">100% Client Subsidy</span>
+                                <span class="text-[11px] text-slate block">Pass £3 saving to sole traders (£6.99/mo client pricing).</span>
+                            </div>
+                        </label>
                     </div>
                 </div>
 

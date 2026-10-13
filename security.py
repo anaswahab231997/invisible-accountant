@@ -110,9 +110,71 @@ def is_valid_api_key(candidate: str | None) -> bool:
     except Exception:
         return False
 
+_EPHEMERAL_SIGNING_SECRET = None
+
+def get_signing_secret() -> str:
+    global _EPHEMERAL_SIGNING_SECRET
+    secret = os.getenv("API_KEY") or os.getenv("SECRET_KEY")
+    if not secret:
+        if _EPHEMERAL_SIGNING_SECRET is None:
+            _EPHEMERAL_SIGNING_SECRET = secrets.token_hex(32)
+        return _EPHEMERAL_SIGNING_SECRET
+    return secret
+
+def create_accountant_session_token() -> str:
+    import time
+    now = int(time.time())
+    payload = f"accountant_admin:{now}"
+    secret = get_signing_secret()
+    sig = hmac.new(secret.encode('utf-8'), payload.encode('utf-8'), hashlib.sha256).hexdigest()
+    return f"{payload}:{sig}"
+
+def verify_accountant_session_token(token: str | None) -> bool:
+    if not token or ":" not in token:
+        return False
+    try:
+        parts = token.split(":")
+        if len(parts) != 3:
+            return False
+        role, ts_str, sig = parts
+        if role != "accountant_admin":
+            return False
+        payload = f"{role}:{ts_str}"
+        secret = get_signing_secret()
+        expected = hmac.new(secret.encode('utf-8'), payload.encode('utf-8'), hashlib.sha256).hexdigest()
+        if not secrets.compare_digest(sig, expected):
+            return False
+        import time
+        now = int(time.time())
+        delta = now - int(ts_str)
+        if delta < 0 or delta > 7 * 86400:
+            return False
+        return True
+    except Exception:
+        return False
+
+from urllib.parse import urlparse
+
+def is_safe_redirect(url: str | None, allowed_prefix: str = "/dashboard") -> bool:
+    if not url:
+        return False
+    try:
+        parsed = urlparse(url)
+        if parsed.scheme or parsed.netloc:
+            return False
+        if not parsed.path.startswith(allowed_prefix):
+            return False
+        # Disallow auth delimiters like @ in path to prevent open redirect bypasses
+        if "@" in parsed.path:
+            return False
+        return True
+    except Exception:
+        return False
+
 def is_authenticated_request(request: Request) -> bool:
     """Helper to check if a request has valid authentication without raising exceptions."""
-    if is_valid_api_key(request.cookies.get("accountant_session")):
+    cookie = request.cookies.get("accountant_session")
+    if verify_accountant_session_token(cookie) or is_valid_api_key(cookie):
         return True
     if is_valid_api_key(request.headers.get("X-API-Key")):
         return True
@@ -126,7 +188,7 @@ def set_accountant_session_cookie(
     secure: bool = True,
     max_age: int = 604800,
 ) -> Response:
-    expected = token or get_dashboard_api_key()
+    expected = token or create_accountant_session_token()
     if expected:
         response.set_cookie(
             key="accountant_session",
@@ -160,21 +222,15 @@ async def verify_accountant_session(request: Request) -> str:
     """
     Hardened dual-auth dependency for Accountant Review Gateway.
     Checks:
-      a) HTTP cookie: request.cookies.get("accountant_session")
+      a) HTTP cookie: request.cookies.get("accountant_session") (signed HMAC or API_KEY)
       b) HTTP header: request.headers.get("X-API-Key")
       c) Query parameter: request.query_params.get("key") (magic link)
-    Validation is performed against API_KEY using secrets.compare_digest.
-    If authenticated via query parameter ?key=..., flags request.state.should_set_cookie = True.
-    If unauthenticated:
-      - Browser HTML navigation requests (Accept contains text/html, not HTMX) redirect to /dashboard/login?next=... (303).
-      - API / HTMX requests receive HTTP 401 Unauthorized.
+    Validation is performed against API_KEY or signed session tokens.
     """
-    expected_key = get_dashboard_api_key()
-
     # a) HTTP cookie
     cookie_token = request.cookies.get("accountant_session")
-    if is_valid_api_key(cookie_token):
-        return cookie_token
+    if verify_accountant_session_token(cookie_token) or is_valid_api_key(cookie_token):
+        return "accountant_authenticated"
 
     # b) HTTP header
     header_token = request.headers.get("X-API-Key")
@@ -185,7 +241,7 @@ async def verify_accountant_session(request: Request) -> str:
     query_token = request.query_params.get("key")
     if is_valid_api_key(query_token):
         request.state.should_set_cookie = True
-        request.state.accountant_session = expected_key
+        request.state.accountant_session = create_accountant_session_token()
         return query_token
 
     # If unauthenticated:
@@ -282,7 +338,7 @@ def create_practice_token(practice_id: int, slug: str) -> str:
     import time
     timestamp = int(time.time())
     payload = f"{practice_id}:{slug}:{timestamp}"
-    secret = os.getenv("API_KEY", "fallback_secret_key_uk_mtd_2026")
+    secret = get_signing_secret()
     signature = hmac.new(secret.encode('utf-8'), payload.encode('utf-8'), hashlib.sha256).hexdigest()
     return f"{payload}:{signature}"
 
@@ -295,13 +351,15 @@ def verify_practice_token(token: str | None) -> dict | None:
             return None
         practice_id_str, slug, timestamp_str, signature = parts
         payload = f"{practice_id_str}:{slug}:{timestamp_str}"
-        secret = os.getenv("API_KEY", "fallback_secret_key_uk_mtd_2026")
+        secret = get_signing_secret()
         expected_sig = hmac.new(secret.encode('utf-8'), payload.encode('utf-8'), hashlib.sha256).hexdigest()
         if not secrets.compare_digest(signature, expected_sig):
             return None
         import time
-        # Valid for 14 days
-        if int(time.time()) - int(timestamp_str) > 14 * 86400:
+        now = int(time.time())
+        delta = now - int(timestamp_str)
+        # Valid for 14 days; reject future timestamps (delta < 0)
+        if delta < 0 or delta > 14 * 86400:
             return None
         return {"practice_id": int(practice_id_str), "slug": slug}
     except Exception:
@@ -310,10 +368,10 @@ def verify_practice_token(token: str | None) -> dict | None:
 async def verify_practice_session(request: Request) -> dict:
     """
     Enforces practice-scoped row-level security for partner portal.
-    Checks cookie 'practice_session' and query param ?token=.
+    Checks cookie 'partner_session' (or 'practice_session') and query param ?token=.
     Redirects unauthenticated browser requests to /partner/login.
     """
-    cookie_token = request.cookies.get("practice_session")
+    cookie_token = request.cookies.get("partner_session") or request.cookies.get("practice_session")
     data = verify_practice_token(cookie_token)
     if data:
         return data
@@ -327,7 +385,8 @@ async def verify_practice_session(request: Request) -> dict:
 
     accept_header = request.headers.get("accept", "")
     is_htmx = (request.headers.get("HX-Request", "").lower() == "true")
-    is_browser_nav = ("text/html" in accept_header) and (not is_htmx)
+    is_json = "application/json" in accept_header
+    is_browser_nav = (not is_json) and (not is_htmx)
 
     if is_browser_nav:
         login_url = f"/partner/login?next={request.url.path}"

@@ -12,9 +12,11 @@ from security import (
     is_valid_api_key,
     set_accountant_session_cookie,
     clear_accountant_session_cookie,
+    is_safe_redirect,
 )
 from aes_gcm_security import TokenEncryptionEngine
 from currency_converter import detect_currency, normalize_to_base_currency
+from rate_limiter import limiter
 import logging
 
 router = APIRouter()
@@ -31,13 +33,14 @@ def return_dashboard_response(request: Request, response: HTMLResponse) -> HTMLR
 async def login_page(request: Request, next: str = "/dashboard"):
     """Renders login page or redirects to dashboard if already authenticated."""
     if is_authenticated_request(request):
-        target = next if next and next.startswith("/dashboard") else "/dashboard"
+        target = next if is_safe_redirect(next, "/dashboard") else "/dashboard"
         return RedirectResponse(url=target, status_code=303)
     
     template = templates.get_template("login.html")
     return HTMLResponse(content=template.render({"request": request, "error": None, "next": next}))
 
 @router.post("/dashboard/login")
+@limiter.limit("5/minute")
 async def login_submit(
     request: Request,
     access_key: str = Form(""),
@@ -46,9 +49,9 @@ async def login_submit(
     """Authenticates access key, sets accountant_session cookie, and redirects to dashboard."""
     clean_key = access_key.strip()
     if is_valid_api_key(clean_key):
-        target = next if next and next.startswith("/dashboard") else "/dashboard"
+        target = next if is_safe_redirect(next, "/dashboard") else "/dashboard"
         response = RedirectResponse(url=target, status_code=303)
-        set_accountant_session_cookie(response, token=clean_key, secure=True, max_age=604800)
+        set_accountant_session_cookie(response, secure=True, max_age=604800)
         return response
     
     template = templates.get_template("login.html")
@@ -109,170 +112,177 @@ def format_ts(ts_val) -> str:
 @router.get("/dashboard", response_class=HTMLResponse, dependencies=[Depends(verify_accountant_session)])
 async def view_dashboard(request: Request, tab: str = "all"):
     items = []
+    counts_map = {}
+    staged_count = 0
+    try:
+        async with get_connection() as conn:
+            # Source 1: Staged items from chat_sessions (unconfirmed)
+            if tab in ("all", "pending", "staged"):
+                rows_staged = await conn.fetch("""
+                    SELECT c.id, c.sender_id, c.timestamp as created_at, c.staging_payload as payload,
+                           c.raw_message, c.media_urls
+                    FROM chat_sessions c
+                    LEFT JOIN hmrc_ledger h ON c.id = h.chat_id
+                    WHERE c.staging_payload IS NOT NULL AND h.id IS NULL
+                    ORDER BY c.timestamp DESC
+                """)
+                for r in rows_staged:
+                    raw_payload = r['payload']
+                    is_failed_api = (raw_payload == 'FAILED_API_LIMIT')
+                    payload = {}
+                    if isinstance(raw_payload, str) and not is_failed_api:
+                        try:
+                            payload = json.loads(raw_payload)
+                        except Exception:
+                            payload = {}
+                    elif isinstance(raw_payload, dict):
+                        payload = raw_payload
     
-    async with get_connection() as conn:
-        # Source 1: Staged items from chat_sessions (unconfirmed)
-        if tab in ("all", "pending", "staged"):
-            rows_staged = await conn.fetch("""
-                SELECT c.id, c.sender_id, c.timestamp as created_at, c.staging_payload as payload,
-                       c.raw_message, c.media_urls
-                FROM chat_sessions c
-                LEFT JOIN hmrc_ledger h ON c.id = h.chat_id
-                WHERE c.staging_payload IS NOT NULL AND h.id IS NULL
-                ORDER BY c.timestamp DESC
-            """)
-            for r in rows_staged:
-                raw_payload = r['payload']
-                is_failed_api = (raw_payload == 'FAILED_API_LIMIT')
-                payload = {}
-                if isinstance(raw_payload, str) and not is_failed_api:
-                    try:
-                        payload = json.loads(raw_payload)
-                    except Exception:
-                        payload = {}
-                elif isinstance(raw_payload, dict):
-                    payload = raw_payload
-
-                acc = str(payload.get('account_code') or payload.get('category') or '429').strip()
-                tax = str(payload.get('tax_code') or payload.get('tax_rate') or payload.get('tax_type') or 'NONE').strip()
-                gross = float(payload.get('amount') or payload.get('gross_amount') or 0.0)
-                
-                # Check for currency
-                detected_curr = detect_currency(payload.get('vendor', '') + " " + (r.get('raw_message') or ''))
-                
-                reasoning = payload.get('reasoning', payload.get('reasoning_steps', ''))
-                if not reasoning:
-                    parts = [str(v) for k, v in payload.items() if k.startswith('reasoning_step_')]
-                    reasoning = "\n".join(parts)
-
-                items.append({
-                    "id": r['id'],
-                    "item_type": "staged",
-                    "sender_id": r['sender_id'],
-                    "created_at": format_ts(r['created_at']),
-                    "vendor": payload.get('vendor', 'Unknown Supplier'),
-                    "memo": payload.get('memo', payload.get('reasoning_step_2_nature_of_expense', '')),
-                    "amount": gross,
-                    "account_code": acc,
-                    "tax_code": tax,
-                    "currency": detected_curr,
-                    "raw_message": r.get('raw_message') or 'No message text.',
-                    "media_urls": r.get('media_urls', ''),
-                    "reasoning": reasoning or 'Pre-confirmed intake staged.',
-                    "status": "STAGED",
-                    "status_label": "Unconfirmed",
-                    "flagged": payload.get('is_ambiguous', False) or gross >= 500.0,
-                    "is_capital_allowance": gross >= 500.0,
-                    "is_duplicate": False,
-                    "allowable_business_amount": float(payload.get('allowable_business_amount', gross)),
-                    "business_proportion_percentage": payload.get('business_proportion_percentage', 100),
-                    "is_failed_api": is_failed_api,
-                    "accountant_approved": False,
-                    "external_bill_id": None
-                })
-
-        # Source 2: Active items from hmrc_ledger
-        status_filter = []
-        if tab == "all":
-            status_filter = ["CAPITAL_ALLOWANCE", "DUPLICATE_SUSPECTED", "NEEDS_REVIEW", "PENDING", "SUBMITTED", "FAILED"]
-        elif tab == "capital_allowances":
-            status_filter = ["CAPITAL_ALLOWANCE"]
-        elif tab == "duplicates":
-            status_filter = ["DUPLICATE_SUSPECTED"]
-        elif tab == "pending":
-            status_filter = ["PENDING", "NEEDS_REVIEW"]
-        elif tab == "submitted":
-            status_filter = ["SUBMITTED"]
-
-        if status_filter:
-            rows_ledger = await conn.fetch("""
-                SELECT h.id as ledger_id, h.chat_id, h.timestamp as created_at, h.vendor as ledger_vendor,
-                       h.amount as ledger_amount, h.category, h.status, h.encrypted_financial_data,
-                       h.accountant_approved, h.external_bill_id, h.receipt_fingerprint,
-                       c.sender_id, c.raw_message, c.media_urls
-                FROM hmrc_ledger h
-                LEFT JOIN chat_sessions c ON h.chat_id = c.id
-                WHERE h.status = ANY($1::text[])
-                ORDER BY h.id DESC
-            """, status_filter)
-
-            for r in rows_ledger:
-                fin = {}
-                if r['encrypted_financial_data'] and token_engine:
-                    try:
-                        decrypted_str = token_engine.decrypt_tokens(
-                            json.loads(r['encrypted_financial_data']),
-                            associated_data=str(r['chat_id'])
-                        )
-                        fin = json.loads(decrypted_str)
-                    except Exception as dec_err:
-                        logger.error(f"Failed to decrypt ledger {r['ledger_id']}: {dec_err}")
-                        fin = {}
-
-                gross = float(fin.get('gross_amount') or r['ledger_amount'] or 0.0)
-                net = float(fin.get('net_amount') or gross)
-                vat = float(fin.get('vat_amount') or 0.0)
-                vendor = fin.get('vendor') or r['ledger_vendor'] or 'Unknown Supplier'
-                acc = str(fin.get('account_code') or fin.get('category') or r['category'] or '429').strip()
-                tax = str(fin.get('tax_code') or fin.get('tax_type') or ('INPUT2' if vat > 0 else 'NONE')).strip()
-                curr = fin.get('currency', 'GBP')
-                status = r['status']
-
-                # Compute user-facing badge label
-                if status == "CAPITAL_ALLOWANCE":
-                    status_label = "Capital Asset"
-                elif status == "DUPLICATE_SUSPECTED":
-                    status_label = "Duplicate Suspected"
-                elif status == "NEEDS_REVIEW":
-                    status_label = "Needs Review"
-                elif status == "PENDING":
-                    status_label = "Queued to Xero"
-                elif status == "SUBMITTED":
-                    status_label = "Submitted"
-                else:
-                    status_label = status
-
-                items.append({
-                    "id": r['ledger_id'],
-                    "item_type": "ledger",
-                    "sender_id": r['sender_id'] or 'Unknown',
-                    "created_at": format_ts(r['created_at']),
-                    "vendor": vendor,
-                    "memo": fin.get('memo') or fin.get('reasoning_step_2_nature_of_expense') or r['category'] or 'No memo',
-                    "amount": gross,
-                    "net_amount": net,
-                    "vat_amount": vat,
-                    "account_code": acc,
-                    "tax_code": tax,
-                    "currency": curr,
-                    "raw_message": r.get('raw_message') or 'WhatsApp transaction recorded.',
-                    "media_urls": r.get('media_urls', ''),
-                    "reasoning": fin.get('reasoning') or fin.get('audit_memo') or f"Status: {status}. CAA 2001 & VATA 1994 ledger record.",
-                    "status": status,
-                    "status_label": status_label,
-                    "flagged": status in ("CAPITAL_ALLOWANCE", "DUPLICATE_SUSPECTED", "NEEDS_REVIEW"),
-                    "is_capital_allowance": (status == "CAPITAL_ALLOWANCE") or (gross >= 500.0),
-                    "is_duplicate": (status == "DUPLICATE_SUSPECTED"),
-                    "allowable_business_amount": gross,
-                    "business_proportion_percentage": 100,
-                    "is_failed_api": False,
-                    "accountant_approved": r['accountant_approved'],
-                    "external_bill_id": r['external_bill_id']
-                })
+                    acc = str(payload.get('account_code') or payload.get('category') or '429').strip()
+                    tax = str(payload.get('tax_code') or payload.get('tax_rate') or payload.get('tax_type') or 'NONE').strip()
+                    gross = float(payload.get('amount') or payload.get('gross_amount') or 0.0)
+                    
+                    # Check for currency
+                    detected_curr = detect_currency(payload.get('vendor', '') + " " + (r.get('raw_message') or ''))
+                    
+                    reasoning = payload.get('reasoning', payload.get('reasoning_steps', ''))
+                    if not reasoning:
+                        parts = [str(v) for k, v in payload.items() if k.startswith('reasoning_step_')]
+                        reasoning = "\n".join(parts)
+    
+                    items.append({
+                        "id": r['id'],
+                        "item_type": "staged",
+                        "sender_id": r['sender_id'],
+                        "created_at": format_ts(r['created_at']),
+                        "vendor": payload.get('vendor', 'Unknown Supplier'),
+                        "memo": payload.get('memo', payload.get('reasoning_step_2_nature_of_expense', '')),
+                        "amount": gross,
+                        "account_code": acc,
+                        "tax_code": tax,
+                        "currency": detected_curr,
+                        "raw_message": r.get('raw_message') or 'No message text.',
+                        "media_urls": r.get('media_urls', ''),
+                        "reasoning": reasoning or 'Pre-confirmed intake staged.',
+                        "status": "STAGED",
+                        "status_label": "Unconfirmed",
+                        "flagged": payload.get('is_ambiguous', False) or gross >= 500.0,
+                        "is_capital_allowance": gross >= 500.0,
+                        "is_duplicate": False,
+                        "allowable_business_amount": float(payload.get('allowable_business_amount', gross)),
+                        "business_proportion_percentage": payload.get('business_proportion_percentage', 100),
+                        "is_failed_api": is_failed_api,
+                        "accountant_approved": False,
+                        "external_bill_id": None
+                    })
+    
+            # Source 2: Active items from hmrc_ledger
+            status_filter = []
+            if tab == "all":
+                status_filter = ["CAPITAL_ALLOWANCE", "DUPLICATE_SUSPECTED", "NEEDS_REVIEW", "PENDING", "SUBMITTED", "FAILED"]
+            elif tab == "capital_allowances":
+                status_filter = ["CAPITAL_ALLOWANCE"]
+            elif tab == "duplicates":
+                status_filter = ["DUPLICATE_SUSPECTED"]
+            elif tab == "pending":
+                status_filter = ["PENDING", "NEEDS_REVIEW"]
+            elif tab == "submitted":
+                status_filter = ["SUBMITTED"]
+    
+            if status_filter:
+                rows_ledger = await conn.fetch("""
+                    SELECT h.id as ledger_id, h.chat_id, h.timestamp as created_at, h.vendor as ledger_vendor,
+                           h.amount as ledger_amount, h.category, h.status, h.encrypted_financial_data,
+                           h.accountant_approved, h.external_bill_id, h.receipt_fingerprint,
+                           c.sender_id, c.raw_message, c.media_urls
+                    FROM hmrc_ledger h
+                    LEFT JOIN chat_sessions c ON h.chat_id = c.id
+                    WHERE h.status = ANY($1::text[])
+                    ORDER BY h.id DESC
+                """, status_filter)
+    
+                for r in rows_ledger:
+                    fin = {}
+                    if r['encrypted_financial_data'] and token_engine:
+                        try:
+                            decrypted_str = token_engine.decrypt_tokens(
+                                json.loads(r['encrypted_financial_data']),
+                                associated_data=str(r['chat_id'])
+                            )
+                            fin = json.loads(decrypted_str)
+                        except Exception as dec_err:
+                            logger.error(f"Failed to decrypt ledger {r['ledger_id']}: {dec_err}")
+                            fin = {}
+    
+                    gross = float(fin.get('gross_amount') or r['ledger_amount'] or 0.0)
+                    net = float(fin.get('net_amount') or gross)
+                    vat = float(fin.get('vat_amount') or 0.0)
+                    vendor = fin.get('vendor') or r['ledger_vendor'] or 'Unknown Supplier'
+                    acc = str(fin.get('account_code') or fin.get('category') or r['category'] or '429').strip()
+                    tax = str(fin.get('tax_code') or fin.get('tax_type') or ('INPUT2' if vat > 0 else 'NONE')).strip()
+                    curr = fin.get('currency', 'GBP')
+                    status = r['status']
+    
+                    # Compute user-facing badge label
+                    if status == "CAPITAL_ALLOWANCE":
+                        status_label = "Capital Asset"
+                    elif status == "DUPLICATE_SUSPECTED":
+                        status_label = "Duplicate Suspected"
+                    elif status == "NEEDS_REVIEW":
+                        status_label = "Needs Review"
+                    elif status == "PENDING":
+                        status_label = "Queued to Xero"
+                    elif status == "SUBMITTED":
+                        status_label = "Submitted"
+                    else:
+                        status_label = status
+    
+                    items.append({
+                        "id": r['ledger_id'],
+                        "item_type": "ledger",
+                        "sender_id": r['sender_id'] or 'Unknown',
+                        "created_at": format_ts(r['created_at']),
+                        "vendor": vendor,
+                        "memo": fin.get('memo') or fin.get('reasoning_step_2_nature_of_expense') or r['category'] or 'No memo',
+                        "amount": gross,
+                        "net_amount": net,
+                        "vat_amount": vat,
+                        "account_code": acc,
+                        "tax_code": tax,
+                        "currency": curr,
+                        "raw_message": r.get('raw_message') or 'WhatsApp transaction recorded.',
+                        "media_urls": r.get('media_urls', ''),
+                        "reasoning": fin.get('reasoning') or fin.get('audit_memo') or f"Status: {status}. CAA 2001 & VATA 1994 ledger record.",
+                        "status": status,
+                        "status_label": status_label,
+                        "flagged": status in ("CAPITAL_ALLOWANCE", "DUPLICATE_SUSPECTED", "NEEDS_REVIEW"),
+                        "is_capital_allowance": (status == "CAPITAL_ALLOWANCE") or (gross >= 500.0),
+                        "is_duplicate": (status == "DUPLICATE_SUSPECTED"),
+                        "allowable_business_amount": gross,
+                        "business_proportion_percentage": 100,
+                        "is_failed_api": False,
+                        "accountant_approved": r['accountant_approved'],
+                        "external_bill_id": r['external_bill_id']
+                    })
+    except Exception as e:
+        logger.error(f"Error fetching dashboard items: {e}")
 
     # Summary counts for tab headers
-    async with get_connection() as conn:
-        counts_res = await conn.fetch("""
-            SELECT status, count(*) as count 
-            FROM hmrc_ledger 
-            GROUP BY status
-        """)
-        counts_map = {r['status']: r['count'] for r in counts_res}
-        staged_count = await conn.fetchval("""
-            SELECT count(*) FROM chat_sessions c
-            LEFT JOIN hmrc_ledger h ON c.id = h.chat_id
-            WHERE c.staging_payload IS NOT NULL AND h.id IS NULL
-        """)
+    try:
+        async with get_connection() as conn:
+            counts_res = await conn.fetch("""
+                SELECT status, count(*) as count 
+                FROM hmrc_ledger 
+                GROUP BY status
+            """)
+            counts_map = {r['status']: r['count'] for r in counts_res}
+            staged_count = await conn.fetchval("""
+                SELECT count(*) FROM chat_sessions c
+                LEFT JOIN hmrc_ledger h ON c.id = h.chat_id
+                WHERE c.staging_payload IS NOT NULL AND h.id IS NULL
+            """)
+    except Exception as e:
+        logger.error(f"Error fetching dashboard summary counts: {e}")
 
     tabs_summary = {
         "all": sum(counts_map.values()) + (staged_count or 0),
@@ -492,17 +502,21 @@ async def submit_triage(
             """, norm_amount, re_encrypted, now_ts, item_id)
 
         else: # staged item
-            # Update chat_sessions staging_payload with new codes
             row = await conn.fetchrow("SELECT staging_payload FROM chat_sessions WHERE id = $1", item_id)
-            if row and row["staging_payload"]:
-                payload = json.loads(row["staging_payload"])
-                payload["account_code"] = account_code
-                payload["tax_type"] = tax_type
-                payload["tax_code"] = tax_type
-                payload["is_capital_allowance"] = is_capital_asset
-                await conn.execute("UPDATE chat_sessions SET staging_payload = $1 WHERE id = $2", json.dumps(payload), item_id)
+            if not row or not row["staging_payload"]:
+                return HTMLResponse("<tr class='bg-rose-50'><td colspan='9' class='p-3 text-xs text-rose-700'>Staged payload not found</td></tr>", status_code=404)
+            payload = json.loads(row["staging_payload"])
+            payload["account_code"] = account_code
+            payload["tax_type"] = tax_type
+            payload["tax_code"] = tax_type
+            payload["is_capital_allowance"] = is_capital_asset
+            await conn.execute("UPDATE chat_sessions SET staging_payload = $1 WHERE id = $2", json.dumps(payload), item_id)
 
-            queue_id = await confirm_and_queue_to_ledger(item_id, allow_duplicate=allow_duplicate)
+            try:
+                queue_id = await confirm_and_queue_to_ledger(item_id, allow_duplicate=allow_duplicate)
+            except ValueError as ve:
+                return HTMLResponse(f"<tr class='bg-rose-50'><td colspan='9' class='p-3 text-xs text-rose-700'>{ve}</td></tr>", status_code=400)
+
             await conn.execute("""
                 UPDATE hmrc_ledger 
                 SET status = 'PENDING', 

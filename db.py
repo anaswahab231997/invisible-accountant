@@ -18,26 +18,37 @@ _pool_lock = None
 
 async def init_pool():
     global db_pool, _pool_lock
-    if _pool_lock is None:
+    curr_loop = asyncio.get_running_loop()
+    if _pool_lock is None or getattr(_pool_lock, "_loop", None) != curr_loop:
         _pool_lock = asyncio.Lock()
     if not DATABASE_URL:
         raise ValueError("DATABASE_URL environment variable is required")
     async with _pool_lock:
-        if db_pool is None:
-            db_pool = await asyncpg.create_pool(DATABASE_URL, min_size=1, max_size=8)
+        if db_pool is None or getattr(db_pool, "_loop", None) != curr_loop or (hasattr(db_pool, "_loop") and db_pool._loop.is_closed()):
+            db_pool = await asyncpg.create_pool(
+                DATABASE_URL,
+                min_size=1,
+                max_size=20,
+                command_timeout=15.0,
+                timeout=10.0
+            )
 
 async def close_pool():
     global db_pool, _pool_lock
-    if _pool_lock is None:
-        return
-    async with _pool_lock:
-        if db_pool:
-            await db_pool.close()
-            db_pool = None
+    if db_pool:
+        try:
+            if hasattr(db_pool, "_loop") and not db_pool._loop.is_closed():
+                await db_pool.close()
+        except Exception:
+            pass
+        db_pool = None
+    _pool_lock = None
 
 @asynccontextmanager
 async def get_connection():
-    if db_pool is None:
+    global db_pool
+    curr_loop = asyncio.get_running_loop()
+    if db_pool is None or getattr(db_pool, "_loop", None) != curr_loop or (hasattr(db_pool, "_loop") and db_pool._loop.is_closed()):
         await init_pool()
     async with db_pool.acquire() as conn:
         yield conn

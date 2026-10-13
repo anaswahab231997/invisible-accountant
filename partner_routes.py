@@ -1,6 +1,7 @@
 import hashlib
 import re
 import secrets
+from xml.sax.saxutils import escape as xml_escape
 from fastapi import APIRouter, Depends, Form, HTTPException, Request, Response
 from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
@@ -12,6 +13,7 @@ from security import (
     verify_practice_password,
     verify_practice_session,
 )
+from rate_limiter import limiter
 
 partner_router = APIRouter()
 templates = Jinja2Templates(directory="templates")
@@ -23,6 +25,7 @@ async def partner_register_page(request: Request):
 
 
 @partner_router.post("/partner/register")
+@limiter.limit("3/minute")
 async def partner_register_submit(
     request: Request,
     response: Response,
@@ -40,8 +43,32 @@ async def partner_register_submit(
     clean_email = contact_email.strip().lower()
     clean_slug = re.sub(r"[^a-z0-9\-]", "", slug.strip().lower())
 
+    if len(clean_name) < 3:
+        return templates.TemplateResponse(
+            request=request,
+            name="partner_register.html",
+            context={"error": "Practice name must be at least 3 characters long."},
+            status_code=400,
+        )
+
+    if not re.match(r"^[^@\s]+@[^@\s]+\.[^@\s]+$", clean_email):
+        return templates.TemplateResponse(
+            request=request,
+            name="partner_register.html",
+            context={"error": "Please enter a valid business email address."},
+            status_code=400,
+        )
+
     if not clean_slug:
         clean_slug = re.sub(r"[^a-z0-9\-]", "", clean_name.lower().replace(" ", "-"))
+
+    if len(clean_slug) < 3:
+        return templates.TemplateResponse(
+            request=request,
+            name="partner_register.html",
+            context={"error": "Practice URL slug must be at least 3 characters long."},
+            status_code=400,
+        )
 
     # Check if slug or email exists
     existing_slug = await db.get_practice_by_slug(clean_slug)
@@ -90,6 +117,14 @@ async def partner_register_submit(
         samesite="lax",
         max_age=14 * 86400,
     )
+    redirect.set_cookie(
+        key="partner_session",
+        value=token,
+        httponly=True,
+        secure=True,
+        samesite="lax",
+        max_age=14 * 86400,
+    )
     return redirect
 
 
@@ -99,6 +134,7 @@ async def partner_login_page(request: Request):
 
 
 @partner_router.post("/partner/login")
+@limiter.limit("5/minute")
 async def partner_login_submit(
     request: Request,
     email: str = Form(...),
@@ -125,6 +161,14 @@ async def partner_login_submit(
         samesite="lax",
         max_age=14 * 86400,
     )
+    redirect.set_cookie(
+        key="partner_session",
+        value=token,
+        httponly=True,
+        secure=True,
+        samesite="lax",
+        max_age=14 * 86400,
+    )
     return redirect
 
 
@@ -132,6 +176,7 @@ async def partner_login_submit(
 async def partner_logout():
     redirect = RedirectResponse("/partner/login", status_code=303)
     redirect.delete_cookie(key="practice_session", httponly=True, secure=True, samesite="lax")
+    redirect.delete_cookie(key="partner_session", httponly=True, secure=True, samesite="lax")
     return redirect
 
 
@@ -168,6 +213,14 @@ async def partner_dashboard(request: Request, session: dict = Depends(verify_pra
                 samesite="lax",
                 max_age=14 * 86400,
             )
+            response.set_cookie(
+                key="partner_session",
+                value=token,
+                httponly=True,
+                secure=True,
+                samesite="lax",
+                max_age=14 * 86400,
+            )
 
     return response
 
@@ -191,6 +244,9 @@ async def partner_loi_sign(
     firm_address: str = Form(""),
     session: dict = Depends(verify_practice_session),
 ):
+    if not (1 <= pledged_seats <= 100000):
+        raise HTTPException(status_code=400, detail="Pledged seats must be between 1 and 100,000")
+
     practice_id = session["practice_id"]
     practice = await db.get_practice_by_id(practice_id)
     if not practice:
@@ -202,6 +258,8 @@ async def partner_loi_sign(
     raw_agreement = f"{practice_id}:{firm_legal_name}:{signatory_name}:{pledged_seats}:{client_ip}"
     doc_hash = hashlib.sha256(raw_agreement.encode("utf-8")).hexdigest()
 
+    safe_sig = xml_escape(signatory_name.strip())
+
     await db.record_practice_loi(
         practice_id=practice_id,
         signatory_name=signatory_name.strip(),
@@ -210,7 +268,7 @@ async def partner_loi_sign(
         firm_crn=practice.get("company_number", ""),
         firm_address=firm_address.strip(),
         pledged_client_seats=pledged_seats,
-        signature_data_url=f"data:image/svg+xml;utf8,<svg><text>{signatory_name}</text></svg>",
+        signature_data_url=f"data:image/svg+xml;utf8,<svg><text>{safe_sig}</text></svg>",
         signature_ip_address=client_ip,
         document_sha256=doc_hash,
     )

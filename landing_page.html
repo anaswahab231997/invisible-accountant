@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Invisible Accountant | Stress-Free UK Taxes</title>
-    <meta name="description" content="WhatsApp AI that prepares MTD-ready expense drafts for your accountant">
+    <title>Invisible Accountant | Zero-Cost Receipt Capture for UK Practices &amp; Sole Traders</title>
+    <meta name="description" content="WhatsApp receipt capture staging verified Draft Bills directly into Xero with SHA-256 digital links. £0 practice fee. 100% human sign-off retained.">
     <link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -253,49 +253,111 @@
 
     <main class="max-w-7xl mx-auto px-6 md:px-12 pt-8 md:pt-16 pb-16 md:pb-24 grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-16 items-center">
         <div class="lg:col-span-7">
-            <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-mint text-emerald-800 font-medium text-sm mb-6 border border-emerald-200 shadow-sm">
-                <i data-lucide="check-circle" class="w-4 h-4"></i> Built for MTD-Ready Drafts for your Accountant
+            <!-- Audience Segmenter (Default: For Accountancy Firms) -->
+            <div class="inline-flex p-1 rounded-xl bg-gray-200/80 border border-gray-300 mb-6 max-w-md w-full shadow-inner">
+                <button id="hero-tab-practice" onclick="setHeroAudience('practice')" class="w-1/2 py-2 px-3 rounded-lg font-heading font-bold text-xs sm:text-sm transition-all duration-200 bg-white text-charcoal shadow-sm flex items-center justify-center gap-1.5">
+                    <i data-lucide="building-2" class="w-3.5 h-3.5 text-ukblue"></i>
+                    <span>For Accountancy Firms</span>
+                </button>
+                <button id="hero-tab-soletrader" onclick="setHeroAudience('soletrader')" class="w-1/2 py-2 px-3 rounded-lg font-heading font-bold text-xs sm:text-sm transition-all duration-200 text-slate hover:text-charcoal flex items-center justify-center gap-1.5">
+                    <i data-lucide="user" class="w-3.5 h-3.5 text-slate"></i>
+                    <span>For Sole Traders</span>
+                </button>
             </div>
-            
-            <h1 class="font-heading font-bold text-5xl md:text-6xl text-charcoal leading-[1.1] mb-6 tracking-tight">
-                The end of tax anxiety. <br>
-                <span class="text-ukblue">Just send a text.</span>
-            </h1>
-            
-            <p class="text-xl text-slate font-body mb-10 leading-relaxed max-w-2xl">
-                Stop stressing over spreadsheets and shoeboxes of receipts. Snap a photo, send it to Emma on WhatsApp, and our AI securely categorises and vaults it securely in your digital ledger for your quarterly updates.
-            </p>
 
-            <div id="waitlist" class="bg-cardbg p-8 rounded-2xl shadow-soft border border-gray-100 max-w-xl min-h-[300px]">
-                <div id="quiz-step-1" class="quiz-step">
-                    <h2 class="font-heading font-bold text-xl mb-2 text-charcoal">MTD Readiness Assessment</h2>
-                    <p class="text-slate mb-6 text-sm">To qualify for the beta vault, please confirm your estimated annual revenue.</p>
-                    <button class="quiz-btn" onclick="setRevenue('under30'); nextQuizStep(2)">Under £30,000 (Currently Exempt) <i data-lucide="chevron-right" class="w-4 h-4 text-gray-400"></i></button>
-                    <button class="quiz-btn" onclick="setRevenue('tier30to50'); nextQuizStep(2)">£30,000 - £50,000 (Mandatory April 2027) <i data-lucide="chevron-right" class="w-4 h-4 text-gray-400"></i></button>
-                    <button class="quiz-btn" onclick="setRevenue('tier50to90'); nextQuizStep(2)">£50,000 - £90,000 (Mandatory April 2026) <i data-lucide="chevron-right" class="w-4 h-4 text-gray-400"></i></button>
-                    <button class="quiz-btn" onclick="setRevenue('over90'); nextQuizStep(2)">Over £90,000 (VAT Registered &amp; Mandatory) <i data-lucide="chevron-right" class="w-4 h-4 text-gray-400"></i></button>
+            <!-- Panel A: Practice / Firm Focus (Default View) -->
+            <div id="hero-practice-content" class="transition-all duration-300">
+                <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-blue-50 text-ukblue font-semibold text-xs mb-5 border border-blue-200 shadow-sm">
+                    <span class="w-2 h-2 rounded-full bg-ukblue animate-pulse"></span>
+                    <span>Built for UK Accounting Practices • Xero Ecosystem Sync</span>
                 </div>
-                <div id="quiz-step-2" class="quiz-step hidden">
-                    <h2 class="font-heading font-bold text-xl mb-2 text-charcoal">Current Workflow</h2>
-                    <p class="text-slate mb-6 text-sm">How do you currently track your business expenses?</p>
-                    <button class="quiz-btn" onclick="nextQuizStep(3)">Paper & Shoeboxes <i data-lucide="chevron-right" class="w-4 h-4 text-gray-400"></i></button>
-                    <button class="quiz-btn" onclick="nextQuizStep(3)">Excel Spreadsheets <i data-lucide="chevron-right" class="w-4 h-4 text-gray-400"></i></button>
-                    <button class="quiz-btn" onclick="nextQuizStep(3)">Traditional Accounting Software <i data-lucide="chevron-right" class="w-4 h-4 text-gray-400"></i></button>
+                
+                <h1 class="font-heading font-bold text-4xl sm:text-5xl md:text-6xl text-charcoal leading-[1.1] mb-5 tracking-tight">
+                    Zero-Cost Receipt Capture.<br>
+                    <span class="text-ukblue">Straight to Xero Draft Bills.</span>
+                </h1>
+                
+                <p class="text-base sm:text-lg text-slate font-body mb-8 leading-relaxed max-w-2xl">
+                    Stop paying Dext £8–£15/month for sole traders who refuse to download apps. Your clients snap receipts in WhatsApp. We extract line items, flag capital assets over £500, split mixed VAT under BIM45014, and stage clean Draft Bills in Xero for your quarterly review.
+                </p>
+
+                <!-- Practice Pilot Enrollment Card -->
+                <div class="bg-cardbg p-6 sm:p-7 rounded-2xl shadow-soft border border-gray-200 max-w-xl">
+                    <div class="flex items-center justify-between pb-4 mb-4 border-b border-gray-100">
+                        <div>
+                            <span class="text-xs font-bold uppercase tracking-wider text-ukblue">Official 60-Day Practice Pilot</span>
+                            <h3 class="font-heading font-bold text-lg text-charcoal">Deploy for up to 25 Sole Traders</h3>
+                        </div>
+                        <span class="text-xs bg-emerald-50 text-emerald-800 font-bold px-2.5 py-1 rounded-full border border-emerald-200">£0 Practice Fee</span>
+                    </div>
+                    
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5 mb-6 text-xs text-charcoal font-medium">
+                        <div class="flex items-center gap-2"><i data-lucide="check" class="w-4 h-4 text-emerald-600 shrink-0"></i> Pushes strictly to Xero Draft Bills</div>
+                        <div class="flex items-center gap-2"><i data-lucide="check" class="w-4 h-4 text-emerald-600 shrink-0"></i> 100% human sign-off firewall</div>
+                        <div class="flex items-center gap-2"><i data-lucide="check" class="w-4 h-4 text-emerald-600 shrink-0"></i> Permanent SHA-256 receipt attachments</div>
+                        <div class="flex items-center gap-2"><i data-lucide="check" class="w-4 h-4 text-emerald-600 shrink-0"></i> Keep £3/mo margin or pass as subsidy</div>
+                    </div>
+
+                    <div class="flex flex-col sm:flex-row gap-3">
+                        <a href="/partner/register" class="flex-1 py-3.5 px-5 bg-ukblue hover:bg-blue-700 text-white rounded-xl font-heading font-bold text-sm shadow-md transition-all flex items-center justify-center gap-2">
+                            <i data-lucide="building" class="w-4 h-4"></i>
+                            Register Practice for 60-Day Pilot
+                        </a>
+                        <a href="#inference-wrapper" class="py-3.5 px-5 bg-gray-50 hover:bg-gray-100 text-charcoal rounded-xl font-heading font-semibold text-sm border border-gray-200 transition-all flex items-center justify-center gap-2">
+                            <i data-lucide="eye" class="w-4 h-4 text-slate"></i>
+                            Inspect Xero Draft Workflow
+                        </a>
+                    </div>
                 </div>
-                <div id="quiz-step-3" class="quiz-step hidden">
-                    <div class="flex items-center gap-2 text-emerald-700 bg-mint px-3 py-1 rounded-full text-sm font-bold w-max mb-4">
-                        <i data-lucide="check-circle-2" class="w-4 h-4"></i> Qualified for Beta
+            </div>
+
+            <!-- Panel B: Sole Trader Focus -->
+            <div id="hero-soletrader-content" class="hidden transition-all duration-300">
+                <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-mint text-emerald-800 font-medium text-xs mb-5 border border-emerald-200 shadow-sm">
+                    <i data-lucide="check-circle" class="w-3.5 h-3.5"></i>
+                    <span>MTD-Ready Record Keeping for HMRC • Works with Your Accountant</span>
+                </div>
+                
+                <h1 class="font-heading font-bold text-4xl sm:text-5xl md:text-6xl text-charcoal leading-[1.1] mb-5 tracking-tight">
+                    The end of tax anxiety.<br>
+                    <span class="text-ukblue">Just send a text to Emma.</span>
+                </h1>
+                
+                <p class="text-base sm:text-lg text-slate font-body mb-8 leading-relaxed max-w-2xl">
+                    Stop stressing over spreadsheets and shoeboxes of receipts. Snap a photo, send it to Emma on WhatsApp, and our AI securely categorises and vaults it in your digital ledger for your accountant's review.
+                </p>
+
+                <div id="waitlist" class="bg-cardbg p-6 sm:p-7 rounded-2xl shadow-soft border border-gray-100 max-w-xl min-h-[300px]">
+                    <div id="quiz-step-1" class="quiz-step">
+                        <h2 class="font-heading font-bold text-xl mb-2 text-charcoal">MTD Readiness Assessment</h2>
+                        <p class="text-slate mb-6 text-sm">To qualify for the beta vault, please confirm your estimated annual revenue.</p>
+                        <button class="quiz-btn" onclick="setRevenue('under30'); nextQuizStep(2)">Under £30,000 (Currently Exempt) <i data-lucide="chevron-right" class="w-4 h-4 text-gray-400"></i></button>
+                        <button class="quiz-btn" onclick="setRevenue('tier30to50'); nextQuizStep(2)">£30,000 - £50,000 (Mandatory April 2027) <i data-lucide="chevron-right" class="w-4 h-4 text-gray-400"></i></button>
+                        <button class="quiz-btn" onclick="setRevenue('tier50to90'); nextQuizStep(2)">£50,000 - £90,000 (Mandatory April 2026) <i data-lucide="chevron-right" class="w-4 h-4 text-gray-400"></i></button>
+                        <button class="quiz-btn" onclick="setRevenue('over90'); nextQuizStep(2)">Over £90,000 (VAT Registered &amp; Mandatory) <i data-lucide="chevron-right" class="w-4 h-4 text-gray-400"></i></button>
                     </div>
-                    <h2 id="quiz-result-title" class="font-heading font-bold text-xl mb-2 text-charcoal">You are required to comply with MTD.</h2>
-                    <p id="quiz-result-desc" class="text-slate mb-6 text-sm leading-relaxed">Based on your profile, you will face quarterly mandatory updates by April 2026. Secure your spot in the Invisible Accountant Beta vault now.</p>
-                    <div class="flex items-center justify-between mb-4 bg-gray-50 rounded-lg p-3 border border-gray-200">
-                        <span class="text-slate font-medium text-sm">Queue Position</span>
-                        <span class="font-mono font-bold text-ukblue text-lg">#143 / 250</span>
+                    <div id="quiz-step-2" class="quiz-step hidden">
+                        <h2 class="font-heading font-bold text-xl mb-2 text-charcoal">Current Workflow</h2>
+                        <p class="text-slate mb-6 text-sm">How do you currently track your business expenses?</p>
+                        <button class="quiz-btn" onclick="nextQuizStep(3)">Paper & Shoeboxes <i data-lucide="chevron-right" class="w-4 h-4 text-gray-400"></i></button>
+                        <button class="quiz-btn" onclick="nextQuizStep(3)">Excel Spreadsheets <i data-lucide="chevron-right" class="w-4 h-4 text-gray-400"></i></button>
+                        <button class="quiz-btn" onclick="nextQuizStep(3)">Traditional Accounting Software <i data-lucide="chevron-right" class="w-4 h-4 text-gray-400"></i></button>
                     </div>
-                    <a href="https://wa.me/447000000000?text=Add%20me%20to%20the%20UK%20Beta" class="btn-massive w-full py-4 bg-wapp hover:bg-[#20bd5a] text-white rounded-xl flex items-center justify-center gap-3 font-heading font-bold text-lg shadow-[0_4px_14px_0_rgba(37,211,102,0.39)]">
-                        <i data-lucide="message-circle" class="w-6 h-6"></i>
-                        Join Waitlist via WhatsApp
-                    </a>
+                    <div id="quiz-step-3" class="quiz-step hidden">
+                        <div class="flex items-center gap-2 text-emerald-700 bg-mint px-3 py-1 rounded-full text-sm font-bold w-max mb-4">
+                            <i data-lucide="check-circle-2" class="w-4 h-4"></i> Qualified for Beta
+                        </div>
+                        <h2 id="quiz-result-title" class="font-heading font-bold text-xl mb-2 text-charcoal">You are required to comply with MTD.</h2>
+                        <p id="quiz-result-desc" class="text-slate mb-6 text-sm leading-relaxed">Based on your profile, you will face quarterly mandatory updates by April 2026. Secure your spot in the Invisible Accountant Beta vault now.</p>
+                        <div class="flex items-center justify-between mb-4 bg-gray-50 rounded-lg p-3 border border-gray-200">
+                            <span class="text-slate font-medium text-sm">Queue Position</span>
+                            <span class="font-mono font-bold text-ukblue text-lg">#143 / 250</span>
+                        </div>
+                        <a href="https://wa.me/447000000000?text=Add%20me%20to%20the%20UK%20Beta" class="btn-massive w-full py-4 bg-wapp hover:bg-[#20bd5a] text-white rounded-xl flex items-center justify-center gap-3 font-heading font-bold text-lg shadow-[0_4px_14px_0_rgba(37,211,102,0.39)]">
+                            <i data-lucide="message-circle" class="w-6 h-6"></i>
+                            Join Waitlist via WhatsApp
+                        </a>
+                    </div>
                 </div>
             </div>
         </div>
@@ -369,6 +431,71 @@
         </div>
     </main>
 
+    <!-- Above-the-Fold UK Practice Trust Bar -->
+    <section class="py-6 sm:py-8 bg-white border-y border-gray-200 shadow-sm relative z-20">
+        <div class="max-w-7xl mx-auto px-6 md:px-12 text-center">
+            <p class="text-xs font-bold tracking-widest text-slate uppercase mb-5 font-heading">
+                Engineered for UK Accountancy Practices • Xero Ecosystem Sync • HMRC Notice 700/22 Compliance
+            </p>
+            <div class="grid grid-cols-2 md:grid-cols-5 gap-6 md:gap-8 items-center justify-center opacity-95">
+                
+                <!-- Xero Ecosystem -->
+                <div class="flex items-center gap-3 justify-center text-left">
+                    <div class="w-9 h-9 rounded-xl bg-[#13B5EA]/10 border border-[#13B5EA]/20 flex items-center justify-center text-[#13B5EA] font-extrabold text-sm shadow-sm">X</div>
+                    <div>
+                        <div class="text-xs font-bold text-charcoal">Xero Ecosystem</div>
+                        <div class="text-[10px] text-slate font-medium">Draft Bill &amp; Attachment Sync</div>
+                    </div>
+                </div>
+
+                <!-- Practice Assurance Standards -->
+                <div class="flex items-center gap-3 justify-center text-left">
+                    <div class="w-9 h-9 rounded-xl bg-blue-50 border border-blue-200 flex items-center justify-center text-ukblue shadow-sm">
+                        <i data-lucide="shield-check" class="w-5 h-5"></i>
+                    </div>
+                    <div>
+                        <div class="text-xs font-bold text-charcoal">Practice Compliant</div>
+                        <div class="text-[10px] text-slate font-medium">ICAEW &amp; ACCA Partner Friendly</div>
+                    </div>
+                </div>
+
+                <!-- UK Data Sovereignty -->
+                <div class="flex items-center gap-3 justify-center text-left">
+                    <div class="w-9 h-9 rounded-xl bg-purple-50 border border-purple-200 flex items-center justify-center text-purple-700 shadow-sm">
+                        <i data-lucide="server" class="w-5 h-5"></i>
+                    </div>
+                    <div>
+                        <div class="text-xs font-bold text-charcoal">UK Data Residency</div>
+                        <div class="text-[10px] text-slate font-medium">London (eu-west-2) • AES-256</div>
+                    </div>
+                </div>
+
+                <!-- Notice 700/22 Digital Links -->
+                <div class="flex items-center gap-3 justify-center text-left">
+                    <div class="w-9 h-9 rounded-xl bg-emerald-50 border border-emerald-200 flex items-center justify-center text-emerald-700 shadow-sm">
+                        <i data-lucide="link" class="w-5 h-5"></i>
+                    </div>
+                    <div>
+                        <div class="text-xs font-bold text-charcoal">Notice 700/22 §3.3</div>
+                        <div class="text-[10px] text-slate font-medium">SHA-256 Digital Audit Links</div>
+                    </div>
+                </div>
+
+                <!-- Zero Model Training -->
+                <div class="flex items-center gap-3 justify-center text-left col-span-2 md:col-span-1">
+                    <div class="w-9 h-9 rounded-xl bg-amber-50 border border-amber-200 flex items-center justify-center text-amber-700 shadow-sm">
+                        <i data-lucide="lock" class="w-5 h-5"></i>
+                    </div>
+                    <div>
+                        <div class="text-xs font-bold text-charcoal">Private &amp; Confidential</div>
+                        <div class="text-[10px] text-slate font-medium">Zero LLM Model Training</div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
     <section id="inference-wrapper" class="bg-calmstone border-y border-gray-200 lg:h-[250vh] relative">
         <div class="lg:sticky lg:top-0 lg:h-screen flex flex-col justify-start pt-24 pb-8">
             <div class="max-w-7xl mx-auto px-6 md:px-12 w-full">
@@ -424,46 +551,105 @@
                         </div>
                     </div>
 
-                    <!-- Right: The Cards -->
-                    <div class="lg:col-span-7 flex flex-col gap-3 md:gap-4 relative z-10 w-full max-w-lg mx-auto">
+                    <!-- Right: Authentic Xero Draft Bill Output -->
+                    <div class="lg:col-span-7 flex flex-col gap-3 relative z-10 w-full max-w-xl mx-auto">
                         
-                        <!-- Vendor Card -->
-                        <div id="card-vendor" class="opacity-0 transform translate-x-8 transition-all duration-700 bg-white p-4 md:p-5 rounded-2xl border-l-[6px] border-hmrcblue shadow-soft flex items-center justify-between gap-2">
-                            <div class="min-w-0">
-                                <div class="text-[10px] sm:text-xs text-gray-500 font-semibold uppercase mb-1">Vendor Identified</div>
-                                <div class="text-lg sm:text-xl md:text-2xl font-bold text-deepslate truncate">Costa Coffee</div>
+                        <!-- Xero Live Integration Header -->
+                        <div class="bg-slate-900 text-white px-4 py-2.5 rounded-t-2xl flex items-center justify-between border-b border-slate-800 shadow-sm">
+                            <div class="flex items-center gap-2">
+                                <span class="w-6 h-6 rounded bg-[#13B5EA] text-white font-bold text-xs flex items-center justify-center">X</span>
+                                <span class="text-xs font-semibold text-gray-200 font-heading">Xero Accounting • Bills to Pay</span>
                             </div>
-                            <i data-lucide="check-circle-2" class="w-6 h-6 sm:w-8 sm:h-8 text-hmrcblue/20 shrink-0"></i>
-                        </div>
-                        
-                        <!-- Tax Category Card: Intelligent Split -->
-                        <div id="card-context" class="opacity-0 transform translate-x-8 transition-all duration-700 bg-white p-4 md:p-5 rounded-2xl border-l-[6px] border-ukblue shadow-soft flex flex-col gap-2">
-                            <div class="flex items-center justify-between">
-                                <div class="text-[10px] sm:text-xs text-gray-500 font-semibold uppercase">Smart Tax Apportionment (BIM45014)</div>
-                                <span class="text-[10px] sm:text-xs bg-blue-50 text-ukblue px-2 py-0.5 rounded font-medium">Split Receipt</span>
-                            </div>
-                            <div class="space-y-1.5 pt-1 border-t border-gray-100 text-xs sm:text-sm">
-                                <div class="flex justify-between items-center">
-                                    <span class="text-deepslate font-medium">Meeting Room (£21.90)</span>
-                                    <span class="text-[10px] sm:text-xs bg-green-50 text-emerald-700 px-2 py-0.5 rounded font-semibold">100% Allowable (Premises)</span>
-                                </div>
-                                <div class="flex justify-between items-center">
-                                    <span class="text-slate font-medium">Client Hospitality (£23.10)</span>
-                                    <span class="text-[10px] sm:text-xs bg-orange-50 text-warmcaution px-2 py-0.5 rounded font-semibold">Non-allowable (Ent.)</span>
-                                </div>
+                            <div class="flex items-center gap-2">
+                                <span class="text-[10px] bg-amber-500/20 text-amber-300 font-mono font-bold px-2 py-0.5 rounded border border-amber-500/30">STATUS: DRAFT</span>
+                                <span class="text-[10px] text-gray-400">100% Sign-Off Gated</span>
                             </div>
                         </div>
 
-                        <!-- Amount Card -->
-                        <div id="card-amount" class="opacity-0 transform translate-x-8 transition-all duration-700 bg-white p-4 md:p-5 rounded-2xl border-l-[6px] border-sagesuccess shadow-soft flex items-center justify-between gap-2">
-                            <div class="min-w-0">
-                                <div class="text-[10px] sm:text-xs text-gray-500 font-semibold uppercase mb-1">Total &amp; Compliance Audit</div>
-                                <div class="text-xl sm:text-2xl md:text-3xl font-heading font-bold text-sagesuccess truncate">£45.00</div>
-                                <div class="text-[11px] text-slate mt-0.5">Tax deduction: £21.90 | Disallowable: £23.10</div>
+                        <!-- Xero Bill Details Container -->
+                        <div class="bg-white rounded-b-2xl border-x border-b border-gray-200 p-4 sm:p-5 shadow-soft space-y-4">
+                            
+                            <!-- Header Grid -->
+                            <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 pb-3 border-b border-gray-100 text-xs">
+                                <div>
+                                    <div class="text-[10px] font-bold text-gray-400 uppercase">Contact</div>
+                                    <div id="card-vendor" class="font-bold text-charcoal truncate transition-all duration-500">Costa Coffee</div>
+                                    <div class="text-[9px] text-emerald-600 font-medium">✓ Matched Existing</div>
+                                </div>
+                                <div>
+                                    <div class="text-[10px] font-bold text-gray-400 uppercase">Date</div>
+                                    <div class="font-semibold text-charcoal">Today</div>
+                                </div>
+                                <div>
+                                    <div class="text-[10px] font-bold text-gray-400 uppercase">Reference</div>
+                                    <div class="font-mono text-charcoal">WA-COSTA-914</div>
+                                </div>
+                                <div>
+                                    <div class="text-[10px] font-bold text-gray-400 uppercase">Receipt File</div>
+                                    <div class="text-ukblue font-semibold flex items-center gap-1 truncate">
+                                        <i data-lucide="paperclip" class="w-3 h-3 shrink-0"></i>
+                                        <span class="truncate">costa_rec.jpg</span>
+                                    </div>
+                                    <div class="text-[9px] text-gray-400 font-mono truncate">SHA-256: b352a2c0...</div>
+                                </div>
                             </div>
-                            <div class="text-[10px] sm:text-xs bg-green-50 text-sagesuccess px-2 py-1 sm:px-2.5 sm:py-1.5 rounded-md font-medium shrink-0 whitespace-nowrap">Ready for Xero</div>
+
+                            <!-- Line Items Table -->
+                            <div class="overflow-x-auto">
+                                <table class="w-full min-w-[480px] text-left text-xs">
+                                    <thead>
+                                        <tr class="text-[10px] font-bold text-gray-400 uppercase border-b border-gray-100">
+                                            <th class="pb-1.5 font-semibold">Description</th>
+                                            <th class="pb-1.5 font-semibold">Account</th>
+                                            <th class="pb-1.5 font-semibold">Tax Rate</th>
+                                            <th class="pb-1.5 font-semibold text-right">Gross</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="divide-y divide-gray-100 font-body">
+                                        <tr id="card-context" class="transition-all duration-500">
+                                            <td class="py-2.5 pr-2">
+                                                <div class="font-medium text-charcoal">Meeting Room Hire</div>
+                                                <div class="text-[10px] text-emerald-700 font-semibold">BIM45014 Allowable Premises</div>
+                                            </td>
+                                            <td class="py-2.5 pr-2 font-mono text-gray-700">424 - Rent</td>
+                                            <td class="py-2.5 pr-2 text-gray-600">20% (VAT on Exp)</td>
+                                            <td class="py-2.5 text-right font-bold text-charcoal">£21.90</td>
+                                        </tr>
+                                        <tr id="card-amount" class="transition-all duration-500">
+                                            <td class="py-2.5 pr-2">
+                                                <div class="font-medium text-charcoal">Pastries &amp; Flat Whites (x2)</div>
+                                                <div class="text-[10px] text-warmcaution font-semibold">BIM45000 Disallowable Ent.</div>
+                                            </td>
+                                            <td class="py-2.5 pr-2 font-mono text-gray-700">429 - Entertain.</td>
+                                            <td class="py-2.5 pr-2 text-gray-600">No VAT (0%)</td>
+                                            <td class="py-2.5 text-right font-bold text-charcoal">£23.10</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+
+                            <!-- Total & Audit Footnote -->
+                            <div class="pt-3 border-t border-gray-200 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+                                <div class="text-[11px] text-slate leading-tight">
+                                    <span class="font-semibold text-charcoal">Practice Audit Trail:</span> Receipt SHA-256 verified • Staged in Xero Draft • Zero contact duplication • Ready for 1-click partner approval.
+                                </div>
+                                <div class="text-right shrink-0">
+                                    <div class="text-[10px] font-bold text-gray-400 uppercase">Total Bill (GBP)</div>
+                                    <div class="text-xl sm:text-2xl font-heading font-extrabold text-charcoal">£45.00</div>
+                                </div>
+                            </div>
+
                         </div>
-                        
+
+                        <!-- Practice Reassurance Pill -->
+                        <div class="bg-emerald-50 border border-emerald-200 rounded-xl px-4 py-2.5 text-xs text-emerald-900 flex items-center justify-between shadow-sm">
+                            <div class="flex items-center gap-2">
+                                <i data-lucide="check-circle" class="w-4 h-4 text-emerald-600 shrink-0"></i>
+                                <span><strong>HMRC Notice 700/22 Compliant:</strong> Permanent receipt attachment linked directly in Xero.</span>
+                            </div>
+                            <span class="font-bold text-emerald-700 text-[11px] uppercase tracking-wider shrink-0">Draft Protected</span>
+                        </div>
+
                     </div>
                 </div>
             </div>
@@ -611,9 +797,9 @@
                     <!-- Left Column: The Partner Offer -->
                     <div class="lg:col-span-6 bg-white rounded-3xl border border-gray-200 shadow-xl p-8 sm:p-10 flex flex-col justify-between h-full">
                         <div>
-                            <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-purple-50 text-purple-800 text-xs font-bold uppercase tracking-wider mb-4 border border-purple-200">
-                                <i data-lucide="award" class="w-3.5 h-3.5"></i>
-                                Official Practice Partnership Program
+                            <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-blue-50 text-ukblue text-xs font-bold uppercase tracking-wider mb-4 border border-blue-200">
+                                <i data-lucide="shield-check" class="w-3.5 h-3.5"></i>
+                                ICAEW &amp; ACCA Section 330 Aligned • £0 Practice Model
                             </div>
                             
                             <h3 class="font-heading font-bold text-3xl sm:text-4xl text-charcoal mb-4">
@@ -621,7 +807,7 @@
                             </h3>
 
                             <p class="text-slate text-sm sm:text-base leading-relaxed mb-6">
-                                Why pay hundreds in practice fees for Dext or AutoEntry shelfware? Invisible Accountant charges your practice <strong>£0</strong>, automates receipt-chasing on WhatsApp, and pays your firm <strong>£3.00/client/month</strong> in recurring passive profit.
+                                Keep Dext or AutoEntry for your complex corporate clients. But stop burning £5–£15/month on desktop software for sole traders who refuse to download apps. Invisible Accountant charges your practice <strong>£0</strong>, automates receipt-chasing on WhatsApp, and gives you total commercial flexibility: <strong>retain £3.00/client/month</strong> as practice recurring margin, <strong>OR pass as a £3.00/mo software discount</strong> directly to your clients (£6.99/mo client rate).
                             </p>
 
                             <div class="bg-emerald-50/70 border border-emerald-200 rounded-2xl p-5 mb-6">
@@ -629,12 +815,12 @@
                                     <div class="border-r border-emerald-200 pr-2">
                                         <div class="text-[11px] font-bold text-emerald-800 uppercase tracking-wide">Practice Platform Fee</div>
                                         <div class="text-3xl font-heading font-extrabold text-emerald-700 mt-1">£0.00</div>
-                                        <div class="text-[10px] text-emerald-600 mt-0.5">Zero upfront or monthly software cost</div>
+                                        <div class="text-[10px] text-emerald-600 mt-0.5">Zero monthly subscription or seat fees</div>
                                     </div>
                                     <div class="pl-2">
-                                        <div class="text-[11px] font-bold text-emerald-800 uppercase tracking-wide">Practice Revenue Share</div>
-                                        <div class="text-3xl font-heading font-extrabold text-ukblue mt-1">+£3.00</div>
-                                        <div class="text-[10px] text-slate mt-0.5">Per active client / month via BACS</div>
+                                        <div class="text-[11px] font-bold text-emerald-800 uppercase tracking-wide">Commercial Flexibility</div>
+                                        <div class="text-2xl sm:text-3xl font-heading font-extrabold text-ukblue mt-1">£3.00 / mo</div>
+                                        <div class="text-[10px] text-slate mt-0.5">Keep as margin OR pass as client subsidy</div>
                                     </div>
                                 </div>
                             </div>
@@ -642,23 +828,23 @@
                             <div class="space-y-3 mb-8">
                                 <div class="flex items-start gap-3">
                                     <i data-lucide="check-circle-2" class="w-5 h-5 text-emerald-600 flex-shrink-0 mt-0.5"></i>
-                                    <span class="text-xs sm:text-sm text-charcoal font-medium"><strong>Automated Receipt Chasing:</strong> Emma chases slow sole traders on WhatsApp on your firm's behalf.</span>
+                                    <span class="text-xs sm:text-sm text-charcoal font-medium"><strong>Automated Receipt Chasing:</strong> Emma chases slow sole traders on WhatsApp on your firm's behalf, saving ~6 hrs/client/year.</span>
                                 </div>
                                 <div class="flex items-start gap-3">
                                     <i data-lucide="check-circle-2" class="w-5 h-5 text-emerald-600 flex-shrink-0 mt-0.5"></i>
-                                    <span class="text-xs sm:text-sm text-charcoal font-medium"><strong>Zero Shelfware Risk:</strong> Clients are billed £9.99/mo directly. You only earn on active clients.</span>
+                                    <span class="text-xs sm:text-sm text-charcoal font-medium"><strong>Zero Shelfware Risk:</strong> Inactive sole traders incur £0 practice cost. Never pay software shelfware on dormant records.</span>
                                 </div>
                                 <div class="flex items-start gap-3">
                                     <i data-lucide="check-circle-2" class="w-5 h-5 text-emerald-600 flex-shrink-0 mt-0.5"></i>
-                                    <span class="text-xs sm:text-sm text-charcoal font-medium"><strong>Multi-Tenant Practice Portal:</strong> Review receipts, override account codes, and push to Xero/QBO in bulk.</span>
+                                    <span class="text-xs sm:text-sm text-charcoal font-medium"><strong>Strictly Xero Draft Bills:</strong> Staged in Draft with cryptographic SHA-256 attachments. 100% human sign-off retained.</span>
                                 </div>
                                 <div class="flex items-start gap-3">
                                     <i data-lucide="check-circle-2" class="w-5 h-5 text-emerald-600 flex-shrink-0 mt-0.5"></i>
-                                    <span class="text-xs sm:text-sm text-charcoal font-medium"><strong>Branded Practice Link &amp; QR:</strong> Custom onboarding portal e.g. <code class="text-xs bg-gray-100 px-1 py-0.5 rounded">/join/your-firm</code>.</span>
+                                    <span class="text-xs sm:text-sm text-charcoal font-medium"><strong>ICAEW &amp; ACCA Ethics Aligned:</strong> Full compliance with Section 330 referral rules via margin or client fee-reduction option.</span>
                                 </div>
                                 <div class="flex items-start gap-3">
                                     <i data-lucide="check-circle-2" class="w-5 h-5 text-emerald-600 flex-shrink-0 mt-0.5"></i>
-                                    <span class="text-xs sm:text-sm text-charcoal font-medium"><strong>90-Day Pilot LOI Protection:</strong> Formal digital agreement compliant with ICAEW/ACCA ethics.</span>
+                                    <span class="text-xs sm:text-sm text-charcoal font-medium"><strong>60-Day Pilot (Up to 25 Clients Free):</strong> Trial without modifying your corporate stack or signing long-term lock-in contracts.</span>
                                 </div>
                             </div>
                         </div>
@@ -666,7 +852,7 @@
                         <div class="pt-6 border-t border-gray-100 flex flex-col sm:flex-row gap-3">
                             <a href="/partner/register" class="flex-1 py-3.5 px-6 bg-ukblue hover:bg-blue-700 text-white rounded-xl font-heading font-bold text-center text-sm shadow-md transition-all flex items-center justify-center gap-2">
                                 <i data-lucide="building" class="w-4 h-4"></i>
-                                Register Your Practice Free
+                                Register Practice for Pilot Free
                             </a>
                             <a href="/partner/login" class="py-3.5 px-6 bg-gray-100 hover:bg-gray-200 text-charcoal rounded-xl font-heading font-semibold text-center text-sm border border-gray-300 transition-all flex items-center justify-center gap-2">
                                 <i data-lucide="log-in" class="w-4 h-4"></i>
@@ -679,14 +865,14 @@
                     <div class="lg:col-span-6 bg-white rounded-3xl border border-gray-200 shadow-xl p-8 sm:p-10">
                         <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 text-emerald-800 text-xs font-bold uppercase tracking-wider mb-4 border border-emerald-200">
                             <i data-lucide="calculator" class="w-3.5 h-3.5"></i>
-                            Interactive Practice Impact Calculator
+                            Practice Impact Calculator
                         </div>
 
                         <h3 class="font-heading font-bold text-2xl sm:text-3xl text-charcoal mb-2">
                             Calculate Your Firm's Annual Return
                         </h3>
                         <p class="text-slate text-xs sm:text-sm mb-8 leading-relaxed">
-                            Drag the slider to match your firm's active sole trader and landlord client base.
+                            Drag the slider to match your firm's active sole trader and landlord portfolio.
                         </p>
 
                         <!-- Slider Control -->
@@ -707,23 +893,23 @@
                         <!-- Calculated Results Grid -->
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8">
                             <div class="bg-emerald-50/60 border border-emerald-200 rounded-2xl p-5 text-center">
-                                <div class="text-[11px] font-bold text-emerald-800 uppercase tracking-wider">Annual Practice Revenue Share</div>
+                                <div class="text-[11px] font-bold text-emerald-800 uppercase tracking-wider">Annual Margin or Client Subsidy</div>
                                 <div id="calc-annual-commission" class="text-3xl font-heading font-black text-emerald-700 my-1.5">£3,600</div>
-                                <div id="calc-monthly-commission" class="text-xs font-semibold text-emerald-800">£300.00 / month passive profit</div>
+                                <div id="calc-monthly-commission" class="text-xs font-semibold text-emerald-800">£300.00 / month margin OR client subsidy</div>
                             </div>
 
                             <div class="bg-blue-50/60 border border-blue-200 rounded-2xl p-5 text-center">
                                 <div class="text-[11px] font-bold text-blue-900 uppercase tracking-wider">Annual Chasing Hours Saved</div>
                                 <div id="calc-annual-hours" class="text-3xl font-heading font-black text-ukblue my-1.5">720 hrs</div>
-                                <div id="calc-weekly-hours" class="text-xs font-semibold text-blue-800">~15 hrs/week partner time saved</div>
+                                <div id="calc-weekly-hours" class="text-xs font-semibold text-blue-800">~15 hrs/week firm chasing time eliminated</div>
                             </div>
                         </div>
 
                         <!-- Summary Comparison Card -->
                         <div class="bg-charcoal text-white rounded-2xl p-6 mb-6 space-y-3">
                             <div class="flex items-center justify-between text-xs pb-3 border-b border-gray-700">
-                                <span class="text-gray-300">Traditional Software Cost (Dext/AutoEntry):</span>
-                                <span id="calc-traditional-cost" class="font-bold text-rose-400">-£2,400 / yr</span>
+                                <span class="text-gray-300">Legacy Software Cost (Dext @ £5/client/mo):</span>
+                                <span id="calc-traditional-cost" class="font-bold text-rose-400">-£6,000 / yr</span>
                             </div>
                             <div class="flex items-center justify-between text-xs pb-3 border-b border-gray-700">
                                 <span class="text-gray-300">Invisible Accountant Practice Cost:</span>
@@ -731,12 +917,12 @@
                             </div>
                             <div class="flex items-center justify-between text-sm font-heading font-bold pt-1">
                                 <span class="text-white">Net Practice Financial Advantage:</span>
-                                <span id="calc-net-advantage" class="text-emerald-400 font-extrabold text-base">+£6,000 / yr</span>
+                                <span id="calc-net-advantage" class="text-emerald-400 font-extrabold text-base">+£9,600 / yr</span>
                             </div>
                         </div>
 
                         <a href="/partner/register" class="w-full py-4 px-6 bg-ukblue hover:bg-blue-700 text-white rounded-xl font-heading font-bold text-center text-sm shadow-lg transition-all flex items-center justify-center gap-2">
-                            <span>Join the 90-Day Practice Pilot (Zero Risk)</span>
+                            <span>Apply for 60-Day Practice Pilot (Up to 25 Clients Free)</span>
                             <i data-lucide="arrow-right" class="w-4 h-4"></i>
                         </a>
                     </div>
@@ -747,17 +933,54 @@
         </div>
     </section>
 
-    <!-- Footer -->
-    <footer class="bg-white py-12 text-center border-t border-gray-100">
-        <div class="max-w-7xl mx-auto px-4">
-            <div class="flex flex-col md:flex-row justify-center items-center gap-4 md:gap-8 mb-6">
-                <a href="/terms" class="text-sm font-body text-slate hover:text-ukblue transition-colors">Terms & Conditions</a>
-                <a href="/privacy" class="text-sm font-body text-slate hover:text-ukblue transition-colors">Privacy Policy</a>
-                <a href="/accessibility" class="text-sm font-body text-slate hover:text-ukblue transition-colors">Accessibility</a>
-                <a href="mailto:security@invisibleaccountant.co.uk" class="text-sm font-body text-slate hover:text-ukblue transition-colors">Report Security Issue</a>
+    <!-- Statutory Pre-Incorporation Footer -->
+    <footer class="bg-white py-14 text-center border-t border-gray-200">
+        <div class="max-w-7xl mx-auto px-6 md:px-12">
+            <!-- Navigation Links -->
+            <div class="flex flex-wrap justify-center items-center gap-4 md:gap-8 mb-8 text-sm font-body text-slate">
+                <a href="/terms" class="hover:text-ukblue transition-colors">Terms of Pilot Service</a>
+                <span class="text-gray-300 hidden sm:inline">•</span>
+                <a href="/privacy" class="hover:text-ukblue transition-colors">UK GDPR &amp; Privacy Policy</a>
+                <span class="text-gray-300 hidden sm:inline">•</span>
+                <a href="/accessibility" class="hover:text-ukblue transition-colors">Accessibility Standards</a>
+                <span class="text-gray-300 hidden sm:inline">•</span>
+                <a href="/partner/register" class="hover:text-ukblue transition-colors font-semibold text-ukblue">Practice Pilot Enrollment</a>
+                <span class="text-gray-300 hidden sm:inline">•</span>
+                <a href="/partner/login" class="hover:text-ukblue transition-colors">Partner Portal Sign In</a>
+                <span class="text-gray-300 hidden sm:inline">•</span>
+                <a href="mailto:security@invisibleaccountant.co.uk" class="hover:text-ukblue transition-colors">Security Incident Response</a>
             </div>
-            <p class="text-sm font-body text-slate">&copy; 2026 Invisible Accountant Ltd. Registered in England & Wales.</p>
-            <p class="text-xs font-body text-gray-400 mt-2 max-w-2xl mx-auto">Our software seamlessly pushes verified draft bills to Xero (QuickBooks &amp; FreeAgent integrations in development). Use of our software does not constitute formal tax advice or an endorsement of your tax affairs. The taxpayer remains legally responsible for the accuracy of their statutory records under Schedule 24 Finance Act 2007.</p>
+
+            <!-- Pre-incorporation & Pilot Disclosure -->
+            <div class="bg-gray-50 border border-gray-200 rounded-2xl p-6 mb-8 max-w-4xl mx-auto text-left">
+                <div class="flex items-start gap-3 mb-3">
+                    <i data-lucide="info" class="w-5 h-5 text-ukblue shrink-0 mt-0.5"></i>
+                    <div>
+                        <h4 class="text-xs font-bold uppercase tracking-wider text-charcoal">Regulatory &amp; Pilot Operation Notice</h4>
+                        <p class="text-xs text-slate mt-1 leading-relaxed">
+                            <strong>Invisible Accountant</strong> is an early-stage UK FinTech pilot project operating an invitation-only practice evaluation program for UK accountancy firms, ICAEW / ACCA practitioners, and Xero partners. Formal UK company incorporation (Companies House) is scheduled upon completion of the multi-firm sandbox pilot.
+                        </p>
+                    </div>
+                </div>
+                <div class="border-t border-gray-200 pt-3 grid grid-cols-1 md:grid-cols-2 gap-4 text-[11px] text-slate">
+                    <div>
+                        <strong class="text-charcoal block mb-0.5">Statutory Sign-Off (Schedule 24 FA 2007):</strong>
+                        Invisible Accountant is an administrative digital link and document ingestion engine. It does not provide formal tax advice, investment advice, or statutory audit services. All financial records are staged as Xero Draft Bills and require review and authorization by the appointed accountant or taxpayer. The taxpayer remains legally responsible for the completeness and accuracy of statutory records submitted to HM Revenue &amp; Customs (Taxes Management Act 1970 s12B).
+                    </div>
+                    <div>
+                        <strong class="text-charcoal block mb-0.5">UK Data Sovereignty &amp; Notice 700/22 §3.3:</strong>
+                        All transaction data is processed and hosted strictly within the UK (AWS London, <code class="bg-gray-100 px-1 py-0.5 rounded text-[10px]">eu-west-2</code>) in compliance with the UK Data Protection Act 2018 and UK GDPR. Attachments are encrypted at rest with AES-256-GCM and cryptographically linked via SHA-256 hashes. Client financial records are strictly isolated and never used for LLM foundation model training.
+                    </div>
+                </div>
+            </div>
+
+            <!-- Copyright Line (Truthful & parked) -->
+            <p class="text-xs font-body text-slate">
+                &copy; 2026 Invisible Accountant (FinTech Pilot Initiative). All rights reserved.
+            </p>
+            <p class="text-[11px] font-body text-gray-400 mt-2 max-w-2xl mx-auto">
+                Xero is a registered trademark of Xero Limited. Invisible Accountant integrates with the official Xero Accounting API via standard developer partner protocols.
+            </p>
         </div>
     </footer>
 
@@ -884,10 +1107,24 @@
             }
         });
 
-        // Soft Scroll-driven Receipt Scanner Logic
+        // Soft Scroll-driven Receipt Scanner Logic with RAF throttling
+        let isScrollTicking = false;
         window.addEventListener('scroll', () => {
+            if (!isScrollTicking) {
+                window.requestAnimationFrame(() => {
+                    handleReceiptScanner();
+                    isScrollTicking = false;
+                });
+                isScrollTicking = true;
+            }
+        }, { passive: true });
+
+        function handleReceiptScanner() {
             const wrapper = document.getElementById('inference-wrapper');
-            if(!wrapper) return;
+            if (!wrapper) return;
+            
+            const isDesktop = window.innerWidth >= 1024;
+            if (!isDesktop) return; // on mobile, cards remain fully visible in normal document flow
             
             const scrollStart = wrapper.offsetTop;
             const scrollDistance = wrapper.offsetHeight - window.innerHeight; 
@@ -903,48 +1140,35 @@
             }
 
             // Vendor (Passes around 20-30%)
-            if(progress > 0.25) {
-                document.getElementById('receipt-vendor').classList.add('text-hmrcblue');
-                document.getElementById('card-vendor').classList.replace('opacity-0', 'opacity-100');
-                document.getElementById('card-vendor').classList.replace('translate-y-4', 'translate-y-0');
+            const receiptVendor = document.getElementById('receipt-vendor');
+            const cardVendor = document.getElementById('card-vendor');
+            if (progress > 0.25) {
+                if (receiptVendor) receiptVendor.classList.add('text-hmrcblue');
+                if (cardVendor) cardVendor.classList.add('text-ukblue');
             } else {
-                document.getElementById('receipt-vendor').classList.remove('text-hmrcblue');
-                document.getElementById('card-vendor').classList.replace('opacity-100', 'opacity-0');
-                document.getElementById('card-vendor').classList.replace('translate-y-0', 'translate-y-4');
+                if (receiptVendor) receiptVendor.classList.remove('text-hmrcblue');
+                if (cardVendor) cardVendor.classList.remove('text-ukblue');
             }
 
             // Amount (Passes around 65%)
-            if(progress > 0.65) {
-                document.getElementById('receipt-total').classList.add('text-hmrcblue');
-                document.getElementById('card-amount').classList.replace('opacity-0', 'opacity-100');
-                document.getElementById('card-amount').classList.replace('translate-y-4', 'translate-y-0');
+            const receiptTotal = document.getElementById('receipt-total');
+            const cardAmount = document.getElementById('card-amount');
+            if (progress > 0.65) {
+                if (receiptTotal) receiptTotal.classList.add('text-hmrcblue');
+                if (cardAmount) cardAmount.classList.add('bg-amber-50/70');
             } else {
-                document.getElementById('receipt-total').classList.remove('text-hmrcblue');
-                document.getElementById('card-amount').classList.replace('opacity-100', 'opacity-0');
-                document.getElementById('card-amount').classList.replace('translate-y-0', 'translate-y-4');
+                if (receiptTotal) receiptTotal.classList.remove('text-hmrcblue');
+                if (cardAmount) cardAmount.classList.remove('bg-amber-50/70');
             }
 
-            // Context & Vault (Passes end, around 85%)
-            if(progress > 0.85) {
-                document.getElementById('card-context').classList.replace('opacity-0', 'opacity-100');
-                document.getElementById('card-context').classList.replace('translate-y-4', 'translate-y-0');
-                
-                let vault = document.getElementById('card-vault');
-                if (vault) {
-                    vault.classList.replace('opacity-0', 'opacity-100');
-                    vault.classList.replace('translate-y-4', 'translate-y-0');
-                }
+            // Context (Passes end, around 85%)
+            const cardContext = document.getElementById('card-context');
+            if (progress > 0.85) {
+                if (cardContext) cardContext.classList.add('bg-blue-50/70');
             } else {
-                document.getElementById('card-context').classList.replace('opacity-100', 'opacity-0');
-                document.getElementById('card-context').classList.replace('translate-y-0', 'translate-y-4');
-                
-                let vault = document.getElementById('card-vault');
-                if (vault) {
-                    vault.classList.replace('opacity-100', 'opacity-0');
-                    vault.classList.replace('translate-y-0', 'translate-y-4');
-                }
+                if (cardContext) cardContext.classList.remove('bg-blue-50/70');
             }
-        });
+        }
 
         
         // Real-Time Inference WebSockets & API
@@ -1032,14 +1256,23 @@
             inp.value = ''; inp.disabled = true;
             
             const chat = document.getElementById('chatBody');
-            chat.innerHTML += `<div class="msg-user px-3 py-2 text-[15px] self-end max-w-[85%] mb-2">${val}</div>`;
+            
+            // Safe DOM insertion preventing any HTML/script injection
+            const userMsgEl = document.createElement('div');
+            userMsgEl.className = "msg-user px-3 py-2 text-[15px] self-end max-w-[85%] mb-2";
+            userMsgEl.textContent = val;
+            chat.appendChild(userMsgEl);
             chat.scrollTop = chat.scrollHeight;
 
-            chat.innerHTML += `<div id="typing-indicator" class="msg-ai px-4 py-2 self-start text-slate flex gap-1 items-center max-w-[85%] mb-2">
+            const typingEl = document.createElement('div');
+            typingEl.id = "typing-indicator";
+            typingEl.className = "msg-ai px-4 py-2 self-start text-slate flex gap-1 items-center max-w-[85%] mb-2";
+            typingEl.innerHTML = `
                 <span class="w-1.5 h-1.5 bg-slate rounded-full animate-bounce"></span>
                 <span class="w-1.5 h-1.5 bg-slate rounded-full animate-bounce" style="animation-delay: 0.1s"></span>
                 <span class="w-1.5 h-1.5 bg-slate rounded-full animate-bounce" style="animation-delay: 0.2s"></span>
-            </div>`;
+            `;
+            chat.appendChild(typingEl);
             chat.scrollTop = chat.scrollHeight;
 
             // Send actual request to the backend AI
@@ -1055,18 +1288,51 @@
                 });
             } catch (err) {
                 console.error(err);
-                document.getElementById('typing-indicator').remove();
-                chat.innerHTML += `<div class="msg-ai px-3 py-2 text-[15px] shadow-sm max-w-[85%] mb-2 text-red-600">Connection error. Please try again.</div>`;
+                const ind = document.getElementById('typing-indicator');
+                if (ind) ind.remove();
+                const errEl = document.createElement('div');
+                errEl.className = "msg-ai px-3 py-2 text-[15px] shadow-sm max-w-[85%] mb-2 text-red-600";
+                errEl.textContent = "Connection error. Please try again.";
+                chat.appendChild(errEl);
                 inp.disabled = false;
             }
         }
 
-        // Dual-Funnel Pricing Switcher & Practice Impact Calculator
+        // Unified Audience & Pricing Funnel Synchronizer
+        function setAudience(type) {
+            setHeroAudience(type);
+            switchPricingFunnel(type);
+        }
+
+        function setHeroAudience(type) {
+            const tabPractice = document.getElementById('hero-tab-practice');
+            const tabSoletrader = document.getElementById('hero-tab-soletrader');
+            const contentPractice = document.getElementById('hero-practice-content');
+            const contentSoletrader = document.getElementById('hero-soletrader-content');
+
+            if (!tabPractice || !tabSoletrader || !contentPractice || !contentSoletrader) return;
+
+            if (type === 'soletrader') {
+                tabPractice.className = "w-1/2 py-2 px-3 rounded-lg font-heading font-bold text-xs sm:text-sm transition-all duration-200 text-slate hover:text-charcoal flex items-center justify-center gap-1.5";
+                tabSoletrader.className = "w-1/2 py-2 px-3 rounded-lg font-heading font-bold text-xs sm:text-sm transition-all duration-200 bg-white text-charcoal shadow-sm flex items-center justify-center gap-1.5";
+                contentPractice.classList.add('hidden');
+                contentSoletrader.classList.remove('hidden');
+            } else {
+                tabPractice.className = "w-1/2 py-2 px-3 rounded-lg font-heading font-bold text-xs sm:text-sm transition-all duration-200 bg-white text-charcoal shadow-sm flex items-center justify-center gap-1.5";
+                tabSoletrader.className = "w-1/2 py-2 px-3 rounded-lg font-heading font-bold text-xs sm:text-sm transition-all duration-200 text-slate hover:text-charcoal flex items-center justify-center gap-1.5";
+                contentSoletrader.classList.add('hidden');
+                contentPractice.classList.remove('hidden');
+            }
+            if (window.lucide) lucide.createIcons();
+        }
+
         function switchPricingFunnel(type) {
             const soletraderBtn = document.getElementById('toggle-soletrader-btn');
             const practiceBtn = document.getElementById('toggle-practice-btn');
             const soletraderPanel = document.getElementById('pricing-soletrader-panel');
             const practicePanel = document.getElementById('pricing-practice-panel');
+
+            if (!soletraderBtn || !practiceBtn || !soletraderPanel || !practicePanel) return;
 
             if (type === 'practice') {
                 soletraderBtn.className = "w-1/2 py-2.5 px-4 rounded-lg font-heading font-bold text-sm transition-all duration-200 text-slate hover:text-charcoal";
@@ -1082,16 +1348,33 @@
             if (window.lucide) lucide.createIcons();
         }
 
+        // Detect URL parameter e.g. /?audience=practice vs /?audience=soletrader
+        document.addEventListener("DOMContentLoaded", () => {
+            const params = new URLSearchParams(window.location.search);
+            const aud = params.get('audience');
+            if (aud === 'soletrader') {
+                setAudience('soletrader');
+            } else {
+                setAudience('practice');
+            }
+        });
+
         function updatePracticeCalculator(val) {
-            const clients = parseInt(val, 10);
+            let clients = parseInt(val, 10);
+            if (isNaN(clients) || clients < 10) clients = 10;
+            if (clients > 500) clients = 500;
+
             const clientDisp = document.getElementById('calc-client-display');
             if (clientDisp) clientDisp.textContent = `${clients} clients`;
             
+            const gbpFormatter = new Intl.NumberFormat('en-GB', { style: 'currency', currency: 'GBP', maximumFractionDigits: 0 });
+            const gbpExactFormatter = new Intl.NumberFormat('en-GB', { style: 'currency', currency: 'GBP', minimumFractionDigits: 2, maximumFractionDigits: 2 });
+
             const monthlyCommission = clients * 3.0;
             const annualCommission = monthlyCommission * 12;
             const weeklyHours = Math.round(clients * 0.15);
             const annualHours = Math.round(clients * 7.2);
-            const traditionalCost = clients * 24; // Average £2/client/month on legacy packages
+            const traditionalCost = clients * 60; // Dext £5/mo benchmark = £60/client/yr
             const netAdvantage = annualCommission + traditionalCost;
 
             const annualCommEl = document.getElementById('calc-annual-commission');
@@ -1101,12 +1384,12 @@
             const tradCostEl = document.getElementById('calc-traditional-cost');
             const netAdvEl = document.getElementById('calc-net-advantage');
 
-            if (annualCommEl) annualCommEl.textContent = `£${annualCommission.toLocaleString()}`;
-            if (monthlyCommEl) monthlyCommEl.textContent = `£${monthlyCommission.toFixed(2)} / month passive profit`;
-            if (annualHoursEl) annualHoursEl.textContent = `${annualHours} hrs`;
-            if (weeklyHoursEl) weeklyHoursEl.textContent = `~${weeklyHours} hrs/week partner time saved`;
-            if (tradCostEl) tradCostEl.textContent = `-£${traditionalCost.toLocaleString()} / yr`;
-            if (netAdvEl) netAdvEl.textContent = `+£${netAdvantage.toLocaleString()} / yr`;
+            if (annualCommEl) annualCommEl.textContent = gbpFormatter.format(annualCommission);
+            if (monthlyCommEl) monthlyCommEl.textContent = `${gbpExactFormatter.format(monthlyCommission)} / month margin OR client subsidy`;
+            if (annualHoursEl) annualHoursEl.textContent = `${annualHours.toLocaleString('en-GB')} hrs`;
+            if (weeklyHoursEl) weeklyHoursEl.textContent = `~${weeklyHours} hrs/week firm chasing time eliminated`;
+            if (tradCostEl) tradCostEl.textContent = `-${gbpFormatter.format(traditionalCost)} / yr`;
+            if (netAdvEl) netAdvEl.textContent = `+${gbpFormatter.format(netAdvantage)} / yr`;
         }
 
     </script>
