@@ -26,3 +26,5 @@ fix_*.py
 patch_*.py
 temp_*.py
 scratch/
+
+dashboard_output.html

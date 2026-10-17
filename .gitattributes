@@ -1,0 +1,20 @@
+﻿# GitHub Linguist Overrides - Classify documentation, decks, and presentation assets
+docs/** linguist-documentation
+docs/decks/** linguist-documentation
+templates/** linguist-documentation
+public/** linguist-documentation
+assets/** linguist-documentation
+brand_assets/** linguist-documentation
+deploy_web/** linguist-documentation
+frontend/** linguist-documentation
+
+# File extension documentation classifications
+*.html linguist-documentation
+*.pdf linguist-documentation
+*.md linguist-documentation
+*.svg linguist-documentation
+*.jpg linguist-documentation
+*.png linguist-documentation
+
+# Ensure Python is strictly recognized as the primary language
+*.py linguist-detectable=true
