@@ -16,32 +16,34 @@ Every time a receipt or message is processed, the system builds a dynamic schema
 - **Anti-Hallucination Auditor**: A secondary AI pass that strictly verifies the model didn't invent vendors or amounts not present in the user's text.
 
 ## 🛠 Tech Stack
-- **Backend**: Python, FastAPI, SQLite (async)
+- **Backend**: Python 3.11+, FastAPI, PostgreSQL (`asyncpg`)
 - **Frontend**: HTMX, Tailwind CSS, Jinja2 Templates
 - **AI Infrastructure**: Google Gemini API (`google-genai` SDK)
 
 ## 📦 Installation & Setup
 
-1. **Clone & Install**
+1. **Clone & Install Dependencies**
    ```bash
    pip install -r requirements.txt
    ```
 
-2. **Environment Variables**
+2. **Environment Configuration**
    Create a `.env` file in the root directory:
    ```env
    GEMINI_API_KEY=your_gemini_api_key_here
-   DATABASE_URL=sqlite+aiosqlite:///prototype_db.sqlite
+   DATABASE_URL=postgresql://user:password@localhost:5432/invisible_accountant
+   ENCRYPTION_MASTER_KEY_B64=your_base64_master_key
    ```
 
-3. **Initialize the Database**
+3. **Database Schema**
+   Apply PostgreSQL schema and multi-tenancy migrations:
    ```bash
-   python init_db.py
+   psql -d invisible_accountant -f migrations/004_add_practice_multi_tenancy.sql
    ```
 
 4. **Run the Server**
    ```bash
-   python -m uvicorn main:app --port 8000
+   uvicorn main:app --port 8000
    ```
 
 ## 📊 Dashboards
